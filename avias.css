@@ -1,0 +1,24 @@
+body {
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-color: rgb(255, 255, 255);
+    background-position: center top;
+
+}
+
+.shapka {
+    width: 1000%;
+    height: 200px;
+    background-color: rgb(39, 160, 168);
+    margin-left: -100px;
+    margin-top: -100px;
+}
+
+.avis {
+    color: rgb(43, 36, 143);
+    position: absolute;
+    font-family: 'Times New Roman';
+    margin-top: -83px;
+    margin-left: 20px;
+    font-size: 3rem;
+}

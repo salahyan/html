@@ -1,0 +1,121 @@
+body {
+  bacground-repeat: no-repeat;
+  background-size: 100%;
+  background-color: rgb(12, 15, 34);
+  background-position: center top;
+
+}
+
+.bak {
+  height: 163px;
+  width: 100%;
+  background-color: black;
+  position: absolute;
+  margin-top: -100px;
+  margin-left: -10px;
+}
+
+.kinchik {
+  color: rgb(255, 255, 255);
+  position: absolute;
+  margin-left: 880px;
+  margin-top: 110px;
+  color: rgb(58, 56, 182);
+  font-family: Arial;
+  font-weight: 800;
+}
+
+.vhod {
+  position: absolute;
+  margin-top: 120px;
+  margin-left: 830px;
+  font-family: Arial;
+  color: white;
+  font-size: 2.4rem;
+  font-weight: 900;
+}
+
+.ipi {
+  background-color: rgb(10, 12, 27);
+  border: none;
+  margin-top: 205px;
+  position: absolute;
+  margin-left: 596px;
+  width: 550px;
+  height: 70px;
+  border-radius: 12px;
+  font-family: Arial;
+  font-size: 1.1rem;
+  color: aliceblue;
+  padding: 8px;
+}
+
+.iiv {
+  margin-top: 100px;
+  position: absolute;
+
+}
+
+.vvv {
+  width: 550px;
+  height: 70px;
+  background-color: rgb(229, 255, 0);
+  position: absolute;
+  margin-top: 406px;
+  margin-left: 603px;
+  border-radius: 12px;
+  font-family: Arial;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+}
+
+.rrr {
+  width: 550px;
+  height: 70px;
+  background-color: rgb(10, 12, 27);
+  position: absolute;
+  margin-top: 492px;
+  margin-left: 603px;
+  border-radius: 12px;
+  font-family: Arial;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  border: none;
+}
+
+.ffv {
+  margin-top: 595px;
+  position: absolute;
+  font-family: Arial;
+  font-size: 1.2rem;
+  margin-left: 775px;
+  color: rgb(30, 98, 177);
+}
+
+.seti {
+  position: absolute;
+  width: 35px;
+  height: 40px;
+  margin-left: 770px;
+  margin-top: 636px;
+}
+
+.soc {
+  margin-left: 50px;
+  margin-top: -2px;
+  position: absolute;
+}
+
+.sdx {
+  margin-left: 105px;
+  margin-top: -1px;
+  position: absolute;
+}
+
+.sow {
+  margin-left: 162px;
+  margin-top: -1px;
+  position: absolute;
+}

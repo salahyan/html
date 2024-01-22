@@ -1,0 +1,72 @@
+body {
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-color: rgb(12, 15, 34);
+    background-position: center top;
+
+}
+
+.bak {
+    height: 163px;
+    width: 100%;
+    background-color: black;
+    position: absolute;
+    margin-top: -100px;
+    margin-left: -10px;
+}
+
+.kinchik {
+    color: rgb(255, 255, 255);
+    position: absolute;
+    margin-left: 900px;
+    margin-top: 110px;
+    color: rgb(58, 56, 182);
+    font-family: Arial;
+    font-weight: 800;
+}
+
+.vhod {
+    position: absolute;
+    margin-top: 120px;
+    margin-left: 700px;
+    font-family: Arial;
+    color: white;
+    font-size: 2.4rem;
+    font-weight: 900;
+}
+
+.iiv {
+    margin-top: 100px;
+    position: absolute;
+
+}
+
+.ipi {
+    background-color: rgb(10, 12, 27);
+    border: none;
+    margin-top: 210px;
+    position: absolute;
+    margin-left: 690px;
+    width: 470px;
+    height: 70px;
+    border-radius: 12px;
+    font-family: Arial;
+    font-size: 1.1rem;
+    color: aliceblue;
+    padding: 8px;
+    border: none;
+}
+
+.vvv {
+    width: 470px;
+    height: 70px;
+    background-color: rgb(229, 255, 0);
+    position: absolute;
+    margin-top: 417px;
+    margin-left: 695px;
+    border-radius: 12px;
+    font-family: Arial;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border: none;
+}

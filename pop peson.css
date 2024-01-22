@@ -1,0 +1,951 @@
+.prsi {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    font-size: 4rem;
+    margin-left: 277px;
+    margin-top: 55px;
+}
+
+.spis {
+    margin-left: 1320px;
+    margin-top: -100px;
+}
+
+.yo {
+    margin-left: 40px;
+    color: rgb(134, 130, 130);
+    font-family: Arial;
+    font-weight: 700;
+}
+
+.yo:hover {
+    color: aliceblue;
+}
+
+.kventi {
+    width: 480px;
+    height: 500px;
+    margin-top: 100px;
+    margin-left: 40px;
+    border-radius: 12px;
+
+}
+
+
+.tep {
+    display: flex;
+    margin-left: 230px;
+    position: absolute;
+
+}
+
+.qq {
+    color: rgb(255, 251, 0);
+    font-family: Arial;
+    position: absolute;
+    margin-left: -970px;
+    margin-top: 120px;
+}
+
+.tarant {
+    font-size: 1.9rem;
+    font-family: Arial;
+    font-weight: bold;
+    color: aliceblue;
+    position: absolute;
+    margin-left: -965px;
+    margin-top: 465px;
+
+}
+
+.nwo {
+    color: rgb(124, 124, 121);
+    font-family: Arial;
+    position: absolute;
+    font-weight: 1.8rem;
+    margin-left: -965px;
+    margin-top: 502px;
+}
+
+.qz {
+    color: rgb(255, 251, 0);
+    font-family: Arial;
+    position: absolute;
+    margin-top: 535PX;
+    margin-left: -965px;
+}
+
+.qd {
+    color: rgb(255, 251, 0);
+    font-family: Arial;
+    position: absolute;
+    margin-left: -445px;
+    margin-top: 120px;
+    position: absolute;
+}
+
+.tarantq {
+    position: absolute;
+    font-size: 1.9rem;
+    font-family: Arial;
+    font-weight: bold;
+    color: aliceblue;
+    margin-left: -435px;
+    margin-top: 465px;
+}
+
+.nwb {
+    position: absolute;
+    color: rgb(124, 124, 121);
+    font-family: Arial;
+    position: absolute;
+    font-weight: 1.9rem;
+    margin-left: -440px;
+    margin-top: 500px;
+}
+
+.qtz {
+    position: absolute;
+    color: rgb(255, 251, 0);
+    font-family: Arial;
+    margin-top: 530px;
+    margin-left: -437px;
+}
+
+.kvad {
+    width: 465px;
+    height: 500px;
+    background-color: rgb(16, 26, 49);
+    border-radius: 12px;
+    margin-top: 100px;
+    margin-left: 1295px;
+    position: relative;
+    display: block;
+}
+
+.kvadi {
+    border-color: rgb(14, 14, 19);
+    width: 370px;
+    position: absolute;
+    margin-left: 43px;
+    margin-top: 137px;
+}
+
+.spisok {
+    color: aliceblue;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin-left: 40px;
+    margin-top: 45px;
+    position: absolute;
+}
+
+.spi {
+    margin-left: 40px;
+    margin-top: 77px;
+    font-size: 1.2rem;
+    color: rgb(97, 93, 93);
+    font-weight: bold;
+    position: absolute;
+
+}
+
+.dao {
+    color: rgb(240, 255, 25);
+    font-size: 1rem;
+    margin-left: 44px;
+    font-family: Arial;
+    margin-top: 104px;
+    position: absolute;
+}
+
+.rtb {
+    color: rgb(240, 255, 25);
+    margin-left: 330px;
+    margin-top: 68px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    font-family: Arial;
+    position: absolute;
+}
+
+.spisk {
+    color: aliceblue;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin-left: 40px;
+    margin-top: 162px;
+    position: absolute;
+}
+
+.spa {
+    margin-left: 40px;
+    margin-top: 195px;
+    font-size: 1.2rem;
+    color: rgb(97, 93, 93);
+    font-weight: bold;
+    position: absolute;
+}
+
+.kvado {
+    border-color: rgb(14, 14, 19);
+    width: 370px;
+    position: absolute;
+    margin-left: 43px;
+    margin-top: 256px;
+}
+
+.cao {
+    color: rgb(240, 255, 25);
+    font-size: 1rem;
+    margin-left: 44px;
+    font-family: Arial;
+    margin-top: 222px;
+    position: absolute;
+}
+
+.ntb {
+    color: rgb(240, 255, 25);
+    margin-left: 330px;
+    margin-top: 190px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    font-family: Arial;
+    position: absolute;
+}
+
+.kvads {
+    border-color: rgb(14, 14, 19);
+    width: 370px;
+    position: absolute;
+    margin-left: 43px;
+    margin-top: 378px;
+    position: absolute;
+}
+
+.spsk {
+    color: aliceblue;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin-left: 40px;
+    margin-top: 280px;
+    position: absolute;
+}
+
+.spo {
+    margin-left: 40px;
+    margin-top: 315px;
+    font-size: 1.2rem;
+    color: rgb(97, 93, 93);
+    font-weight: bold;
+    position: absolute;
+}
+
+.cwo {
+    color: rgb(240, 255, 25);
+    margin-left: 330px;
+    margin-top: 305px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    font-family: Arial;
+    position: absolute;
+}
+
+.nqb {
+    color: rgb(240, 255, 25);
+    font-size: 1rem;
+    margin-left: 44px;
+    font-family: Arial;
+    margin-top: 345px;
+    position: absolute;
+}
+
+.spk {
+    color: aliceblue;
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin-left: 40px;
+    margin-top: 400px;
+    position: absolute;
+}
+
+.spp {
+    margin-left: 40px;
+    margin-top: 430px;
+    font-size: 1.2rem;
+    color: rgb(97, 93, 93);
+    font-weight: bold;
+    position: absolute;
+}
+
+.cvo {
+    color: rgb(240, 255, 25);
+    margin-left: 330px;
+    margin-top: 413px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    font-family: Arial;
+    position: absolute;
+}
+
+.nqz {
+    color: rgb(240, 255, 25);
+    font-size: 1rem;
+    margin-left: 44px;
+    font-family: Arial;
+    margin-top: 460px;
+    position: absolute;
+}
+
+.topi {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    font-size: 4rem;
+    margin-top: 90px;
+    margin-left: 270PX;
+
+}
+
+.pot {
+    margin-left: 1565px;
+    margin-top: -110px;
+    color: aliceblue;
+    font-size: 1.8rem;
+}
+
+.kaig {
+    width: 1250px;
+    height: 780px;
+    margin-left: 270px;
+    margin-top: 46px;
+    border-radius: 12px;
+    filter: brightness(150%);
+}
+
+.oiu {
+    position: absolute;
+    color: aliceblue;
+    font-size: 2.2rem;
+    font-family: Arial;
+    font-weight: 1000;
+    margin-left: 310px;
+    margin-top: -240px;
+}
+
+.ggi {
+    color: aliceblue;
+    position: absolute;
+    margin-left: 310px;
+    margin-top: -170px;
+    font-family: Arial;
+    font-weight: 400;
+}
+
+.ggi {
+    line-height: 1.8;
+}
+
+.rrt {
+    color: aliceblue;
+    font-size: 1rem;
+    font-family: Arial;
+    font-weight: 700;
+    margin-left: 315px;
+    margin-top: -740px;
+    position: absolute;
+}
+
+.ret {
+    color: aliceblue;
+    font-size: 1rem;
+    font-family: Arial;
+    font-weight: 300;
+    margin-left: 417px;
+    margin-top: -742px;
+    position: absolute;
+}
+
+.rpo {
+    color: aliceblue;
+    font-size: 1rem;
+    font-family: Arial;
+    font-weight: 300;
+    margin-left: 480px;
+    margin-top: -742px;
+    position: absolute;
+}
+
+.soni {
+    width: 230px;
+    height: 176px;
+    border-radius: 12px;
+    margin-left: 1480px;
+    margin-top: -80px;
+
+}
+
+.poc {
+    color: aliceblue;
+    font-weight: 1000;
+    font-family: Arial;
+    margin-left: 1498px;
+    margin-top: -63px;
+    font-size: 1rem;
+
+}
+
+.head {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    margin-left: 1502px;
+    margin-top: -154px;
+    font-size: 1rem;
+}
+
+.son {
+    width: 230px;
+    height: 176px;
+    border-radius: 12px;
+    margin-left: -235px;
+    margin-top: 120px;
+}
+
+.pos {
+    color: aliceblue;
+    font-weight: 1000;
+    font-family: Arial;
+    margin-left: -228px;
+    margin-top: -63px;
+    font-size: 1rem;
+}
+
+.heap {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    margin-left: -220px;
+    margin-top: -154px;
+    font-size: 1rem;
+}
+
+.sonw {
+    width: 230px;
+    height: 176px;
+    border-radius: 12px;
+    margin-left: -235px;
+    margin-top: 320px;
+}
+
+.pls {
+    color: aliceblue;
+    font-weight: 1000;
+    font-family: Arial;
+    margin-left: -225px;
+    margin-top: -63px;
+    font-size: 1rem;
+}
+
+.helx {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    margin-left: -220px;
+    margin-top: -154px;
+    font-size: 1rem;
+}
+
+.filmi {
+    margin-top: -700px;
+    display: flex;
+    margin-left: 74px;
+}
+
+.sonc {
+    width: 230px;
+    height: 176px;
+    border-radius: 12px;
+    margin-left: -235px;
+    margin-top: 520px;
+}
+
+.pxs {
+    color: aliceblue;
+    font-weight: 1000;
+    font-family: Arial;
+    margin-left: -225px;
+    margin-top: -55px;
+    font-size: 1rem;
+}
+
+.hwlx {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    margin-left: -220px;
+    margin-top: -140px;
+    font-size: 1rem;
+}
+
+body::-webkit-scrollbar {
+
+    display: none;
+}
+
+.prsd {
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    font-size: 4rem;
+    margin-top: 300px;
+    margin-left: 260px;
+
+}
+
+.iuy {
+    background-color: rgb(12, 15, 34);
+    margin-top: 200px;
+    width: 9000px;
+    height: 2450px;
+    margin-left: -10px;
+    display: flex;
+    background-position: center top;
+
+}
+
+.nowinka {
+    position: absolute;
+    margin-top: 120px;
+    color: aliceblue;
+    font-weight: bold;
+    font-family: Arial;
+    font-size: 4rem;
+    margin-left: 272px;
+
+}
+
+.teaiu {
+    margin-left: 1670px;
+    margin-top: 130px;
+
+    color: aliceblue;
+    font-size: 1.9rem;
+
+
+}
+
+.vant {
+    padding: 10px;
+    color: aliceblue;
+    font-size: 2.8rem;
+    margin-left: 1600px;
+    position: absolute;
+    margin-top: 112px;
+    font-weight: 1000;
+}
+
+.twost {
+    padding: 10px;
+    color: aliceblue;
+    font-size: 2.8rem;
+    margin-left: 770px;
+    position: absolute;
+    margin-top: 1892px;
+}
+
+.few {
+    margin-left: 50px;
+    height: 350px;
+
+}
+
+.gwav {
+    margin-left: -1550px;
+    margin-top: 145px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.wdz {
+    background-color: rgb(73, 238, 58);
+    position: absolute;
+    border-radius: 6px;
+    margin-top: 109px;
+    margin-left: -70px;
+    font-weight: bold;
+    font-size: 1.6rem;
+    padding: 6px;
+}
+
+.fbw {
+    width: 340px;
+    height: 460px;
+    margin-top: 105px;
+    border-radius: 11px;
+    filter: brightness(1);
+}
+.fbw:hover {
+filter: brightness(1.60);
+}
+
+.fcw {
+    width: 340px;
+    height: 460px;
+    margin-top: 105px;
+    border-radius: 11px;
+    filter: brightness(1);
+}
+.fcw:hover {
+    filter: brightness(1.60);
+}
+
+.mart {
+    margin-top: 947px;
+    margin-left: -890px;
+    position: absolute;
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1.6rem;
+    font-weight: 150;
+
+}
+
+.elem {
+
+    border: 1px solid #ffffff;
+    width: 60px;
+    margin-left: -580px;
+    margin-top: 960px;
+}
+
+.ttre {
+    margin-top: 950px;
+    position: absolute;
+    margin-left: -430px;
+    font-family: Arial;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #4d4a4a;
+}
+
+.ttre:hover {
+    color: rgb(255, 255, 255);
+}
+
+.mtre {
+    margin-top: 950px;
+    position: absolute;
+    margin-left: -300px;
+    font-family: Arial;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #4d4a4a;
+}
+
+.mtre:hover {
+    color: rgb(255, 255, 255);
+}
+
+.tjre {
+    margin-top: 950px;
+    position: absolute;
+    margin-left: -150px;
+    font-family: Arial;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #4d4a4a;
+}
+
+.tjre:hover {
+    color: rgb(255, 255, 255);
+}
+
+.ddf {
+    margin-top: 1080px;
+    margin-left: -1480px;
+    width: 110px;
+    border-radius: 12px;
+}
+
+.rre {
+
+    margin-left: -1350px;
+    margin-top: -140px;
+    font-family: Arial;
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.rte {
+    margin-left: -1348px;
+    color: rgb(239, 241, 67);
+    font-family: Arial;
+    font-size: 1rem;
+    margin-top: -7px;
+}
+
+.ree {
+    margin-left: -1348px;
+    margin-top: -6px;
+    font-family: Arial;
+    font-size: 1rem;
+    margin-top: -7px;
+    color: gray;
+    font-weight: 100;
+}
+
+
+.ale {
+    margin-left: 335px;
+}
+
+.are {
+    margin-left: 335px;
+}
+
+.ape {
+    margin-left: 335px;
+}
+
+.awe {
+    margin-left: 335px;
+}
+
+.heid {
+    margin-left: -2830px;
+    margin-top: 1400px;
+    width: 1520px;
+    border-radius: 12px;
+}
+
+.kartina {
+    padding: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: start;
+    gap: 20px;
+    flex-direction: column;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 80px;
+    background-image: linear-gradient(to top, rgba(29, 57, 160, .8117647059), rgba(29, 57, 160, .8117647059)), url(follow_img.png);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 460px;
+    width: 64%;
+    margin-top: 1380px;
+    position: absolute;
+    margin-left: 300px;
+}
+
+.pkl {
+    margin-top: 50px;
+    width: 180px;
+    margin-left: -56px;
+}
+
+.rust {
+    position: absolute;
+    font-size: 3.2rem;
+    margin-left: -360px;
+    font-family: Arial;
+    font-weight: 1000;
+    color: #ffffff;
+}
+
+.qst {
+    position: absolute;
+    margin-top: 135px;
+    margin-left: -290px;
+    font-family: Arial;
+    font-weight: 400;
+    color: #ffffff;
+    line-height: 1.4;
+    font-size: 1.5rem;
+}
+
+.ini {
+    border: 1px solid #ffffff;
+    background-color: #fff;
+    margin-top: 227px;
+    position: absolute;
+    margin-left: -275px;
+    width: 440px;
+    height: 60px;
+    border-radius: 12px;
+    font-family: Arial;
+    font-size: 1.1rem;
+}
+
+.chre {
+    background-color: rgb(255, 251, 7);
+    margin-top: 227px;
+    position: absolute;
+    margin-left: 177px;
+    height: 65px;
+    border-radius: 12px;
+    width: 250px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    font-family: Arial;
+}
+
+.ssd {
+    margin-top: 312px;
+    margin-left: -190px;
+    color: #fff;
+    font-weight: 100;
+    font-family: Arial;
+    position: absolute;
+}
+
+.zer {
+    margin-top: 310px;
+    position: absolute;
+    margin-left: 40px;
+    color: #fbff00;
+    font-weight: 100;
+    font-family: Arial;
+    font-size: 1.2rem;
+    text-decoration: underline;
+}
+
+.cy {
+    width: 60px;
+    height: 18px;
+    margin-left: -230px;
+    margin-top: 314px;
+    position: absolute;
+}
+
+.erc {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 2030px;
+    margin-left: 890px;
+}
+
+.erd {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 2029px;
+    margin-left: 933px;
+}
+
+.erp {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 2029px;
+    margin-left: 970px;
+}
+
+.ern {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 2029px;
+    margin-left: 1010px;
+}
+
+.erm {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 2029px;
+    margin-left: 1052px;
+}
+
+.afi {
+    position: absolute;
+    font-family: Arial;
+    margin-top: 2115px;
+    margin-left: 575px;
+    font-weight: bold;
+    color: aliceblue;
+
+}
+
+.uuo {
+    margin-left: 60px;
+    font-size: 1.2rem;
+}
+
+.uuo:hover {
+    color: gray;
+}
+
+.uup {
+    margin-left: 60px;
+    font-size: 1.2rem;
+}
+
+.uup:hover {
+    color: gray;
+}
+
+.uue {
+    margin-left: 60px;
+    font-size: 1.2rem;
+}
+
+.uue:hover {
+    color: gray;
+}
+
+.uuq {
+    margin-left: 60px;
+    font-size: 1.2rem;
+}
+
+.uuq:hover {
+    color: gray;
+}
+
+.uuw {
+    margin-left: 60px;
+    font-size: 1.2rem;
+}
+
+.uuw:hover {
+    color: gray;
+}
+
+.uuj {
+    font-size: 1.1rem;
+}
+
+.uuj:hover {
+    color: gray;
+}
+
+.gigi {
+    position: absolute;
+    margin-top: 2200px;
+    color: #726e6e;
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-left: 840px;
+}
+
+.zwr {
+    position: absolute;
+    text-decoration: underline;
+    margin-top: 2255px;
+    color: #726e6e;
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin-left: 866px;
+}

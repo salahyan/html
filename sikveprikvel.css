@@ -1,0 +1,639 @@
+.sklpl {
+    position: absolute;
+    margin-top: 5970px;
+    margin-left: 580px;
+    color: rgb(255, 255, 255);
+    font-size: 3.4rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.vvin {
+    margin-top: 6110px;
+    position: absolute;
+    width: 350PX;
+    height: 460px;
+    margin-left: 145PX;
+    border-radius: 12px;
+
+}
+
+.igry {
+    margin-top: 6590px;
+    position: absolute;
+    margin-left: 145px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+}
+
+.igty {
+    margin-top: 6615px;
+    position: absolute;
+    margin-left: 145px;
+    font-family: Arial;
+    color: rgb(255, 224, 47);
+    font-size: 1rem;
+    font-weight: 100;
+}
+
+.sek {
+    margin-top: 6122px;
+    margin-left: 162px;
+    position: absolute;
+    color: rgb(255, 255, 255);
+    background-color: rgb(65, 24, 211);
+    border-radius: 8px;
+    width: 90px;
+    height: 40px;
+    font-family: Arial;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+}
+
+.spk {
+    margin-top: 6122px;
+    margin-left: 430px;
+    position: absolute;
+    width: 57px;
+    height: 33px;
+    border-radius: 8px;
+    font-family: Arial;
+    background-color: rgb(109, 189, 30);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: none;
+}
+
+.pch {
+    margin-left: 400px;
+
+}
+
+.poh {
+    margin-left: 790px;
+}
+
+.pih {
+    margin-left: 1180px;
+}
+
+.newd {
+    position: absolute;
+    margin-top: 6690px;
+    margin-left: 840px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 1.8rem;
+}
+
+.chit {
+    margin-top: 6795px;
+    position: absolute;
+    margin-left: 140px;
+    color: rgb(255, 255, 255);
+    font-size: 3.3rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.prof {
+    width: 1540px;
+    height: 170px;
+    position: absolute;
+    margin-top: 6915px;
+    background-color: rgb(23, 23, 37);
+    margin-left: 135px;
+    border-radius: 7px;
+}
+
+.ttui {
+    margin-top: 65px;
+    margin-left: 43px;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 50;
+    font-size: 1rem;
+    font-style: italic;
+}
+
+.kav {
+    margin-top: -155px;
+    margin-left: 42px;
+    font-size: 8rem;
+    color: rgb(15, 15, 29);
+}
+
+.otcj {
+    margin-top: -85px;
+    margin-left: 42px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.rata {
+    width: 1540px;
+    height: 235px;
+    position: absolute;
+    margin-top: 7155px;
+    background-color: rgb(23, 23, 37);
+    margin-left: 135px;
+    border-radius: 7px;
+}
+
+.ppi {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 50;
+    font-size: 1rem;
+    font-style: italic;
+    margin-left: 44px;
+    margin-top: 65px;
+}
+
+.gav {
+    margin-top: -210px;
+    margin-left: 42px;
+    font-size: 8rem;
+    color: rgb(15, 15, 29);
+}
+
+.otd {
+    margin-top: -30px;
+    margin-left: 43px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.film {
+    margin-top: 7470px;
+    position: absolute;
+    margin-left: 700PX;
+    position: absolute;
+    color: rgb(255, 255, 255);
+    font-size: 3.2rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.filk {
+    margin-top: 7600px;
+    position: absolute;
+    width: 345px;
+    height: 440px;
+    margin-left: 140px;
+    border-radius: 12px;
+}
+
+.gari {
+    margin-top: 7610px;
+    position: absolute;
+    margin-left: 410px;
+    width: 60px;
+    height: 36px;
+    border-radius: 8px;
+    font-family: Arial;
+    background-color: rgb(109, 189, 30);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: none;
+}
+
+.gga {
+    margin-top: 8055px;
+    position: absolute;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-left: 140px;
+}
+
+.gtd {
+    margin-top: 8080px;
+    position: absolute;
+    margin-left: 140px;
+    font-family: Arial;
+    color: rgb(255, 224, 47);
+    font-size: 1rem;
+    font-weight: 100;
+
+}
+
+.garrip {
+    margin-left: 395px;
+}
+
+.garri {
+    margin-left: 795px;
+}
+
+.gripo {
+    margin-left: 1195px;
+}
+
+.nwd {
+    position: absolute;
+    margin-top: 8130px;
+    margin-left: -360px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 1.8rem;
+}
+
+.rech {
+    position: absolute;
+    margin-top: 8260px;
+    margin-left: 150px;
+    color: rgb(255, 255, 255);
+    font-size: 3.2rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.dob {
+    position: absolute;
+    margin-top: 8280px;
+    margin-left: 1500px;
+    width: 175px;
+    height: 6%;
+    background-color: rgb(40, 89, 180);
+    border-radius: 10px;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 700;
+    border: none;
+
+}
+
+.vsego {
+    width: 170px;
+    height: 67px;
+    position: absolute;
+    margin-top: 8380px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 155px;
+    border-radius: 7px;
+
+}
+
+.vser {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-left: 26px;
+    margin-top: 21px;
+}
+
+.vvs {
+    margin-top: -49px;
+    margin-left: 115px;
+    position: absolute;
+    width: 38px;
+    height: 35px;
+    border-radius: 7%;
+    background-color: rgb(53, 53, 253);
+    font-family: Arial;
+    color: rgb(150, 150, 226);
+    font-weight: bold;
+    border: none;
+}
+
+.poloh {
+    width: 280px;
+    height: 67px;
+    position: absolute;
+    margin-top: 8380px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 350px;
+    border-radius: 7px;
+}
+
+.polo {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-left: 22px;
+    margin-top: 21px;
+}
+
+.pol {
+    margin-top: -49px;
+    margin-left: 227px;
+    position: absolute;
+    width: 38px;
+    height: 35px;
+    border-radius: 7%;
+    background-color: rgb(86, 192, 65);
+    font-family: Arial;
+    color: rgb(203, 240, 194);
+    font-weight: bold;
+    border: none;
+}
+
+.otri {
+    width: 280px;
+    height: 67px;
+    position: absolute;
+    margin-top: 8380px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 655px;
+    border-radius: 7px;
+}
+
+.otp {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-left: 22px;
+    margin-top: 21px;
+
+}
+
+.otl {
+    margin-top: -49px;
+    margin-left: 227px;
+    position: absolute;
+    width: 38px;
+    height: 35px;
+    border-radius: 7%;
+    background-color: rgb(196, 60, 60);
+    font-family: Arial;
+    color: rgb(236, 182, 182);
+    font-weight: bold;
+    border: none;
+}
+
+.net {
+    width: 360px;
+    height: 67px;
+    position: absolute;
+    margin-top: 8380px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 960px;
+    border-radius: 7px;
+}
+
+.netr {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-left: 22px;
+    margin-top: 21px;
+}
+
+.recht {
+    margin-top: -49px;
+    margin-left: 305px;
+    position: absolute;
+    width: 38px;
+    height: 35px;
+    border-radius: 7%;
+    background-color: rgb(228, 217, 70);
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    border: none;
+}
+
+.nprp {
+    width: 200px;
+    height: 67px;
+    position: absolute;
+    margin-top: 8380px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 1348px;
+    border-radius: 7px;
+}
+
+.chent {
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 1.4rem;
+    margin-left: 22px;
+    margin-top: 21px;
+}
+
+.ref {
+    margin-top: -49px;
+    margin-left: 147px;
+    position: absolute;
+    width: 38px;
+    height: 35px;
+    border-radius: 7%;
+    background-color: rgb(86, 192, 65);
+    font-family: Arial;
+    color: rgb(203, 240, 194);
+    font-weight: bold;
+    border: none;
+}
+
+.gren {
+    width: 1505px;
+    height: 1050px;
+    position: absolute;
+    margin-top: 8500px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 160px;
+    border-radius: 7px;
+    border: 6px solid rgb(19, 197, 13)
+}
+
+.lle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    margin-left: 45px;
+    margin-top: 50px;
+}
+
+.lerayta {
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 1.9rem;
+    margin-left: 200px;
+    margin-top: -100px;
+}
+
+.polooo {
+    background-color: rgb(86, 192, 65);
+    margin-left: 313px;
+    margin-top: -62px;
+    position: absolute;
+    height: 43px;
+    font-family: Arial;
+    color: rgb(203, 240, 194);
+    border-radius: 7px;
+    width: 205px;
+    font-size: 15px;
+    border: none;
+}
+
+.oche {
+    margin-left: 200px;
+    margin-top: 5px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-weight: 100;
+    font-size: 1.2rem;
+}
+
+.menu_like_dislike {
+    display: flex;
+    width: 55%;
+    justify-content: flex-end;
+    margin-top: -100px;
+    margin-left: 630px;
+}
+
+.menu_like_dislike img {
+    width: 50px;
+    height: 50px;
+}
+
+.menu_like_dislike button {
+    background-color: #1b2033;
+    border: 0px;
+    border-radius: 10%;
+}
+
+.dize {
+    margin-left: 20px;
+    margin-top: 9px;
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1.1rem;
+    position: absolute;
+}
+
+.dizlike_left {
+    margin-left: 12px;
+}
+
+.liked {
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1.1rem;
+    margin-left: 22px;
+    position: absolute;
+    margin-top: 9px;
+}
+
+.put {
+    position: absolute;
+    margin-top: 40px;
+    margin-left: 60px;
+    color: white;
+    font-family: Arial;
+    font-size: 1.7rem;
+}
+
+.apr {
+    margin-top: 48px;
+    margin-left: 290px;
+    position: absolute;
+    color: rgb(122, 128, 134);
+    font-size: 1rem;
+    font-family: Arial;
+    font-weight: 300;
+}
+
+.container4 {
+    position: absolute;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 100;
+    font-size: 20px;
+    margin-left: 60px;
+    margin-top: 75px;
+}
+
+.vose {
+    position: absolute;
+    margin-top: 750PX;
+    margin-left: 60px;
+    color: white;
+    font-family: Arial;
+    font-weight: 100;
+    font-size: 20px;
+}
+
+.xxc {
+    position: absolute;
+    margin-top: 795PX;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 700;
+    font-size: 15px;
+    margin-left: 57px;
+    text-decoration: underline;
+}
+
+.rvf {
+    position: absolute;
+    margin-top: 795PX;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-weight: 700;
+    font-size: 15px;
+    margin-left: 217px;
+    text-decoration: underline;
+}
+
+.tru {
+    position: absolute;
+    margin-top: 795PX;
+    font-family: Arial;
+    font-weight: 700;
+    font-size: 15px;
+    margin-left: 1220px;
+    text-decoration: underline;
+    color: rgb(226, 119, 119);
+}
+
+.gre {
+    width: 1505px;
+    height: 1050px;
+    position: absolute;
+    margin-top: 9630px;
+    background-color: rgb(29, 29, 43);
+    margin-left: 160px;
+    border-radius: 7px;
+    border: 6px solid rgb(185, 197, 13);
+}
+
+.polp {
+    background-color: rgb(179, 152, 66);
+    margin-left: 420px;
+    margin-top: -62px;
+    position: absolute;
+    height: 43px;
+    font-family: Arial;
+    color: rgb(241, 226, 175);
+    border-radius: 7px;
+    width: 205px;
+    font-size: 15px;
+    border: none;
+}
+
+.app {
+    margin-top: 48px;
+    margin-left: 510px;
+    position: absolute;
+    color: rgb(122, 128, 134);
+    font-size: 1rem;
+    font-family: Arial;
+    font-weight: 300;
+}

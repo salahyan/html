@@ -1,0 +1,473 @@
+.jec {
+    position: absolute;
+    margin-top: 1630px;
+    margin-left: 165px;
+}
+
+.texv {
+    position: absolute;
+    margin-top: 1785px;
+    margin-left: 165px;
+    color: aliceblue;
+    font-weight: 600;
+    font-family: Arial;
+}
+
+.qexv {
+    position: absolute;
+    margin-top: 1809px;
+    margin-left: 165px;
+    color: rgb(134, 133, 126);
+    font-weight: 100;
+    font-family: Arial;
+    font-size: 1.1rem;
+
+}
+
+.pexv {
+    position: absolute;
+    margin-top: 1830px;
+    margin-left: 165px;
+    color: rgb(255, 225, 0);
+    font-weight: 100;
+    font-family: Arial;
+    font-size: 1rem;
+}
+
+
+.main_role_block_card {
+    display: grid;
+    width: 80%;
+    margin: 2% 10% 2% 10%;
+    justify-items: center;
+    grid-template-areas:
+        "a . . . ." ". b . . ." ". . c . ." ". . . d ." ". . . . e";
+    margin-top: 1630px;
+    position: absolute;
+    margin-left: 153px;
+}
+
+.main_role_card img {
+    height: 200px;
+    border-radius: 5px;
+    width: 270px;
+    height: 240px;
+}
+
+.main_role_card h3,
+.main_role_card h4,
+.main_role_card p {
+    margin: 2%;
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1.2rem;
+}
+
+.main_role_card h4 {
+    color: gray;
+    font-size: 15px;
+    font-family: Arial;
+    font-size: 1.1rem;
+}
+
+.main_role_card p {
+    color: yellow;
+    font-size: 13px;
+    font-family: Arial;
+    font-size: 1rem;
+}
+
+.main_role_menu_janr {
+    display: flex;
+    justify-content: center;
+    gap: 2.5%;
+    margin-top: 2350px;
+    position: absolute;
+    margin-left: 455px;
+}
+
+.main_role_menu_janr p {
+    padding: 1%;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    color: rgb(143, 144, 145);
+    font-family: Arial;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.main_role_menu_janr p:hover {
+    background-color: #3657cb;
+    box-shadow: 0px 3px 32px -7px #3657cb;
+    color: rgb(255, 255, 255);
+}
+
+.pob {
+    position: absolute;
+    margin-top: 2500px;
+    margin-left: 165px;
+    font-size: 3.6rem;
+    font-weight: 1000;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+}
+
+.toch {
+    position: absolute;
+    margin-top: 2525px;
+    margin-left: 1465px;
+    font-size: 1.5rem;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+}
+
+.vidos {
+    position: absolute;
+    margin-top: 2650px;
+    margin-left: 170px;
+    width: 1515px;
+    border-radius: 12px;
+}
+
+.prea {
+    position: absolute;
+    margin-top: 3470px;
+    margin-left: 170px;
+    font-family: Arial;
+    color: rgb(255, 255, 255);
+    font-size: 2.7rem;
+    font-weight: 1000;
+}
+
+.vc {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-top: 574px;
+    margin-left: 980px;
+
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.ihsta {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-top: 573px;
+    margin-left: 1030px;
+
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.fgbook {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-top: 573px;
+    margin-left: 1079px;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.twit {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-top: 573px;
+    margin-left: 1135px;
+
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.tri {
+    margin-top: 560px;
+    margin-left: 1180px;
+    position: absolute;
+    opacity: 0.5;
+    z-index: 1;
+    font-size: 2rem;
+    color: rgb(207, 207, 199);
+}
+
+.sit {
+    position: absolute;
+    margin-top: 2923px;
+    margin-left: -290px;
+}
+
+.meni_like_disliki {
+    display: flex;
+    width: 55%;
+    justify-content: flex-end;
+    margin-top: -90px;
+    margin-left: 1972px;
+    position: absolute;
+    margin-top: 543px;
+}
+
+.meni_like_disliki img {
+    width: 45px;
+    height: 47px;
+}
+
+.meni_like_disliki button {
+    background-color: #1b2033;
+    border: 0px;
+    border-radius: 10%;
+}
+
+.dizlike_eft {
+    margin-left: 10px;
+}
+
+.like {
+    margin-left: 11px;
+    margin-top: 9px;
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1rem;
+    font-weight: 100;
+}
+
+.diz {
+    margin-left: 13px;
+    margin-top: 9px;
+    color: aliceblue;
+    font-family: Arial;
+    font-size: 1rem;
+    font-weight: 100;
+}
+
+.vfv {
+    margin-top: 3650px;
+    position: absolute;
+    margin-left: 165px;
+    color: rgb(255, 255, 255);
+    font-size: 3.5rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.vsnagrad {
+    margin-top: 3680px;
+    position: absolute;
+    margin-left: 1485px;
+    font-size: 1.5rem;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+}
+
+.nagradi {
+    width: 75%;
+    margin-left: 12.5%;
+    position: absolute;
+    margin-top: 3000px;
+}
+
+.nagradi h1 {
+    font-size: 50px;
+}
+
+.nagradi p {
+    align-self: center;
+}
+
+.nagradi_block_card {
+    display: grid;
+    grid-template-areas: "a . . ." ". b . ." " . . c . " " . . . d";
+    width: 80%;
+    height: 5%;
+    margin-left: 155px;
+    gap: 2%;
+    margin-top: 3800px;
+    position: absolute;
+}
+
+.nagradi_block_card img {
+    float: left;
+    height: 150px;
+    width: 80px;
+    border-radius: 12px;
+}
+
+.nagrada {
+    width: 100%;
+    height: 100%;
+    background-color: #253363;
+    border-radius: 20px;
+    margin-left: 20px;
+}
+
+.nagrada h3 {
+    font-size: 17px;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    margin-top: 30px;
+}
+
+.nagrada h4 {
+    font-size: 14px;
+    color: yellow;
+    font-family: Arial;
+    margin-top: -6px;
+}
+
+.nagrada p {
+    font-size: 13px;
+    color: gray;
+    font-family: Arial;
+    margin-top: -6px;
+}
+
+.ppf {
+    position: absolute;
+    margin-top: 4012px;
+    margin-left: 170px;
+    color: rgb(255, 255, 255);
+    font-size: 3.4rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.ggg {
+    margin-top: 4033px;
+    margin-left: 1500px;
+    position: absolute;
+    font-size: 1.5rem;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+}
+
+.pow {
+    position: absolute;
+    margin-top: 4135px;
+    margin-left: 170px;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.imа {
+    position: absolute;
+    margin-top: 4200px;
+    margin-left: 170px;
+    border-radius: 12px;
+    width: 350px;
+    height: 465px;
+}
+
+
+.imf {
+    position: absolute;
+    margin-top: 4200px;
+    margin-left: 560px;
+    border-radius: 12px;
+    width: 350px;
+    height: 465px;
+}
+
+.imp {
+    position: absolute;
+    margin-top: 4200px;
+    margin-left: 950px;
+    border-radius: 12px;
+    width: 350px;
+    height: 465px;
+}
+
+.imv {
+    position: absolute;
+    margin-top: 4200px;
+    margin-left: 1340px;
+    border-radius: 12px;
+    width: 350px;
+    height: 465px;
+
+}
+
+.kka {
+    position: absolute;
+    margin-top: 4745px;
+    margin-left: 170px;
+    color: rgb(255, 255, 255);
+    font-size: 3.3rem;
+    font-family: Arial;
+    font-weight: 1000;
+}
+
+.gfg {
+    position: absolute;
+    margin-top: 4775px;
+    margin-left: 1490px;
+    font-size: 1.5rem;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+}
+
+.tyb {
+    position: absolute;
+    margin-top: 4860px;
+    margin-left: 173px;
+    color: rgb(255, 255, 255);
+    font-family: Arial;
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.shirin {
+    margin-top: 4920px;
+    position: absolute;
+    margin-left: 172px;
+    border-radius: 13px;
+    height: 450px;
+    width: 710px;
+}
+
+.shh {
+    margin-top: 4920px;
+    position: absolute;
+    margin-left: 920px;
+    border-radius: 13px;
+    width: 357px;
+    height: 450px;
+}
+
+.shu {
+    margin-top: 4920px;
+    position: absolute;
+    margin-left: 1320px;
+    border-radius: 13px;
+    width: 357px;
+    height: 450px;
+}
+
+.ggd {
+    margin-top: 5415px;
+    position: absolute;
+    margin-left: 170px;
+    border-radius: 13px;
+    width: 345px;
+    height: 450px;
+}
+
+.yyu {
+    margin-top: 5415px;
+    position: absolute;
+    margin-left: 540px;
+    border-radius: 13px;
+    width: 342px;
+    height: 450px;
+}
+
+.rpv {
+    position: absolute;
+    margin-top: 5415px;
+    border-radius: 13px;
+    margin-left: 920px;
+    width: 748PX;
+    height: 450px;
+}
