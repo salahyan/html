@@ -28,156 +28,20 @@ let isListening = false;
 
 let requestInProgress = false;
 
-let currentAudio = null;
-
 // ============================================================
-// AI VOICE JARVIS
+// ГОЛОС JARVIS
 // ============================================================
 
-async function speakWithAI(text) {
-
-    if (!text) {
-        return false;
-    }
-
-    // Проверяем Puter
-    if (
-        typeof puter === "undefined" ||
-        !puter.ai ||
-        !puter.ai.txt2speech
-    ) {
-
-        console.log(
-            "Puter.js недоступен"
-        );
-
-        return false;
-    }
-
-    try {
-
-        console.log(
-            "JARVIS AI Voice запускается..."
-        );
-
-        statusText.textContent =
-            "Говорю, сэр...";
-
-        // Останавливаем предыдущий AI-голос
-        if (currentAudio) {
-
-            try {
-
-                currentAudio.pause();
-
-            } catch (error) {
-
-                console.log(
-                    "Не удалось остановить старое аудио:",
-                    error
-                );
-            }
-
-            currentAudio = null;
-        }
-
-        // На всякий случай останавливаем
-        // стандартный голос браузера
-        if (
-            "speechSynthesis" in window
-        ) {
-
-            window.speechSynthesis.cancel();
-        }
-
-        // =====================================================
-        // GEMINI AI TTS
-        // =====================================================
-
-        const audio =
-            await puter.ai.txt2speech(
-                text,
-                {
-                    provider: "gemini",
-
-                    model:
-                        "gemini-3.1-flash-tts-preview",
-
-                    // Более низкий и уверенный вариант
-                    voice: "Charon",
-
-                    instructions:
-                        "Speak in Russian. " +
-                        "Use a calm, deep, confident, " +
-                        "professional futuristic AI assistant style. " +
-                        "Sound natural and controlled. " +
-                        "Speak clearly and not too slowly."
-                }
-            );
-
-        if (!audio) {
-
-            console.log(
-                "AI TTS не вернул аудио"
-            );
-
-            return false;
-        }
-
-        currentAudio = audio;
-
-        // =====================================================
-        // ВОСПРОИЗВЕДЕНИЕ
-        // =====================================================
-
-        if (
-            typeof audio.play === "function"
-        ) {
-
-            await audio.play();
-
-        } else {
-
-            console.log(
-                "У аудио отсутствует play()"
-            );
-
-            return false;
-        }
-
-        console.log(
-            "JARVIS AI Voice запущен"
-        );
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "Ошибка AI Voice:",
-            error
-        );
-
-        return false;
-    }
-}
-
-// ============================================================
-// РЕЗЕРВНЫЙ СИСТЕМНЫЙ ГОЛОС
-// ============================================================
-
-function speakWithBrowser(text) {
+function speak(text) {
 
     if (!text) {
         return;
     }
 
-    if (
-        !("speechSynthesis" in window)
-    ) {
+    if (!("speechSynthesis" in window)) {
 
         statusText.textContent =
-            "Синтез речи недоступен, сэр.";
+            "Синтез речи не поддерживается браузером, сэр.";
 
         return;
     }
@@ -189,8 +53,7 @@ function speakWithBrowser(text) {
         const speakNow = () => {
 
             const voices =
-                window.speechSynthesis
-                    .getVoices();
+                window.speechSynthesis.getVoices();
 
             const russianVoices =
                 voices.filter(
@@ -223,9 +86,11 @@ function speakWithBrowser(text) {
             utterance.lang =
                 "ru-RU";
 
+            // Быстрая и спокойная речь
             utterance.rate =
                 0.92;
 
+            // Немного более низкий голос
             utterance.pitch =
                 0.72;
 
@@ -238,13 +103,18 @@ function speakWithBrowser(text) {
                     preferredVoice;
 
                 console.log(
-                    "Резервный голос:",
-                    preferredVoice.name
+                    "Голос JARVIS:",
+                    preferredVoice.name,
+                    preferredVoice.lang
                 );
             }
 
             utterance.onstart =
                 function () {
+
+                    console.log(
+                        "JARVIS начал говорить"
+                    );
 
                     statusText.textContent =
                         "Говорю, сэр...";
@@ -252,6 +122,10 @@ function speakWithBrowser(text) {
 
             utterance.onend =
                 function () {
+
+                    console.log(
+                        "JARVIS закончил говорить"
+                    );
 
                     statusText.textContent =
                         "Готов к дальнейшим указаниям, сэр.";
@@ -261,7 +135,7 @@ function speakWithBrowser(text) {
                 function (event) {
 
                     console.error(
-                        "Ошибка системного голоса:",
+                        "Ошибка синтеза речи:",
                         event
                     );
 
@@ -275,8 +149,7 @@ function speakWithBrowser(text) {
         };
 
         const voices =
-            window.speechSynthesis
-                .getVoices();
+            window.speechSynthesis.getVoices();
 
         if (voices.length > 0) {
 
@@ -298,35 +171,12 @@ function speakWithBrowser(text) {
     } catch (error) {
 
         console.error(
-            "Ошибка резервного голоса:",
+            "Ошибка запуска голоса:",
             error
         );
-    }
-}
 
-// ============================================================
-// ГЛАВНАЯ ФУНКЦИЯ ГОЛОСА
-// ============================================================
-
-async function speak(text) {
-
-    if (!text) {
-        return;
-    }
-
-    // Сначала пробуем новый AI-голос
-    const aiVoiceWorked =
-        await speakWithAI(text);
-
-    // Если AI TTS не сработал —
-    // возвращаем старый рабочий голос
-    if (!aiVoiceWorked) {
-
-        console.log(
-            "AI Voice недоступен → резервный голос"
-        );
-
-        speakWithBrowser(text);
+        statusText.textContent =
+            "Не удалось запустить голос, сэр.";
     }
 }
 
@@ -457,18 +307,11 @@ async function askJarvis(text) {
             data.answer
         );
 
-        console.log(
-            "AI provider:",
-            data.provider || "unknown"
-        );
-
         // ====================================================
-        // НОВЫЙ AI-ГОЛОС
+        // ОЗВУЧИВАЕМ
         // ====================================================
 
-        await speak(
-            data.answer
-        );
+        speak(data.answer);
 
     } catch (error) {
 
@@ -490,9 +333,7 @@ async function askJarvis(text) {
                 <br>
 
                 <small>
-                    ${escapeHTML(
-                        error.message
-                    )}
+                    ${escapeHTML(error.message)}
                 </small>
 
             </div>
@@ -536,28 +377,7 @@ function handleMicClick() {
 
     try {
 
-        // Останавливаем предыдущий AI-голос
-        if (currentAudio) {
-
-            try {
-
-                currentAudio.pause();
-
-            } catch (error) {
-
-                console.log(
-                    "Ошибка остановки аудио:",
-                    error
-                );
-            }
-
-            currentAudio = null;
-        }
-
-        // Останавливаем системную речь
-        if (
-            "speechSynthesis" in window
-        ) {
+        if ("speechSynthesis" in window) {
 
             window.speechSynthesis.cancel();
         }
@@ -607,7 +427,7 @@ if (!SpeechRecognition) {
     );
 
     // ========================================================
-    // НАЧАЛО
+    // НАЧАЛО СЛУШАНИЯ
     // ========================================================
 
     recognition.onstart =
@@ -624,7 +444,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // РЕЗУЛЬТАТ
+    // ПОЛУЧЕНИЕ РЕЧИ
     // ========================================================
 
     recognition.onresult =
@@ -728,7 +548,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // КОНЕЦ
+    // КОНЕЦ СЛУШАНИЯ
     // ========================================================
 
     recognition.onend =
@@ -758,14 +578,12 @@ function escapeHTML(text) {
 }
 
 // ============================================================
-// AUDIO UNLOCK
+// РАЗБЛОКИРОВКА AUDIO НА IPHONE
 // ============================================================
 
 function unlockAudio() {
 
-    if (
-        !("speechSynthesis" in window)
-    ) {
+    if (!("speechSynthesis" in window)) {
         return;
     }
 
