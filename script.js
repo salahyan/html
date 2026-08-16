@@ -195,12 +195,23 @@ async function askJarvis(text) {
             );
         }
 
-        if (!response.ok) {
-            throw new Error(
-                data.error ||
-                "Ошибка Worker"
-            );
-        }
+if (!response.ok) {
+    console.error("ПОЛНАЯ ОШИБКА GEMINI:", data);
+
+    let details = "";
+
+    if (data.details) {
+        details =
+            typeof data.details === "string"
+                ? data.details
+                : JSON.stringify(data.details);
+    }
+
+    throw new Error(
+        (data.error || "Ошибка Worker") +
+        (details ? "\n" + details : "")
+    );
+}
 
         if (!data.answer) {
             throw new Error(
