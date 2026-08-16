@@ -54,7 +54,7 @@ function forceUnlockSpeech() {
 
     } catch (error) {
 
-        console.log(
+        console.error(
             "Ошибка разблокировки голоса:",
             error
         );
@@ -108,13 +108,13 @@ function speak(text) {
 
     utterance.onerror = function (event) {
 
-        console.log(
-            "Ошибка синтеза речи:",
+        console.error(
+            "Ошибка голоса:",
             event
         );
 
         statusText.textContent =
-            "Не удалось воспроизвести голос.";
+            "Ошибка воспроизведения голоса.";
 
     };
 
@@ -122,7 +122,7 @@ function speak(text) {
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS
+// ОТПРАВКА ЗАПРОСА JARVIS
 // ============================================================
 
 async function askJarvis(text) {
@@ -143,7 +143,7 @@ async function askJarvis(text) {
     try {
 
         console.log(
-            "Отправляю запрос:",
+            "JARVIS → Worker:",
             text
         );
 
@@ -165,7 +165,7 @@ async function askJarvis(text) {
             );
 
         console.log(
-            "HTTP статус:",
+            "HTTP статус Worker:",
             response.status
         );
 
@@ -177,6 +177,10 @@ async function askJarvis(text) {
             raw
         );
 
+        // ====================================================
+        // ПЫТАЕМСЯ РАЗОБРАТЬ JSON
+        // ====================================================
+
         let data;
 
         try {
@@ -184,35 +188,86 @@ async function askJarvis(text) {
             data =
                 JSON.parse(raw);
 
-        } catch (error) {
+        } catch (jsonError) {
 
             throw new Error(
-                "Worker вернул не JSON: " +
-                raw.substring(0, 300)
-            );
-
-        }
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.error ||
-                "Ошибка сервера"
-            );
-
-        }
-
-        if (!data.answer) {
-
-            throw new Error(
-                data.error ||
-                "Gemini не вернул ответ"
+                "Worker вернул не JSON. Ответ: " +
+                raw.substring(0, 500)
             );
 
         }
 
         // ====================================================
-        // ВЫВОД ОТВЕТА
+        // HTTP ОШИБКА
+        // ====================================================
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status +
+                ": " +
+                (
+                    data.error ||
+                    data.message ||
+                    raw
+                )
+            );
+
+        }
+
+        // ====================================================
+        // ОШИБКА ОТ BEGET / GEMINI
+        // ====================================================
+
+        if (data.error) {
+
+            let details = "";
+
+            if (data.details) {
+
+                try {
+
+                    details =
+                        " | " +
+                        JSON.stringify(
+                            data.details
+                        );
+
+                } catch (e) {
+
+                    details =
+                        " | " +
+                        String(
+                            data.details
+                        );
+
+                }
+
+            }
+
+            throw new Error(
+                data.error +
+                details
+            );
+
+        }
+
+        // ====================================================
+        // ПРОВЕРЯЕМ ОТВЕТ
+        // ====================================================
+
+        if (!data.answer) {
+
+            throw new Error(
+                "В ответе нет поля answer. Ответ сервера: " +
+                raw.substring(0, 500)
+            );
+
+        }
+
+        // ====================================================
+        // ПОКАЗЫВАЕМ ОТВЕТ
         // ====================================================
 
         conversation.innerHTML = `
@@ -238,6 +293,11 @@ async function askJarvis(text) {
         statusText.textContent =
             "Ответ получен, сэр.";
 
+        console.log(
+            "Ответ JARVIS:",
+            data.answer
+        );
+
         // ====================================================
         // ОЗВУЧИВАЕМ ОТВЕТ
         // ====================================================
@@ -247,9 +307,17 @@ async function askJarvis(text) {
     } catch (error) {
 
         console.error(
-            "Ошибка JARVIS:",
+            "ПОЛНАЯ ОШИБКА JARVIS:",
             error
         );
+
+        const errorMessage =
+            error && error.message
+                ? error.message
+                : String(error);
+
+        // Показываем реальную ошибку
+        // вместо общей фразы
 
         conversation.innerHTML = `
 
@@ -265,14 +333,19 @@ async function askJarvis(text) {
 
                 <strong>JARVIS:</strong><br>
 
-                Ошибка связи с сервером, сэр.
+                Ошибка сервера, сэр.<br><br>
+
+                <small>
+                    ${escapeHTML(errorMessage)}
+                </small>
 
             </div>
 
         `;
 
         statusText.textContent =
-            "Не удалось получить ответ, сэр.";
+            "Ошибка: " +
+            errorMessage;
 
     } finally {
 
@@ -315,7 +388,7 @@ function handleMicClick() {
 
     } catch (error) {
 
-        console.log(
+        console.error(
             "Ошибка запуска микрофона:",
             error
         );
@@ -324,7 +397,7 @@ function handleMicClick() {
 }
 
 // ============================================================
-// СОЗДАНИЕ SPEECH RECOGNITION
+// ИНИЦИАЛИЗАЦИЯ РАСПОЗНАВАНИЯ
 // ============================================================
 
 if (!SpeechRecognition) {
@@ -357,7 +430,7 @@ if (!SpeechRecognition) {
     );
 
     // ========================================================
-    // НАЧАЛО
+    // НАЧАЛО ПРОСЛУШИВАНИЯ
     // ========================================================
 
     recognition.onstart =
@@ -375,7 +448,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // РЕЗУЛЬТАТ
+    // ПОЛУЧЕНИЕ РЕЧИ
     // ========================================================
 
     recognition.onresult =
@@ -417,22 +490,23 @@ if (!SpeechRecognition) {
             statusText.textContent =
                 "Отправляю запрос, сэр...";
 
-            // ВАЖНО:
-            // здесь действительно вызывается Gemini
+            // =================================================
+            // ОТПРАВЛЯЕМ В GEMINI
+            // =================================================
 
             await askJarvis(text);
 
         };
 
     // ========================================================
-    // ОШИБКА
+    // ОШИБКА РАСПОЗНАВАНИЯ
     // ========================================================
 
     recognition.onerror =
         function (event) {
 
-            console.log(
-                "Ошибка распознавания:",
+            console.error(
+                "Ошибка SpeechRecognition:",
                 event.error
             );
 
@@ -469,14 +543,15 @@ if (!SpeechRecognition) {
             } else {
 
                 statusText.textContent =
-                    "Не удалось распознать речь.";
+                    "Ошибка микрофона: " +
+                    event.error;
 
             }
 
         };
 
     // ========================================================
-    // КОНЕЦ
+    // ОКОНЧАНИЕ
     // ========================================================
 
     recognition.onend =
