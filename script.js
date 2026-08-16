@@ -9,24 +9,40 @@ const SpeechRecognition =
 let recognition = null;
 let isListening = false;
 let speechUnlocked = false;
-let pendingResponse = null;
 
 // ========================================
-// РАЗБЛОКИРОВКА SPEECH SYNTHESIS
+// ЖЁСТКАЯ РАЗБЛОКИРОВКА ДЛЯ SAFARI
 // ========================================
 
-function unlockSpeech() {
+function forceUnlockSpeech() {
     if (!("speechSynthesis" in window)) return;
     if (speechUnlocked) return;
 
     try {
         window.speechSynthesis.cancel();
-        const unlock = new SpeechSynthesisUtterance(" ");
-        unlock.volume = 0;
-        unlock.rate = 10;
-        window.speechSynthesis.speak(unlock);
+
+        // 1. Говорим тишину
+        const silent = new SpeechSynthesisUtterance(" ");
+        silent.volume = 0;
+        silent.rate = 10;
+        window.speechSynthesis.speak(silent);
+
+        // 2. Говорим ещё один тихий звук (для надёжности)
+        const silent2 = new SpeechSynthesisUtterance("  ");
+        silent2.volume = 0;
+        silent2.rate = 10;
+        window.speechSynthesis.speak(silent2);
+
         speechUnlocked = true;
-        console.log("🔊 Speech synthesis unlocked");
+        console.log("🔊 Safari speech unlocked");
+
+        // 3. Проверка: говорим тестовую фразу (громко)
+        setTimeout(() => {
+            const test = new SpeechSynthesisUtterance(" ");
+            test.volume = 0;
+            window.speechSynthesis.speak(test);
+        }, 100);
+
     } catch (error) {
         console.log("Ошибка разблокировки речи:", error);
     }
@@ -42,9 +58,8 @@ function speak(text) {
         return;
     }
 
-    // Если звук ещё не разблокирован — пробуем
     if (!speechUnlocked) {
-        unlockSpeech();
+        forceUnlockSpeech();
     }
 
     window.speechSynthesis.cancel();
@@ -72,20 +87,24 @@ function speak(text) {
 }
 
 // ========================================
-// ГЛАВНАЯ ФУНКЦИЯ — ВСЁ В ОДНОМ КЛИКЕ
+// ОБРАБОТЧИК КНОПКИ (всё в одном месте)
 // ========================================
 
 function handleMicClick() {
     if (isListening) return;
 
     // 1. Разблокируем звук
-    unlockSpeech();
+    forceUnlockSpeech();
 
-    // 2. НЕМЕДЛЕННО говорим тишину (звук активирован!)
+    // 2. НЕМЕДЛЕННО говорим тишину (в том же обработчике)
     if (speechUnlocked) {
         const silent = new SpeechSynthesisUtterance(" ");
         silent.volume = 0;
         window.speechSynthesis.speak(silent);
+        // Второй раз для Safari
+        const silent2 = new SpeechSynthesisUtterance("  ");
+        silent2.volume = 0;
+        window.speechSynthesis.speak(silent2);
     }
 
     // 3. Запускаем распознавание
@@ -109,25 +128,20 @@ if (!SpeechRecognition) {
     recognition.continuous = false;
     recognition.interimResults = false;
 
-    // КНОПКА МИКРОФОНА
     micButton.addEventListener("click", handleMicClick);
 
-    // НАЧАЛО ПРОСЛУШИВАНИЯ
     recognition.onstart = function () {
         isListening = true;
         micButton.classList.add("listening");
         statusText.textContent = "Слушаю вас, сэр...";
     };
 
-    // ПОЛУЧИЛИ РЕЧЬ
     recognition.onresult = function (event) {
         const text = event.results[0][0].transcript.trim();
 
         conversation.innerHTML = `
             <div class="user-message">
-                <strong>Вы:</strong>
-
-                ${escapeHTML(text)}
+                <strong>Вы:</strong>${escapeHTML(text)}
             </div>
             <div class="jarvis-message">
                 <strong>JARVIS:</strong>
@@ -138,14 +152,14 @@ if (!SpeechRecognition) {
 
         statusText.textContent = "Подготавливаю ответ, сэр...";
 
-        // Говорим ОТВЕТ (уже безопасно, звук разблокирован)
+        // Говорим ОТВЕТ
         speak("Я вас услышал, сэр.");
     };
 
-    // ОШИБКА
     recognition.onerror = function (event) {
         console.log("Ошибка распознавания:", event.error);
-        isListening = false;micButton.classList.remove("listening");
+        isListening = false;
+        micButton.classList.remove("listening");
 
         if (event.error === "not-allowed") {
             statusText.textContent = "Разрешите доступ к микрофону, сэр.";
@@ -156,7 +170,6 @@ if (!SpeechRecognition) {
         }
     };
 
-    // ЗАВЕРШЕНИЕ
     recognition.onend = function () {
         isListening = false;
         micButton.classList.remove("listening");
@@ -174,16 +187,19 @@ function escapeHTML(text) {
 }
 
 // ========================================
-// ДОПОЛНИТЕЛЬНО: разблокировка при касании
+// АВТО-РАЗБЛОКИРОВКА ПРИ КАСАНИИ
 // ========================================
 
 document.addEventListener("touchstart", function firstTouch() {
-    unlockSpeech();
+    forceUnlockSpeech();
     // Говорим тишину при первом касании
     if (speechUnlocked) {
         const silent = new SpeechSynthesisUtterance(" ");
         silent.volume = 0;
         window.speechSynthesis.speak(silent);
+        const silent2 = new SpeechSynthesisUtterance("  ");
+        silent2.volume = 0;
+        window.speechSynthesis.speak(silent2);
     }
     document.removeEventListener("touchstart", firstTouch);
 }, { passive: true });
