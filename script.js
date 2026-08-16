@@ -2,16 +2,8 @@ const micButton = document.getElementById("micButton");
 const statusText = document.getElementById("status");
 const conversation = document.getElementById("conversation");
 
-// ============================================================
-// CLOUDFLARE WORKER
-// ============================================================
-
 const JARVIS_API =
     "https://jarvis.salahyansergei2006.workers.dev/";
-
-// ============================================================
-// SPEECH RECOGNITION
-// ============================================================
 
 const SpeechRecognition =
     window.SpeechRecognition ||
@@ -22,79 +14,101 @@ let isListening = false;
 let requestInProgress = false;
 
 // ============================================================
+// БЫСТРЫЕ ЛОКАЛЬНЫЕ ОТВЕТЫ
+// ============================================================
+
+function getLocalAnswer(text) {
+    const t = text
+        .toLowerCase()
+        .replace(/[!?.,]/g, "")
+        .trim();
+
+    if (
+        t === "привет джарвис" ||
+        t === "джарвис привет" ||
+        t === "привет jarvis"
+    ) {
+        return "Здравствуйте, сэр. Я к вашим услугам.";
+    }
+
+    if (
+        t === "2 плюс 2" ||
+        t === "два плюс два" ||
+        t === "сколько будет 2 плюс 2" ||
+        t === "сколько будет два плюс два"
+    ) {
+        return "Четыре, сэр. Даже мои схемы сегодня не подвели.";
+    }
+
+    return null;
+}
+
+// ============================================================
 // ГОЛОС
 // ============================================================
 
 function speak(text) {
-
-    if (!text) {
-        return;
-    }
-
-    if (!("speechSynthesis" in window)) {
-        statusText.textContent =
-            "Синтез речи не поддерживается браузером, сэр.";
+    if (!text || !("speechSynthesis" in window)) {
         return;
     }
 
     try {
-
-        // Останавливаем предыдущую речь
         window.speechSynthesis.cancel();
 
-        // Небольшая задержка помогает Safari/iOS
-        // корректно запустить новую речь
-        setTimeout(function () {
+        const utterance =
+            new SpeechSynthesisUtterance(text);
 
-            const utterance =
-                new SpeechSynthesisUtterance(text);
+        utterance.lang = "ru-RU";
 
-            utterance.lang = "ru-RU";
-            utterance.rate = 0.85;
-            utterance.pitch = 0.8;
-            utterance.volume = 1;
+        // Скорость чуть выше для более быстрого JARVIS
+        utterance.rate = 0.95;
 
-            utterance.onstart = function () {
+        // Более низкий тон
+        utterance.pitch = 0.78;
 
-                console.log("JARVIS начал говорить");
+        utterance.volume = 1;
 
-                statusText.textContent =
-                    "Говорю, сэр...";
-            };
+        utterance.onstart = function () {
+            statusText.textContent =
+                "Говорю, сэр...";
+        };
 
-            utterance.onend = function () {
+        utterance.onend = function () {
+            statusText.textContent =
+                "Готов к дальнейшим указаниям, сэр.";
+        };
 
-                console.log("JARVIS закончил говорить");
+        utterance.onerror = function (event) {
+            console.error("Ошибка голоса:", event);
 
-                statusText.textContent =
-                    "Готов к дальнейшим указаниям, сэр.";
-            };
+            statusText.textContent =
+                "Ошибка воспроизведения голоса, сэр.";
+        };
 
-            utterance.onerror = function (event) {
-
-                console.error(
-                    "Ошибка синтеза речи:",
-                    event
-                );
-
-                statusText.textContent =
-                    "Ошибка воспроизведения голоса, сэр.";
-            };
-
-            window.speechSynthesis.speak(utterance);
-
-        }, 100);
+        // Запускаем сразу — без setTimeout
+        window.speechSynthesis.speak(utterance);
 
     } catch (error) {
-
-        console.error(
-            "Ошибка запуска голоса:",
-            error
-        );
-
-        statusText.textContent =
-            "Не удалось запустить голос, сэр.";
+        console.error("Ошибка запуска голоса:", error);
     }
+}
+
+// ============================================================
+// ПОКАЗ СООБЩЕНИЯ
+// ============================================================
+
+function showConversation(userText, answer) {
+    conversation.innerHTML = `
+        <div class="user-message">
+            <strong>Вы:</strong>
+            ${escapeHTML(userText)}
+        </div>
+
+        <div class="jarvis-message">
+            <strong>JARVIS:</strong>
+            ${escapeHTML(answer)}
+        </div>
+    `;
 }
 
 // ============================================================
@@ -103,25 +117,43 @@ function speak(text) {
 
 async function askJarvis(text) {
 
-    if (!text) {
-        return;
-    }
-
-    if (requestInProgress) {
+    if (!text || requestInProgress) {
         return;
     }
 
     requestInProgress = true;
 
     statusText.textContent =
-        "Думаю над ответом, сэр...";
+        "Обрабатываю запрос, сэр...";
 
     try {
 
-        console.log(
-            "Отправляем в Worker:",
-            text
-        );
+        // ====================================================
+        // СНАЧАЛА ПРОВЕРЯЕМ БЫСТРЫЕ КОМАНДЫ
+        // ====================================================
+
+        const localAnswer =
+            getLocalAnswer(text);
+
+        if (localAnswer) {
+
+            showConversation(
+                text,
+                localAnswer
+            );
+
+            statusText.textContent =
+                "Ответ готов, сэр.";
+
+            // Голос сразу
+            speak(localAnswer);
+
+            return;
+        }
+
+        // ====================================================
+        // ОТПРАВЛЯЕМ В WORKER
+        // ====================================================
 
         const response =
             await fetch(
@@ -136,40 +168,34 @@ async function askJarvis(text) {
 
                     body: JSON.stringify({
                         text: text
-                    })
+                    }),
+
+                    // Не держим соединение бесконечно
+                    signal: AbortSignal.timeout(30000)
                 }
             );
-
-        console.log(
-            "Worker HTTP:",
-            response.status
-        );
 
         const raw =
             await response.text();
 
         console.log(
-            "Worker ответ:",
+            "Worker:",
+            response.status,
             raw
         );
 
         let data;
 
         try {
-
-            data =
-                JSON.parse(raw);
-
-        } catch (error) {
-
+            data = JSON.parse(raw);
+        } catch {
             throw new Error(
                 "Worker вернул не JSON: " +
-                raw.substring(0, 500)
+                raw.substring(0, 300)
             );
         }
 
         if (!response.ok) {
-
             throw new Error(
                 data.error ||
                 "Ошибка Worker"
@@ -177,10 +203,9 @@ async function askJarvis(text) {
         }
 
         if (!data.answer) {
-
             throw new Error(
                 data.error ||
-                "JARVIS не получил ответ Gemini"
+                "JARVIS не получил ответ"
             );
         }
 
@@ -188,36 +213,16 @@ async function askJarvis(text) {
         // ПОКАЗЫВАЕМ ОТВЕТ
         // ====================================================
 
-        conversation.innerHTML = `
-
-            <div class="user-message">
-
-                <strong>Вы:</strong>
-
-                ${escapeHTML(text)}
-
-            </div>
-
-            <div class="jarvis-message">
-
-                <strong>JARVIS:</strong>
-
-                ${escapeHTML(data.answer)}
-
-            </div>
-
-        `;
+        showConversation(
+            text,
+            data.answer
+        );
 
         statusText.textContent =
             "Ответ получен, сэр.";
 
-        console.log(
-            "Ответ JARVIS:",
-            data.answer
-        );
-
         // ====================================================
-        // ГОВОРИМ ОТВЕТ
+        // ГОВОРИМ НЕМЕДЛЕННО
         // ====================================================
 
         speak(data.answer);
@@ -229,12 +234,14 @@ async function askJarvis(text) {
             error
         );
 
-        conversation.innerHTML += `
+        conversation.innerHTML = `
+            <div class="user-message">
+                <strong>Вы:</strong>
+                ${escapeHTML(text)}
+            </div>
 
             <div class="jarvis-message">
-
                 <strong>JARVIS:</strong>
-
                 Ошибка связи с сервером, сэр.
 
                 <br>
@@ -242,9 +249,7 @@ async function askJarvis(text) {
                 <small>
                     ${escapeHTML(error.message)}
                 </small>
-
             </div>
-
         `;
 
         statusText.textContent =
@@ -284,7 +289,6 @@ function handleMicClick() {
 
     try {
 
-        // Останавливаем старую речь
         if ("speechSynthesis" in window) {
             window.speechSynthesis.cancel();
         }
@@ -294,14 +298,14 @@ function handleMicClick() {
     } catch (error) {
 
         console.log(
-            "Ошибка запуска микрофона:",
+            "Микрофон:",
             error
         );
     }
 }
 
 // ============================================================
-// РАСПОЗНАВАНИЕ РЕЧИ
+// SPEECH RECOGNITION
 // ============================================================
 
 if (!SpeechRecognition) {
@@ -322,6 +326,7 @@ if (!SpeechRecognition) {
     recognition.continuous =
         false;
 
+    // false = быстрее отдаёт результат
     recognition.interimResults =
         false;
 
@@ -334,7 +339,7 @@ if (!SpeechRecognition) {
     );
 
     // ========================================================
-    // НАЧАЛО СЛУШАНИЯ
+    // НАЧАЛО
     // ========================================================
 
     recognition.onstart =
@@ -351,7 +356,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // ПОЛУЧЕНИЕ РЕЧИ
+    // РЕЗУЛЬТАТ
     // ========================================================
 
     recognition.onresult =
@@ -375,45 +380,33 @@ if (!SpeechRecognition) {
                 return;
             }
 
-            // Показываем вопрос
-            // сразу после распознавания
+            // Сразу показываем запрос
 
             conversation.innerHTML = `
-
                 <div class="user-message">
-
                     <strong>Вы:</strong>
-
                     ${escapeHTML(text)}
-
                 </div>
 
                 <div class="jarvis-message">
-
                     <strong>JARVIS:</strong>
-
-                    Обрабатываю запрос, сэр...
-
+                    Обрабатываю...
                 </div>
-
             `;
 
-            statusText.textContent =
-                "Отправляю запрос, сэр...";
-
-            // Отправляем Gemini
+            // Отправляем сразу
             await askJarvis(text);
         };
 
     // ========================================================
-    // ОШИБКА МИКРОФОНА
+    // ОШИБКА
     // ========================================================
 
     recognition.onerror =
         function (event) {
 
             console.error(
-                "Ошибка распознавания:",
+                "Speech error:",
                 event.error
             );
 
@@ -423,26 +416,17 @@ if (!SpeechRecognition) {
                 "listening"
             );
 
-            if (
-                event.error ===
-                "not-allowed"
-            ) {
+            if (event.error === "not-allowed") {
 
                 statusText.textContent =
                     "Разрешите доступ к микрофону, сэр.";
 
-            } else if (
-                event.error ===
-                "no-speech"
-            ) {
+            } else if (event.error === "no-speech") {
 
                 statusText.textContent =
                     "Я не услышал вас, сэр.";
 
-            } else if (
-                event.error ===
-                "network"
-            ) {
+            } else if (event.error === "network") {
 
                 statusText.textContent =
                     "Ошибка соединения с распознаванием речи.";
@@ -455,7 +439,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // КОНЕЦ СЛУШАНИЯ
+    // КОНЕЦ
     // ========================================================
 
     recognition.onend =
