@@ -13,11 +13,13 @@ let recognition = null;
 let isListening = false;
 let requestInProgress = false;
 
+
 // ============================================================
 // БЫСТРЫЕ ЛОКАЛЬНЫЕ ОТВЕТЫ
 // ============================================================
 
 function getLocalAnswer(text) {
+
     const t = text
         .toLowerCase()
         .replace(/[!?.,]/g, "")
@@ -43,16 +45,27 @@ function getLocalAnswer(text) {
     return null;
 }
 
+
 // ============================================================
 // ГОЛОС
 // ============================================================
 
 function speak(text) {
-    if (!text || !("speechSynthesis" in window)) {
+
+    if (!text) {
+        return;
+    }
+
+    if (!("speechSynthesis" in window)) {
+
+        statusText.textContent =
+            "Синтез речи не поддерживается браузером, сэр.";
+
         return;
     }
 
     try {
+
         window.speechSynthesis.cancel();
 
         const utterance =
@@ -60,56 +73,82 @@ function speak(text) {
 
         utterance.lang = "ru-RU";
 
-        // Скорость чуть выше для более быстрого JARVIS
+        // Быстрая естественная речь
         utterance.rate = 0.95;
 
-        // Более низкий тон
+        // Более низкий голос
         utterance.pitch = 0.78;
 
         utterance.volume = 1;
 
         utterance.onstart = function () {
+
             statusText.textContent =
                 "Говорю, сэр...";
         };
 
         utterance.onend = function () {
+
             statusText.textContent =
                 "Готов к дальнейшим указаниям, сэр.";
         };
 
         utterance.onerror = function (event) {
-            console.error("Ошибка голоса:", event);
+
+            console.error(
+                "Ошибка синтеза речи:",
+                event
+            );
 
             statusText.textContent =
                 "Ошибка воспроизведения голоса, сэр.";
         };
 
-        // Запускаем сразу — без setTimeout
-        window.speechSynthesis.speak(utterance);
+        // Без дополнительной задержки
+        window.speechSynthesis.speak(
+            utterance
+        );
 
     } catch (error) {
-        console.error("Ошибка запуска голоса:", error);
+
+        console.error(
+            "Ошибка запуска голоса:",
+            error
+        );
+
+        statusText.textContent =
+            "Не удалось запустить голос, сэр.";
     }
 }
 
+
 // ============================================================
-// ПОКАЗ СООБЩЕНИЯ
+// ПОКАЗ ДИАЛОГА
 // ============================================================
 
 function showConversation(userText, answer) {
+
     conversation.innerHTML = `
+
         <div class="user-message">
+
             <strong>Вы:</strong>
+
             ${escapeHTML(userText)}
+
         </div>
 
         <div class="jarvis-message">
+
             <strong>JARVIS:</strong>
+
             ${escapeHTML(answer)}
+
         </div>
+
     `;
 }
+
 
 // ============================================================
 // ЗАПРОС К JARVIS
@@ -117,7 +156,11 @@ function showConversation(userText, answer) {
 
 async function askJarvis(text) {
 
-    if (!text || requestInProgress) {
+    if (!text) {
+        return;
+    }
+
+    if (requestInProgress) {
         return;
     }
 
@@ -128,8 +171,14 @@ async function askJarvis(text) {
 
     try {
 
+        console.log(
+            "Отправляем запрос:",
+            text
+        );
+
+
         // ====================================================
-        // СНАЧАЛА ПРОВЕРЯЕМ БЫСТРЫЕ КОМАНДЫ
+        // БЫСТРЫЕ ЛОКАЛЬНЫЕ КОМАНДЫ
         // ====================================================
 
         const localAnswer =
@@ -145,14 +194,14 @@ async function askJarvis(text) {
             statusText.textContent =
                 "Ответ готов, сэр.";
 
-            // Голос сразу
             speak(localAnswer);
 
             return;
         }
 
+
         // ====================================================
-        // ОТПРАВЛЯЕМ В WORKER
+        // GEMINI ЧЕРЕЗ CLOUDFLARE WORKER
         // ====================================================
 
         const response =
@@ -170,55 +219,109 @@ async function askJarvis(text) {
                         text: text
                     }),
 
-                    // Не держим соединение бесконечно
-                    signal: AbortSignal.timeout(30000)
+                    signal:
+                        AbortSignal.timeout(30000)
                 }
             );
+
+
+        console.log(
+            "Worker HTTP:",
+            response.status
+        );
+
 
         const raw =
             await response.text();
 
+
         console.log(
-            "Worker:",
-            response.status,
+            "Worker RAW:",
             raw
         );
+
+
+        // ====================================================
+        // ПРОВЕРКА JSON
+        // ====================================================
 
         let data;
 
         try {
-            data = JSON.parse(raw);
-        } catch {
+
+            data =
+                JSON.parse(raw);
+
+        } catch (error) {
+
             throw new Error(
-                "Worker вернул не JSON: " +
-                raw.substring(0, 300)
+                "Worker вернул не JSON:\n" +
+                raw.substring(0, 1000)
             );
         }
 
-if (!response.ok) {
-    console.error("ПОЛНАЯ ОШИБКА GEMINI:", data);
 
-    let details = "";
+        console.log(
+            "Worker JSON:",
+            data
+        );
 
-    if (data.details) {
-        details =
-            typeof data.details === "string"
-                ? data.details
-                : JSON.stringify(data.details);
-    }
 
-    throw new Error(
-        (data.error || "Ошибка Worker") +
-        (details ? "\n" + details : "")
-    );
-}
+        // ====================================================
+        // ДИАГНОСТИКА ОШИБКИ GEMINI
+        // ====================================================
+
+        if (!response.ok) {
+
+            console.error(
+                "ПОЛНАЯ ОШИБКА GEMINI:",
+                data
+            );
+
+            let details = "";
+
+            if (data.details) {
+
+                details =
+                    typeof data.details === "string"
+                        ? data.details
+                        : JSON.stringify(
+                            data.details,
+                            null,
+                            2
+                        );
+            }
+
+            throw new Error(
+
+                (data.error ||
+                    "Ошибка Worker")
+
+                +
+
+                (
+                    details
+                        ? "\n\n" + details
+                        : ""
+                )
+            );
+        }
+
+
+        // ====================================================
+        // ПРОВЕРКА ОТВЕТА
+        // ====================================================
 
         if (!data.answer) {
+
             throw new Error(
+
                 data.error ||
-                "JARVIS не получил ответ"
+
+                "JARVIS не получил текстовый ответ от Gemini."
             );
         }
+
 
         // ====================================================
         // ПОКАЗЫВАЕМ ОТВЕТ
@@ -229,48 +332,81 @@ if (!response.ok) {
             data.answer
         );
 
+
         statusText.textContent =
             "Ответ получен, сэр.";
 
+
+        console.log(
+            "Ответ JARVIS:",
+            data.answer
+        );
+
+
         // ====================================================
-        // ГОВОРИМ НЕМЕДЛЕННО
+        // ГОВОРИМ СРАЗУ
         // ====================================================
 
-        speak(data.answer);
+        speak(
+            data.answer
+        );
+
 
     } catch (error) {
 
         console.error(
-            "Ошибка JARVIS:",
+            "ОШИБКА JARVIS:",
             error
         );
 
+
+        // ====================================================
+        // ПОКАЗЫВАЕМ ПОЛНУЮ ОШИБКУ
+        // ====================================================
+
         conversation.innerHTML = `
+
             <div class="user-message">
+
                 <strong>Вы:</strong>
+
                 ${escapeHTML(text)}
+
             </div>
 
             <div class="jarvis-message">
+
                 <strong>JARVIS:</strong>
+
                 Ошибка связи с сервером, сэр.
 
-                <br>
+                <br><br>
 
-                <small>
-                    ${escapeHTML(error.message)}
+                <small style="
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                ">
+                    ${escapeHTML(
+                        error.message
+                    )}
                 </small>
+
             </div>
+
         `;
 
+
         statusText.textContent =
-            "Не удалось получить ответ, сэр.";
+            "Ошибка обработки запроса, сэр.";
+
 
     } finally {
 
-        requestInProgress = false;
+        requestInProgress =
+            false;
     }
 }
+
 
 // ============================================================
 // КНОПКА МИКРОФОНА
@@ -282,6 +418,7 @@ function handleMicClick() {
         return;
     }
 
+
     if (requestInProgress) {
 
         statusText.textContent =
@@ -289,6 +426,7 @@ function handleMicClick() {
 
         return;
     }
+
 
     if (!SpeechRecognition) {
 
@@ -298,25 +436,29 @@ function handleMicClick() {
         return;
     }
 
+
     try {
 
         if ("speechSynthesis" in window) {
+
             window.speechSynthesis.cancel();
         }
+
 
         recognition.start();
 
     } catch (error) {
 
         console.log(
-            "Микрофон:",
+            "Ошибка запуска микрофона:",
             error
         );
     }
 }
 
+
 // ============================================================
-// SPEECH RECOGNITION
+// РАСПОЗНАВАНИЕ РЕЧИ
 // ============================================================
 
 if (!SpeechRecognition) {
@@ -324,39 +466,46 @@ if (!SpeechRecognition) {
     statusText.textContent =
         "Распознавание речи не поддерживается.";
 
-    micButton.disabled = true;
+    micButton.disabled =
+        true;
 
 } else {
 
     recognition =
         new SpeechRecognition();
 
+
     recognition.lang =
         "ru-RU";
+
 
     recognition.continuous =
         false;
 
-    // false = быстрее отдаёт результат
+
     recognition.interimResults =
         false;
 
+
     recognition.maxAlternatives =
         1;
+
 
     micButton.addEventListener(
         "click",
         handleMicClick
     );
 
+
     // ========================================================
-    // НАЧАЛО
+    // НАЧАЛО СЛУШАНИЯ
     // ========================================================
 
     recognition.onstart =
         function () {
 
-            isListening = true;
+            isListening =
+                true;
 
             micButton.classList.add(
                 "listening"
@@ -366,22 +515,26 @@ if (!SpeechRecognition) {
                 "Слушаю вас, сэр...";
         };
 
+
     // ========================================================
-    // РЕЗУЛЬТАТ
+    // ПОЛУЧЕНИЕ РЕЧИ
     // ========================================================
 
     recognition.onresult =
         async function (event) {
 
             const text =
-                event.results[0][0]
+                event
+                    .results[0][0]
                     .transcript
                     .trim();
+
 
             console.log(
                 "Распознано:",
                 text
             );
+
 
             if (!text) {
 
@@ -391,53 +544,84 @@ if (!SpeechRecognition) {
                 return;
             }
 
+
             // Сразу показываем запрос
 
             conversation.innerHTML = `
+
                 <div class="user-message">
+
                     <strong>Вы:</strong>
+
                     ${escapeHTML(text)}
+
                 </div>
 
                 <div class="jarvis-message">
+
                     <strong>JARVIS:</strong>
+
                     Обрабатываю...
+
                 </div>
+
             `;
 
+
+            statusText.textContent =
+                "Обрабатываю запрос, сэр.";
+
+
             // Отправляем сразу
-            await askJarvis(text);
+
+            await askJarvis(
+                text
+            );
         };
 
+
     // ========================================================
-    // ОШИБКА
+    // ОШИБКА РАСПОЗНАВАНИЯ
     // ========================================================
 
     recognition.onerror =
         function (event) {
 
             console.error(
-                "Speech error:",
+                "Ошибка распознавания:",
                 event.error
             );
 
-            isListening = false;
+
+            isListening =
+                false;
+
 
             micButton.classList.remove(
                 "listening"
             );
 
-            if (event.error === "not-allowed") {
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
 
                 statusText.textContent =
                     "Разрешите доступ к микрофону, сэр.";
 
-            } else if (event.error === "no-speech") {
+            } else if (
+                event.error ===
+                "no-speech"
+            ) {
 
                 statusText.textContent =
                     "Я не услышал вас, сэр.";
 
-            } else if (event.error === "network") {
+            } else if (
+                event.error ===
+                "network"
+            ) {
 
                 statusText.textContent =
                     "Ошибка соединения с распознаванием речи.";
@@ -449,20 +633,23 @@ if (!SpeechRecognition) {
             }
         };
 
+
     // ========================================================
-    // КОНЕЦ
+    // КОНЕЦ СЛУШАНИЯ
     // ========================================================
 
     recognition.onend =
         function () {
 
-            isListening = false;
+            isListening =
+                false;
 
             micButton.classList.remove(
                 "listening"
             );
         };
 }
+
 
 // ============================================================
 // ЗАЩИТА HTML
@@ -471,7 +658,9 @@ if (!SpeechRecognition) {
 function escapeHTML(text) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     div.textContent =
         text;
@@ -479,28 +668,38 @@ function escapeHTML(text) {
     return div.innerHTML;
 }
 
+
 // ============================================================
 // РАЗБЛОКИРОВКА AUDIO НА iPHONE
 // ============================================================
 
 function unlockAudio() {
 
-    if (!("speechSynthesis" in window)) {
+    if (
+        !("speechSynthesis" in window)
+    ) {
         return;
     }
+
 
     try {
 
         window.speechSynthesis.cancel();
 
+
         const audio =
-            new SpeechSynthesisUtterance("");
+            new SpeechSynthesisUtterance(
+                ""
+            );
+
 
         audio.lang =
             "ru-RU";
 
+
         audio.volume =
             0;
+
 
         window.speechSynthesis.speak(
             audio
@@ -514,6 +713,7 @@ function unlockAudio() {
         );
     }
 }
+
 
 // ============================================================
 // ПЕРВОЕ КАСАНИЕ
@@ -535,6 +735,7 @@ document.addEventListener(
         passive: true
     }
 );
+
 
 // ============================================================
 // ПЕРВЫЙ КЛИК
