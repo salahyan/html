@@ -3,12 +3,11 @@ const statusText = document.getElementById("status");
 const conversation = document.getElementById("conversation");
 
 // ============================================================
-// НАСТРОЙКИ
+// CLOUDFLARE WORKER
 // ============================================================
 
-// HTTPS-адрес нашего Cloudflare Worker
 const JARVIS_API =
-    "https://jarvis.salahyansergei2006.workers.dev/&quot;;
+    "https://jarvis.salahyansergei2006.workers.dev/";
 
 // ============================================================
 // SPEECH RECOGNITION
@@ -123,7 +122,7 @@ function speak(text) {
 }
 
 // ============================================================
-// ОТПРАВКА ТЕКСТА В GEMINI
+// ЗАПРОС К JARVIS
 // ============================================================
 
 async function askJarvis(text) {
@@ -174,7 +173,7 @@ async function askJarvis(text) {
             await response.text();
 
         console.log(
-            "Ответ сервера:",
+            "Ответ Worker:",
             raw
         );
 
@@ -188,7 +187,7 @@ async function askJarvis(text) {
         } catch (error) {
 
             throw new Error(
-                "Сервер вернул не JSON: " +
+                "Worker вернул не JSON: " +
                 raw.substring(0, 300)
             );
 
@@ -198,7 +197,7 @@ async function askJarvis(text) {
 
             throw new Error(
                 data.error ||
-                "Ошибкасервера"
+                "Ошибка сервера"
             );
 
         }
@@ -213,14 +212,14 @@ async function askJarvis(text) {
         }
 
         // ====================================================
-        // ПОКАЗЫВАЕМ ОТВЕТ
+        // ВЫВОД ОТВЕТА
         // ====================================================
 
         conversation.innerHTML = `
 
             <div class="user-message">
 
-                <strong>Вы:</strong>
+                <strong>Вы:</strong><br>
 
                 ${escapeHTML(text)}
 
@@ -228,7 +227,7 @@ async function askJarvis(text) {
 
             <div class="jarvis-message">
 
-                <strong>JARVIS:</strong>
+                <strong>JARVIS:</strong><br>
 
                 ${escapeHTML(data.answer)}
 
@@ -240,7 +239,7 @@ async function askJarvis(text) {
             "Ответ получен, сэр.";
 
         // ====================================================
-        // ПРОИЗНОСИМ НАСТОЯЩИЙ ОТВЕТ GEMINI
+        // ОЗВУЧИВАЕМ ОТВЕТ
         // ====================================================
 
         speak(data.answer);
@@ -252,14 +251,21 @@ async function askJarvis(text) {
             error
         );
 
-        conversation.innerHTML += `
+        conversation.innerHTML = `
+
+            <div class="user-message">
+
+                <strong>Вы:</strong><br>
+
+                ${escapeHTML(text)}
+
+            </div>
 
             <div class="jarvis-message">
 
-                <strong>JARVIS:</strong>
+                <strong>JARVIS:</strong><br>
 
-                Произошла ошибка при получении
-                ответа, сэр.
+                Ошибка связи с сервером, сэр.
 
             </div>
 
@@ -276,7 +282,7 @@ async function askJarvis(text) {
 }
 
 // ============================================================
-// НАЖАТИЕ НА МИКРОФОН
+// КНОПКА МИКРОФОНА
 // ============================================================
 
 function handleMicClick() {
@@ -288,7 +294,7 @@ function handleMicClick() {
     if (requestInProgress) {
 
         statusText.textContent =
-            "Я ещё обрабатываю предыдущий запрос, сэр.";
+            "Подождите, сэр. Я ещё обрабатываю запрос.";
 
         return;
     }
@@ -315,11 +321,10 @@ function handleMicClick() {
         );
 
     }
-
 }
 
 // ============================================================
-// ИНИЦИАЛИЗАЦИЯ РАСПОЗНАВАНИЯ
+// СОЗДАНИЕ SPEECH RECOGNITION
 // ============================================================
 
 if (!SpeechRecognition) {
@@ -352,24 +357,25 @@ if (!SpeechRecognition) {
     );
 
     // ========================================================
-    // НАЧАЛО ПРОСЛУШИВАНИЯ
+    // НАЧАЛО
     // ========================================================
 
-    recognition.onstart = function () {
+    recognition.onstart =
+        function () {
 
-        isListening = true;
+            isListening = true;
 
-        micButton.classList.add(
-            "listening"
-        );
+            micButton.classList.add(
+                "listening"
+            );
 
-        statusText.textContent =
-            "Слушаю вас, сэр...";
+            statusText.textContent =
+                "Слушаю вас, сэр...";
 
-    };
+        };
 
     // ========================================================
-    // ПОЛУЧЕНИЕ РЕЧИ
+    // РЕЗУЛЬТАТ
     // ========================================================
 
     recognition.onresult =
@@ -388,13 +394,11 @@ if (!SpeechRecognition) {
                 return;
             }
 
-            // Показываем вопрос сразу
-
             conversation.innerHTML = `
 
                 <div class="user-message">
 
-                    <strong>Вы:</strong>
+                    <strong>Вы:</strong><br>
 
                     ${escapeHTML(text)}
 
@@ -402,7 +406,7 @@ if (!SpeechRecognition) {
 
                 <div class="jarvis-message">
 
-                    <strong>JARVIS:</strong>
+                    <strong>JARVIS:</strong><br>
 
                     Обрабатываю запрос, сэр...
 
@@ -410,12 +414,18 @@ if (!SpeechRecognition) {
 
             `;
 
-            // Отправляем настоящий запрос Geminiawait askJarvis(text);
+            statusText.textContent =
+                "Отправляю запрос, сэр...";
+
+            // ВАЖНО:
+            // здесь действительно вызывается Gemini
+
+            await askJarvis(text);
 
         };
 
     // ========================================================
-    // ОШИБКА РАСПОЗНАВАНИЯ
+    // ОШИБКА
     // ========================================================
 
     recognition.onerror =
@@ -454,7 +464,7 @@ if (!SpeechRecognition) {
             ) {
 
                 statusText.textContent =
-                    "Ошибка соединения с распознаванием речи.";
+                    "Ошибка сети распознавания речи.";
 
             } else {
 
@@ -466,7 +476,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // ОКОНЧАНИЕ ПРОСЛУШИВАНИЯ
+    // КОНЕЦ
     // ========================================================
 
     recognition.onend =
@@ -483,7 +493,7 @@ if (!SpeechRecognition) {
 }
 
 // ============================================================
-// ЗАЩИТА ОТ HTML
+// ЗАЩИТА HTML
 // ============================================================
 
 function escapeHTML(text) {
@@ -498,7 +508,7 @@ function escapeHTML(text) {
 }
 
 // ============================================================
-// РАЗБЛОКИРОВКА ЗВУКА ПРИ ПЕРВОМ КАСАНИИ
+// РАЗБЛОКИРОВКА ГОЛОСА ПРИ КАСАНИИ
 // ============================================================
 
 document.addEventListener(
@@ -519,7 +529,7 @@ document.addEventListener(
 );
 
 // ============================================================
-// РАЗБЛОКИРОВКА ЗВУКА ПРИ ПЕРВОМ КЛИКЕ
+// РАЗБЛОКИРОВКА ГОЛОСА ПРИ КЛИКЕ
 // ============================================================
 
 document.addEventListener(
