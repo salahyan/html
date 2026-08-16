@@ -1,0 +1,326 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at center,
+            #062638 0%,
+            #02070c 45%,
+            #000000 100%
+        );
+    color: #dffaff;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+.jarvis {
+    width: min(700px, 94%);
+    min-height: 100vh;
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    padding: 30px 15px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #00eaff;
+    letter-spacing: 3px;
+    font-size: 13px;
+
+    margin-bottom: 35px;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #00ffae;
+
+    box-shadow:
+        0 0 8px #00ffae,
+        0 0 18px #00ffae;
+}
+
+.orb {
+    width: 180px;
+    height: 180px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #00d9ff;
+
+    box-shadow:
+        0 0 25px #00d9ff,
+        0 0 60px rgba(0, 217, 255, 0.35),
+        inset 0 0 35px #00d9ff;
+
+    animation: pulse 3s infinite ease-in-out;
+}
+
+.orb-inner {
+    width: 95px;
+    height: 95px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #ffffff 0%,
+            #aaffff 15%,
+            #009dcc 55%,
+            #00334a 100%
+        );
+
+    box-shadow:
+        0 0 20px #00eaff,
+        0 0 45px #00eaff;
+}
+
+h1 {
+    margin: 30px 0 5px;
+
+    color: #eaffff;
+
+    font-size: 48px;
+    font-weight: 700;
+
+    letter-spacing: 12px;
+
+    text-shadow:
+        0 0 10px #00eaff,
+        0 0 25px rgba(0, 234, 255, 0.5);
+}
+
+#status {
+    min-height: 25px;
+
+    margin: 0 0 20px;
+
+    color: #00eaff;
+
+    font-size: 15px;
+}
+
+.conversation {
+    width: 100%;
+    min-height: 110px;
+
+    margin: 15px 0 25px;
+    padding: 22px;
+
+    border: 1px solid rgba(0, 220, 255, 0.35);
+
+    border-radius: 18px;
+
+    background:
+        rgba(0, 20, 30, 0.65);
+
+    box-shadow:
+        0 0 20px rgba(0, 200, 255, 0.08);
+
+    line-height: 1.6;
+
+    text-align: left;
+
+    word-break: break-word;
+}
+
+.jarvis-message {
+    color: #dffaff;
+}
+
+.user-message {
+    color: #00eaff;
+
+    margin-bottom: 15px;
+}
+
+.mic-button {
+    width: 85px;
+    height: 85px;
+
+    border-radius: 50%;
+
+    border: 2px solid #00eaff;
+
+    background:
+        radial-gradient(
+            circle,
+            #0b536b,
+            #062b3a
+        );
+
+    color: #ffffff;
+
+    font-size: 34px;
+
+    cursor: pointer;
+
+    outline: none;
+
+    box-shadow:
+        0 0 20px rgba(0, 220, 255, 0.45),
+        inset 0 0 15px rgba(0, 220, 255, 0.2);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.mic-button:hover {
+    box-shadow:
+        0 0 30px rgba(0, 220, 255, 0.7),
+        inset 0 0 20px rgba(0, 220, 255, 0.3);
+}
+
+.mic-button:active {
+    transform: scale(0.94);
+}
+
+.mic-button.listening {
+    transform: scale(1.12);
+
+    background:
+        radial-gradient(
+            circle,
+            #147d94,
+            #063443
+        );
+
+    box-shadow:
+        0 0 35px #00eaff,
+        0 0 70px rgba(0, 234, 255, 0.45);
+}
+
+.hint {
+    margin-top: 15px;
+
+    color: #718b96;
+
+    font-size: 13px;
+}
+
+/* Анимация главного ядра */
+
+@keyframes pulse {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Телефон */
+
+max-width: 600px {
+
+    .jarvis {
+        width: 94%;
+        padding: 25px 10px;
+    }
+
+    .header {
+        margin-bottom: 25px;
+
+        font-size: 11px;
+
+        letter-spacing: 2px;
+    }
+
+    .orb {
+        width: 145px;
+        height: 145px;
+    }
+
+    .orb-inner {
+        width: 75px;
+        height: 75px;
+    }
+
+    h1 {
+        font-size: 36px;
+
+        letter-spacing: 8px;
+
+        margin-top: 25px;
+    }
+
+    #status {
+        font-size:14px;
+    }
+
+    .conversation {
+        min-height: 100px;
+
+        padding: 18px;
+
+        font-size: 15px;
+    }
+
+    .mic-button {
+        width: 75px;
+        height: 75px;
+
+        font-size: 30px;
+    }
+}
+
+/* Очень маленький экран */
+
+max-width: 380px {
+
+    .orb {
+        width: 125px;
+        height: 125px;
+    }
+
+    .orb-inner {
+        width: 65px;
+        height: 65px;
+    }
+
+    h1 {
+        font-size: 30px;
+
+        letter-spacing: 6px;
+    }
+
+    .conversation {
+        font-size: 14px;
+    }
+}
