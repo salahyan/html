@@ -8,139 +8,45 @@ const SpeechRecognition =
 
 let recognition = null;
 let isListening = false;
+let speechUnlocked = false;
 
-// ================================
-// ПРОВЕРКА РАСПОЗНАВАНИЯ РЕЧИ
-// ================================
+// ========================================
+// РАЗБЛОКИРОВКА SPEECH SYNTHESIS
+// ========================================
 
-if (!SpeechRecognition) {
+function unlockSpeech() {
 
-    statusText.textContent =
-        "Распознавание речи не поддерживается этим браузером.";
+    if (!("speechSynthesis" in window)) {
+        return;
+    }
 
-    micButton.disabled = true;
+    try {
 
-} else {
+        window.speechSynthesis.cancel();
 
-    recognition = new SpeechRecognition();
+        const unlock = new SpeechSynthesisUtterance("");
 
-    recognition.lang = "ru-RU";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+        unlock.volume = 0;
+        unlock.rate = 10;
 
-    // ================================
-    // НАЖАТИЕ НА МИКРОФОН
-    // ================================
+        window.speechSynthesis.speak(unlock);
 
-    micButton.addEventListener("click", function () {
+        speechUnlocked = true;
 
-        if (isListening) {
-            return;
-        }
+        console.log("Speech synthesis unlocked");
 
-        try {
-
-            recognition.start();
-
-        } catch (error) {
-
-            console.log("Ошибка запуска:", error);
-
-        }
-
-    });
-
-    // ================================
-    // НАЧАЛО ПРОСЛУШИВАНИЯ
-    // ================================
-
-    recognition.onstart = function () {
-
-        isListening = true;
-
-        micButton.classList.add("listening");
-
-        statusText.textContent =
-            "Слушаю вас, сэр...";
-    };
-
-    // ================================
-    // ПОЛУЧЕНИЕ РЕЧИ
-    // ================================
-
-    recognition.onresult = function (event) {
-
-        const text =
-            event.results[0][0].transcript.trim();
-
-        conversation.innerHTML = `
-            <div class="user-message">
-                <strong>Вы:</strong>
-
-                ${escapeHTML(text)}
-            </div>
-
-            <div class="jarvis-message">
-                <strong>JARVIS:</strong>
-
-                Я вас услышал, сэр.
-            </div>
-        `;
-
-        statusText.textContent =
-            "Готов к дальнейшим указаниям, сэр.";
-
-        // Говорим ответ
-        speak("Я вас услышал, сэр.");
-    };
-
-    // ================================
-    // ОШИБКА РАСПОЗНАВАНИЯ
-    // ================================
-
-    recognition.onerror = function (event) {
+    } catch (error) {
 
         console.log(
-            "Ошибка распознавания:",
-            event.error
+            "Ошибка разблокировки речи:",
+            error
         );
-
-        isListening = false;
-
-        micButton.classList.remove("listening");
-
-        if (event.error === "not-allowed") {
-
-            statusText.textContent =
-                "Разрешите доступ к микрофону, сэр.";
-
-        } else if (event.error === "no-speech") {
-
-            statusText.textContent =
-                "Я не услышал вас, сэр.";
-
-        } else {
-
-            statusText.textContent =
-                "Не удалось распознать речь.";
-        }
-    };
-
-    // ================================
-    // ОКОНЧАНИЕ ПРОСЛУШИВАНИЯ
-    // ================================
-
-    recognition.onend = function () {
-
-        isListening = false;
-
-        micButton.classList.remove("listening");
-    };
+    }
 }
 
-// ================================
+// ========================================
 // ГОЛОС JARVIS
-// ================================
+// ========================================
 
 function speak(text) {
 
@@ -152,63 +58,243 @@ function speak(text) {
         return;
     }
 
-    // Останавливаем предыдущую речь
-
     window.speechSynthesis.cancel();
 
-    // Небольшая задержка особенно полезна
-    // для Safari на iPhone
+    const utterance =
+        new SpeechSynthesisUtterance(text);
 
-    setTimeout(function () {
+    utterance.lang = "ru-RU";
+    utterance.rate = 0.9;
+    utterance.pitch = 0.8;
+    utterance.volume = 1;
 
-        const utterance =
-            new SpeechSynthesisUtterance(text);
+    utterance.onstart = function () {
 
-        utterance.lang = "ru-RU";
+        statusText.textContent =
+            "Говорю, сэр...";
 
-        utterance.rate = 0.9;
+    };
 
-        utterance.pitch = 0.8;
+    utterance.onend = function () {
 
-        utterance.volume = 1;
+        statusText.textContent =
+            "Готов к дальнейшим указаниям, сэр.";
 
-        utterance.onstart = function () {
+    };
 
-            statusText.textContent =
-                "Говорю, сэр...";
-        };
+    utterance.onerror = function (event) {
 
-        utterance.onend = function () {
-
-            statusText.textContent =
-                "Готов к дальнейшим указаниям, сэр.";
-        };
-
-        utterance.onerror = function (event) {
-
-            console.log(
-                "Ошибка синтеза речи:",event
-            );
-
-            statusText.textContent =
-                "Не удалось воспроизвести голос.";
-        };
-
-        window.speechSynthesis.speak(
-            utterance
+        console.log(
+            "Speech synthesis error:",
+            event
         );
 
-    }, 150);
+        statusText.textContent =
+            "Не удалось воспроизвести голос.";
+
+    };
+
+    window.speechSynthesis.speak(
+        utterance
+    );
 }
 
-// ================================
+// ========================================
+// РАСПОЗНАВАНИЕ РЕЧИ
+// ========================================
+
+if (!SpeechRecognition) {
+
+    statusText.textContent =
+        "Распознавание речи не поддерживается этим браузером.";
+
+    micButton.disabled = true;
+
+} else {
+
+    recognition =
+        new SpeechRecognition();
+
+    recognition.lang = "ru-RU";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+    // ====================================
+    // КНОПКА МИКРОФОНА
+    // ====================================
+
+    micButton.addEventListener(
+        "click",
+        function () {
+
+            if (isListening) {
+                return;
+            }
+
+            // Очень важно:
+            // вызываем speechSynthesis
+            // непосредственно после нажатия
+
+            if (!speechUnlocked) {
+
+                unlockSpeech();
+
+            }
+
+            try {
+
+                recognition.start();
+
+            } catch (error) {
+
+                console.log(
+                    "Ошибка запуска:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+    // ====================================
+    // НАЧАЛО ПРОСЛУШИВАНИЯ
+    // ====================================
+
+    recognition.onstart = function () {
+
+        isListening = true;
+
+        micButton.classList.add(
+            "listening"
+        );
+
+        statusText.textContent =
+            "Слушаю вас, сэр...";
+
+    };
+
+    // ====================================
+    // ПОЛУЧИЛИ РЕЧЬ
+    // ====================================
+
+    recognition.onresult =
+        function (event) {
+
+            const text =
+                event
+                    .results[0][0]
+                    .transcript
+                    .trim();
+
+            conversation.innerHTML = `
+
+                <div class="user-message">
+
+                    <strong>Вы:</strong>
+
+                    ${escapeHTML(text)}
+
+                </div>
+
+                <div class="jarvis-message">
+
+                    <strong>JARVIS:</strong>
+
+                    Я вас услышал, сэр.</div>
+
+            `;
+
+            statusText.textContent =
+                "Подготавливаю ответ, сэр...";
+
+            // Небольшая пауза после
+            // завершения распознавания
+
+            setTimeout(
+                function () {
+
+                    speak(
+                        "Я вас услышал, сэр."
+                    );
+
+                },
+                300
+            );
+
+        };
+
+    // ====================================
+    // ОШИБКА
+    // ====================================
+
+    recognition.onerror =
+        function (event) {
+
+            console.log(
+                "Ошибка распознавания:",
+                event.error
+            );
+
+            isListening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
+
+                statusText.textContent =
+                    "Разрешите доступ к микрофону, сэр.";
+
+            } else if (
+                event.error ===
+                "no-speech"
+            ) {
+
+                statusText.textContent =
+                    "Я не услышал вас, сэр.";
+
+            } else {
+
+                statusText.textContent =
+                    "Не удалось распознать речь.";
+
+            }
+
+        };
+
+    // ====================================
+    // ЗАВЕРШЕНИЕ
+    // ====================================
+
+    recognition.onend =
+        function () {
+
+            isListening = false;
+
+            micButton.classList.remove(
+                "listening"
+            );
+
+        };
+}
+
+// ========================================
 // ЗАЩИТА HTML
-// ================================
+// ========================================
 
 function escapeHTML(text) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     div.textContent = text;
 
