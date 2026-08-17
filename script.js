@@ -52,7 +52,7 @@ function speak(text) {
         utterance.onstart = function () {
 
             statusText.textContent =
-                "Говорю, сэр.";
+                "Говорю, сэр...";
         };
 
         utterance.onend = function () {
@@ -227,7 +227,8 @@ function handleCommand(text) {
             .test(command)
     ) {
 
-        const now = new Date();
+        const now =
+            new Date();
 
         const date =
             now.toLocaleDateString(
@@ -240,7 +241,9 @@ function handleCommand(text) {
             );
 
         const answer =
-            "Сегодня " + date + ", сэр.";
+            "Сегодня " +
+            date +
+            ", сэр.";
 
         showJarvisMessage(
             original,
@@ -264,7 +267,8 @@ function handleCommand(text) {
             .test(command)
     ) {
 
-        const now = new Date();
+        const now =
+            new Date();
 
         const time =
             now.toLocaleTimeString(
@@ -276,7 +280,9 @@ function handleCommand(text) {
             );
 
         const answer =
-            "Сейчас " + time + ", сэр.";
+            "Сейчас " +
+            time +
+            ", сэр.";
 
         showJarvisMessage(
             original,
@@ -292,243 +298,128 @@ function handleCommand(text) {
     }
 
     // ========================================================
-    // ПРИЛОЖЕНИЯ
+    // ОТКРЫТИЕ ПРИЛОЖЕНИЙ
     // ========================================================
 
     const apps = [
 
         {
-            names: [
-                "youtube",
-                "ютуб",
-                "ютаб"
-            ],
-
-            scheme:
-                "youtube://",
-
-            name:
-                "YouTube"
+            pattern: /\b(youtube|ютуб|ютаб)\b/i,
+            appUrl: "youtube://",
+            webUrl: "https://www.youtube.com/",
+            name: "YouTube"
         },
 
         {
-            names: [
-                "spotify",
-                "спотифай"
-            ],
-
-            scheme:
-                "spotify://",
-
-            name:
-                "Spotify"
+            pattern: /\b(spotify|спотифай)\b/i,
+            appUrl: "spotify://",
+            webUrl: "https://open.spotify.com/",
+            name: "Spotify"
         },
 
         {
-            names: [
-                "telegram",
-                "телеграм"
-            ],
-
-            scheme:
-                "tg://",
-
-            name:
-                "Telegram"
+            pattern: /\b(tiktok|тик ток|тикток)\b/i,
+            appUrl: "tiktok://",
+            webUrl: "https://www.tiktok.com/",
+            name: "TikTok"
         },
 
         {
-            names: [
-                "tiktok",
-                "тик ток",
-                "тикток"
-            ],
+            pattern: /\b(telegram|телеграм)\b/i,
+            appUrl: "tg://",
+            webUrl: "https://web.telegram.org/",
+            name: "Telegram"
+        },
 
-            scheme:
-                "tiktok://",
+        {
+            pattern: /\b(github|гитхаб)\b/i,
+            appUrl: null,
+            webUrl: "https://github.com/",
+            name: "GitHub"
+        },
 
-            name:
-                "TikTok"
+        {
+            pattern: /\b(google|гугл)\b/i,
+            appUrl: null,
+            webUrl: "https://www.google.com/",
+            name: "Google"
         }
     ];
 
-    // ========================================================
-    // КОМАНДЫ ОТКРЫТИЯ
-    // ========================================================
-
     const wantsOpen =
-        command.includes("открой") ||
-        command.includes("открою") ||
-        command.includes("открывай") ||
-        command.includes("открыть") ||
-        command.includes("запусти") ||
-        command.includes("запустить") ||
-        command.includes("запуск") ||
-        command.includes("зайди") ||
-        command.includes("перейди") ||
-        command.includes("перейти");
+        /\b(открой|открывай|открыть|запусти|запуск|зайди|перейди|перейти)\b/i
+            .test(command);
 
-    // ========================================================
-    // ИЩЕМ ПРИЛОЖЕНИЕ
-    // ========================================================
-
-    let selectedApp = null;
-
-    for (
-        let i = 0;
-        i < apps.length;
-        i++
-    ) {
+    if (wantsOpen) {
 
         const app =
-            apps[i];
+            apps.find(function (item) {
 
-        for (
-            let j = 0;
-            j < app.names.length;
-            j++
-        ) {
+                return item.pattern.test(
+                    command
+                );
 
-            if (
-                command.includes(
-                    app.names[j]
-                )
-            ) {
+            });
 
-                selectedApp =
-                    app;
+        if (app) {
 
-                break;
-            }
-        }
-
-        if (selectedApp) {
-            break;
-        }
-    }
-
-    // ========================================================
-    // ЕСЛИ СКАЗАЛИ "ОТКРОЙ YOUTUBE"
-    // ИЛИ ПРОСТО "YOUTUBE"
-    // ========================================================
-
-    const directAppCommand =
-        command === "youtube" ||
-        command === "ютуб" ||
-        command === "ютаб" ||
-
-        command === "spotify" ||
-        command === "спотифай" ||
-
-        command === "telegram" ||
-        command === "телеграм" ||
-
-        command === "tiktok" ||
-        command === "тик ток" ||
-        command === "тикток";
-
-    if (
-        selectedApp &&
-        (
-            wantsOpen ||
-            directAppCommand
-        )
-    ) {
-
-        // ====================================================
-        // ОСТАНАВЛИВАЕМ РЕЧЬ
-        // ====================================================
-
-        if (
-            "speechSynthesis" in window
-        ) {
-
-            window.speechSynthesis.cancel();
-        }
-
-        statusText.textContent =
-            "Запускаю " +
-            selectedApp.name +
-            "...";
-
-        console.log(
-            "JARVIS пытается открыть приложение:",
-            selectedApp.name
-        );
-
-        // ====================================================
-        // НЕ ПОКАЗЫВАЕМ ОТВЕТ
-        // И НЕ ОТПРАВЛЯЕМ GEMINI
-        // ====================================================
-
-        try {
-
-            window.location.href =
-                selectedApp.scheme;
-
-        } catch (error) {
-
-            console.error(
-                "Ошибка запуска приложения:",
-                error
-            );
-
-            const answer =
-                "Извините, сэр, мне не удалось открыть приложение " +
-                selectedApp.name +
-                ".";
+            // ====================================================
+            // ПОКАЗЫВАЕМ КОМАНДУ
+            // ====================================================
 
             showJarvisMessage(
                 original,
-                answer
+                "Открываю " +
+                app.name +
+                ", сэр."
             );
 
             statusText.textContent =
-                "Не удалось открыть приложение.";
+                "Запускаю " +
+                app.name +
+                "...";
 
-            speak(answer);
+            // ====================================================
+            // ЕСЛИ ЕСТЬ ССЫЛКА НА ПРИЛОЖЕНИЕ
+            // ПЫТАЕМСЯ ОТКРЫТЬ ИМЕННО ПРИЛОЖЕНИЕ
+            // ====================================================
 
-            return true;
-        }
+            if (app.appUrl) {
 
-        // ====================================================
-        // ЕСЛИ ПРИЛОЖЕНИЕ НЕ ОТКРЫЛОСЬ
-        // ====================================================
+                window.location.href =
+                    app.appUrl;
 
-        setTimeout(function () {
+                /*
+                 * ВАЖНО:
+                 *
+                 * Мы НЕ ставим таймер,
+                 * который через несколько секунд
+                 * говорит "не удалось открыть".
+                 *
+                 * Браузер не сообщает JavaScript
+                 * достоверно, открылось ли приложение.
+                 */
 
-            /*
-             * Safari может не позволить определить
-             * результат запуска приложения.
-             *
-             * Поэтому здесь показываем сообщение,
-             * если страница всё ещё активна.
-             */
-
-            if (
-                document.visibilityState ===
-                "visible"
-            ) {
-
-                const answer =
-                    "Извините, сэр, мне не удалось открыть приложение " +
-                    selectedApp.name +
-                    ".";
-
-                showJarvisMessage(
-                    original,
-                    answer
-                );
-
-                statusText.textContent =
-                    "Не удалось открыть приложение.";
-
-                speak(answer);
+                return true;
             }
 
-        }, 1500);
+            // ====================================================
+            // ЕСЛИ У ПРИЛОЖЕНИЯ НЕТ DEEP LINK
+            // ОТКРЫВАЕМ ВЕБ-ВЕРСИЮ
+            // ====================================================
 
-        return true;
+            if (app.webUrl) {
+
+                setTimeout(function () {
+
+                    window.location.href =
+                        app.webUrl;
+
+                }, 100);
+
+                return true;
+            }
+        }
     }
 
     // ========================================================
@@ -588,50 +479,17 @@ function handleCommand(text) {
 
         const expression =
             calculationMatch[1]
-                .replace(
-                    /умножить на/g,
-                    "*"
-                )
-                .replace(
-                    /умножить/g,
-                    "*"
-                )
-                .replace(
-                    /помножить на/g,
-                    "*"
-                )
-                .replace(
-                    /разделить на/g,
-                    "/"
-                )
-                .replace(
-                    /разделить/g,
-                    "/"
-                )
-                .replace(
-                    /плюс/g,
-                    "+"
-                )
-                .replace(
-                    /минус/g,
-                    "-"
-                )
-                .replace(
-                    /в степени/g,
-                    "**"
-                )
-                .replace(
-                    /,/g,
-                    "."
-                )
-                .replace(
-                    /×/g,
-                    "*"
-                )
-                .replace(
-                    /÷/g,
-                    "/"
-                )
+                .replace(/умножить на/g, "*")
+                .replace(/умножить/g, "*")
+                .replace(/помножить на/g, "*")
+                .replace(/разделить на/g, "/")
+                .replace(/разделить/g, "/")
+                .replace(/плюс/g, "+")
+                .replace(/минус/g, "-")
+                .replace(/в степени/g, "**")
+                .replace(/,/g, ".")
+                .replace(/×/g, "*")
+                .replace(/÷/g, "/")
                 .replace(
                     /[^0-9+\-*/().%\s]/g,
                     ""
@@ -709,18 +567,14 @@ async function askJarvis(text) {
     }
 
     // ========================================================
-    // СНАЧАЛА ЛОКАЛЬНЫЕ КОМАНДЫ
+    // СНАЧАЛА ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ КОМАНДЫ
     // ========================================================
 
-    if (
-        handleCommand(text)
-    ) {
-
+    if (handleCommand(text)) {
         return;
     }
 
-    requestInProgress =
-        true;
+    requestInProgress = true;
 
     statusText.textContent =
         "Думаю над ответом, сэр...";
@@ -743,10 +597,9 @@ async function askJarvis(text) {
                             "application/json"
                     },
 
-                    body:
-                        JSON.stringify({
-                            text: text
-                        })
+                    body: JSON.stringify({
+                        text: text
+                    })
                 }
             );
 
@@ -891,9 +744,7 @@ function handleMicClick() {
 
     try {
 
-        if (
-            "speechSynthesis" in window
-        ) {
+        if ("speechSynthesis" in window) {
 
             window.speechSynthesis.cancel();
         }
@@ -1085,10 +936,7 @@ function escapeHTML(text) {
 
 function unlockAudio() {
 
-    if (
-        !("speechSynthesis" in window)
-    ) {
-
+    if (!("speechSynthesis" in window)) {
         return;
     }
 
