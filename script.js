@@ -22,107 +22,7 @@ let isListening = false;
 let requestInProgress = false;
 
 // ============================================================
-// ВЫБРАННЫЙ ГОЛОС JARVIS
-// ============================================================
-
-let availableVoices = [];
-let selectedVoice = null;
-
-const SAVED_VOICE_NAME =
-    "jarvis_selected_voice_name";
-
-const SAVED_VOICE_LANG =
-    "jarvis_selected_voice_lang";
-
-// ============================================================
-// ЗАГРУЗКА СОХРАНЁННОГО ГОЛОСА
-// ============================================================
-
-function loadSavedVoice() {
-
-    const savedName =
-        localStorage.getItem(
-            SAVED_VOICE_NAME
-        );
-
-    const savedLang =
-        localStorage.getItem(
-            SAVED_VOICE_LANG
-        );
-
-    if (!savedName) {
-        return;
-    }
-
-    const voice =
-        availableVoices.find(
-            function (item) {
-
-                return (
-                    item.name === savedName &&
-                    item.lang === savedLang
-                );
-            }
-        );
-
-    if (voice) {
-
-        selectedVoice = voice;
-
-        console.log(
-            "Сохранённый голос JARVIS:",
-            voice.name,
-            voice.lang
-        );
-    }
-}
-
-// ============================================================
-// ВЫБОР ГОЛОСА
-// ============================================================
-
-function selectJarvisVoice(index) {
-
-    const voice =
-        availableVoices[index];
-
-    if (!voice) {
-        return;
-    }
-
-    selectedVoice =
-        voice;
-
-    localStorage.setItem(
-        SAVED_VOICE_NAME,
-        voice.name
-    );
-
-    localStorage.setItem(
-        SAVED_VOICE_LANG,
-        voice.lang
-    );
-
-    console.log(
-        "Выбран голос JARVIS:",
-        voice.name,
-        voice.lang
-    );
-
-    updateVoiceButtons();
-
-    statusText.textContent =
-        "Голос JARVIS выбран: " +
-        voice.name;
-
-    // Небольшое подтверждение новым голосом
-    speak(
-        "Голос выбран, сэр."
-    );
-}
-
-// ============================================================
-// ГОЛОС
+// ГОЛОС JARVIS
 // ============================================================
 
 function speak(text) {
@@ -143,79 +43,57 @@ function speak(text) {
 
         window.speechSynthesis.cancel();
 
-        setTimeout(
+        const utterance =
+            new SpeechSynthesisUtterance(text);
+
+        utterance.lang =
+            "ru-RU";
+
+        utterance.rate =
+            0.85;
+
+        utterance.pitch =
+            0.8;
+
+        utterance.volume =
+            1;
+
+        utterance.onstart =
             function () {
 
-                const utterance =
-                    new SpeechSynthesisUtterance(text);
-
-                // ====================================================
-                // ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВЫБРАЛ ГОЛОС
-                // ИСПОЛЬЗУЕМ ИМЕННО ЕГО
-                // ====================================================
-
-                if (selectedVoice) {
-
-                    utterance.voice =
-                        selectedVoice;
-
-                    utterance.lang =
-                        selectedVoice.lang;
-
-                } else {
-
-                    utterance.lang =
-                        "ru-RU";
-                }
-
-                utterance.rate =
-                    0.85;
-
-                utterance.pitch =
-                    0.8;
-
-                utterance.volume =
-                    1;
-
-                utterance.onstart =
-                    function () {
-
-                        console.log(
-                            "JARVIS говорит:",
-                            selectedVoice
-                                ? selectedVoice.name
-                                : "системный голос"
-                        );
-
-                        statusText.textContent =
-                            "Говорю, сэр...";
-                    };
-
-                utterance.onend =
-                    function () {
-
-                        statusText.textContent =
-                            "Готов к дальнейшим указаниям, сэр.";
-                    };
-
-                utterance.onerror =
-                    function (event) {
-
-                        console.error(
-                            "Ошибка синтеза:",
-                            event
-                        );
-
-                        statusText.textContent =
-                            "Ошибка воспроизведения голоса, сэр.";
-                    };
-
-                window.speechSynthesis.speak(
-                    utterance
+                console.log(
+                    "JARVIS начал говорить"
                 );
 
-            },
-            100
+                statusText.textContent =
+                    "Говорю, сэр...";
+            };
+
+        utterance.onend =
+            function () {
+
+                console.log(
+                    "JARVIS закончил говорить"
+                );
+
+                statusText.textContent =
+                    "Готов к дальнейшим указаниям, сэр.";
+            };
+
+        utterance.onerror =
+            function (event) {
+
+                console.error(
+                    "Ошибка синтеза речи:",
+                    event
+                );
+
+                statusText.textContent =
+                    "Ошибка воспроизведения голоса, сэр.";
+            };
+
+        window.speechSynthesis.speak(
+            utterance
         );
 
     } catch (error) {
@@ -346,7 +224,7 @@ async function askJarvis(text) {
         );
 
         // ====================================================
-        // ГОВОРИМ ОТВЕТ ВЫБРАННЫМ ГОЛОСОМ
+        // ОЗВУЧИВАЕМ ОТВЕТ
         // ====================================================
 
         speak(
@@ -679,297 +557,3 @@ document.addEventListener(
         passive: true
     }
 );
-
-// ============================================================
-// КНОПКИ ГОЛОСОВ
-// ============================================================
-
-function updateVoiceButtons() {
-
-    const buttons =
-        document.querySelectorAll(
-            "[data-jarvis-voice-index]"
-        );
-
-    buttons.forEach(
-        function (button) {
-
-            const index =
-                Number(
-                    button.dataset.jarvisVoiceIndex
-                );
-
-            const voice =
-                availableVoices[index];
-
-            if (!voice) {
-                return;
-            }
-
-            const isSelected =
-                selectedVoice &&
-                selectedVoice.name ===
-                    voice.name &&
-                selectedVoice.lang ===
-                    voice.lang;
-
-            button.textContent =
-                isSelected
-                    ? "✓ Выбран"
-                    : "Выбрать";
-
-            button.style.background =
-                isSelected
-                    ? "rgba(0, 200, 100, 0.35)"
-                    : "rgba(0, 100, 130, 0.15)";
-        }
-    );
-}
-
-// ============================================================
-// ТЕСТ ГОЛОСА
-// ============================================================
-
-function testVoice(index) {
-
-    const voice =
-        availableVoices[index];
-
-    if (!voice) {
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const utterance =
-        new SpeechSynthesisUtterance(
-            "Добрый вечер, сэр. Я JARVIS. Все системы готовы к работе."
-        );
-
-    utterance.voice =
-        voice;
-
-    utterance.lang =
-        voice.lang;
-
-    utterance.rate =
-        0.85;
-
-    utterance.pitch =
-        0.8;
-
-    utterance.volume =
-        1;
-
-    window.speechSynthesis.speak(
-        utterance
-    );
-}
-
-// ============================================================
-// СОЗДАНИЕ СПИСКА ГОЛОСОВ
-// ============================================================
-
-function showAvailableVoices() {
-
-    if (!("speechSynthesis" in window)) {
-        return;
-    }
-
-    const voices =
-        window.speechSynthesis.getVoices();
-
-    if (!voices.length) {
-        return;
-    }
-
-    availableVoices =
-        voices;
-
-    loadSavedVoice();
-
-    let box =
-        document.getElementById(
-            "voiceTestBox"
-        );
-
-    if (!box) {
-
-        box =
-            document.createElement("div");
-
-        box.id =
-            "voiceTestBox";
-
-        box.style.cssText = `
-            margin: 25px auto;
-            padding: 18px;
-            max-width: 650px;
-            background: rgba(0, 15, 25, 0.96);
-            border: 1px solid rgba(0, 220, 255, 0.35);
-            border-radius: 16px;
-            color: #dffaff;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            text-align: left;
-            box-shadow: 0 0 25px rgba(0, 200, 255, 0.12);
-        `;
-
-        document.body.appendChild(
-            box
-        );
-    }
-
-    box.innerHTML = "";
-
-    const title =
-        document.createElement("div");
-
-    title.textContent =
-        "🎙️ ГОЛОС JARVIS";
-
-    title.style.cssText = `
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 8px;
-    `;
-
-    box.appendChild(
-        title
-    );
-
-    const info =
-        document.createElement("div");
-
-    info.textContent =
-        "Выберите голос. Он будет использоваться для всех ответов JARVIS.";
-
-    info.style.cssText = `
-        opacity: 0.7;
-        margin-bottom: 15px;
-        line-height: 1.5;
-    `;
-
-    box.appendChild(
-        info
-    );
-
-    voices.forEach(
-        function (voice, index) {
-
-            const row =
-                document.createElement("div");
-
-            row.style.cssText = `
-                display:flex;
-                gap:8px;
-                align-items:center;
-                margin:7px 0;
-            `;
-
-            const testButton =
-                document.createElement("button");
-
-            testButton.type =
-                "button";
-
-            testButton.textContent =
-                "🔊 " +
-                voice.name +
-                " — " +
-                voice.lang;
-
-            testButton.style.cssText = `
-                flex:1;
-                min-width:0;
-                padding:11px;
-                border-radius:10px;
-                border:1px solid rgba(0,220,255,0.25);
-                background:rgba(0,100,130,0.15);
-                color:#ffffff;
-                text-align:left;
-                font-size:13px;
-            `;
-
-            testButton.addEventListener(
-                "click",
-                function () {
-
-                    testVoice(index);
-                }
-            );
-
-            const selectButton =
-                document.createElement("button");
-
-            selectButton.type =
-                "button";
-
-            selectButton.dataset.jarvisVoiceIndex =
-                index;
-
-            selectButton.textContent =
-                "Выбрать";
-
-            selectButton.style.cssText = `
-                flex:0 0 auto;
-                min-width:90px;
-                padding:10px 8px;
-                border-radius:10px;
-                border:1px solid rgba(0,220,255,0.3);
-                background:rgba(0,100,130,0.15);
-                color:#ffffff;
-                font-size:12px;
-            `;
-
-            selectButton.addEventListener(
-                "click",
-                function () {
-
-                    selectJarvisVoice(
-                        index
-                    );
-                }
-            );
-
-            row.appendChild(
-                testButton
-            );
-
-            row.appendChild(
-                selectButton
-            );
-
-            box.appendChild(
-                row
-            );
-        }
-    );
-
-    updateVoiceButtons();
-}
-
-// ============================================================
-// ЗАГРУЗКА ГОЛОСОВ
-// ============================================================
-
-if ("speechSynthesis" in window) {
-
-    showAvailableVoices();
-
-    window.speechSynthesis.onvoiceschanged =
-        function () {
-
-            showAvailableVoices();
-        };
-
-    setTimeout(
-        showAvailableVoices,
-        1000
-    );
-
-    setTimeout(
-        showAvailableVoices,
-        3000
-    );
-}
