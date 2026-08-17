@@ -1,3 +1,50 @@
+// ============================================================
+// ТЕСТ ДОСТУПНЫХ ГОЛОСОВ SAFARI
+// ============================================================
+
+function showAvailableVoices() {
+
+    if (!("speechSynthesis" in window)) {
+        console.log("SpeechSynthesis не поддерживается");
+        return;
+    }
+
+    const voices =
+        window.speechSynthesis.getVoices();
+
+    console.log("========== ГОЛОСА SAFARI ==========");
+
+    voices.forEach((voice, index) => {
+
+        console.log(
+            index +
+            " | " +
+            voice.name +
+            " | " +
+            voice.lang +
+            " | default: " +
+            voice.default
+        );
+
+    });
+
+    console.log(
+        "Всего голосов:",
+        voices.length
+    );
+
+    console.log("==================================");
+}
+
+// Сразу пробуем
+showAvailableVoices();
+
+// Safari может загрузить голоса позже
+if ("onvoiceschanged" in window.speechSynthesis) {
+
+    window.speechSynthesis.onvoiceschanged =
+        showAvailableVoices;
+}
 const micButton =
     document.getElementById("micButton");
 
