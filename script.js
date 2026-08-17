@@ -67,9 +67,6 @@ function speak(text) {
                 "Ошибка речи:",
                 event
             );
-
-            statusText.textContent =
-                "Ошибка воспроизведения голоса, сэр.";
         };
 
         window.speechSynthesis.speak(
@@ -78,15 +75,15 @@ function speak(text) {
 
     } catch (error) {
 
-        console.error(error);
-
-        statusText.textContent =
-            "Не удалось запустить голос, сэр.";
+        console.error(
+            "Ошибка запуска речи:",
+            error
+        );
     }
 }
 
 // ============================================================
-// ПОКАЗ ОТВЕТА JARVIS
+// ПОКАЗ СООБЩЕНИЯ
 // ============================================================
 
 function showJarvisMessage(userText, answer) {
@@ -113,6 +110,65 @@ function showJarvisMessage(userText, answer) {
 }
 
 // ============================================================
+// ОЧИСТКА ТЕКСТА КОМАНДЫ
+// ============================================================
+
+function normalizeCommand(text) {
+
+    return text
+        .toLowerCase()
+        .replace(/[!?.,;:]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+// ============================================================
+// ЗАПУСК ПРИЛОЖЕНИЯ
+// ============================================================
+
+function launchApp(app, original) {
+
+    showJarvisMessage(
+        original,
+        "Открываю " + app.name + ", сэр."
+    );
+
+    statusText.textContent =
+        "Запускаю " + app.name + "...";
+
+    // ========================================================
+    // НИКАКОГО GEMINI
+    // НИКАКИХ ЛИШНИХ ЗАДЕРЖЕК
+    // ========================================================
+
+    try {
+
+        if (app.appUrl) {
+
+            window.location.href =
+                app.appUrl;
+
+        } else if (app.webUrl) {
+
+            window.location.href =
+                app.webUrl;
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Ошибка запуска:",
+            error
+        );
+
+        statusText.textContent =
+            "Не удалось открыть " +
+            app.name +
+            ", сэр.";
+    }
+}
+
+// ============================================================
 // ДИНАМИЧЕСКИЕ КОМАНДЫ
 // ============================================================
 
@@ -122,10 +178,7 @@ function handleCommand(text) {
         text.trim();
 
     const command =
-        original
-            .toLowerCase()
-            .replace(/[!?.,]/g, "")
-            .trim();
+        normalizeCommand(original);
 
     // ========================================================
     // СТОП
@@ -150,12 +203,14 @@ function handleCommand(text) {
     }
 
     // ========================================================
-    // ОЧИСТКА ИСТОРИИ
+    // ОЧИСТИТЬ ДИАЛОГ
     // ========================================================
 
     if (
-        /\b(очисти|удали|сотри)\b.*\b(историю|диалог|чат|сообщения)\b/
-            .test(command)
+        (
+            /\b(очисти|удали|сотри)\b/.test(command) &&
+            /\b(историю|диалог|чат|сообщения)\b/.test(command)
+        )
         ||
         /\b(новый диалог|начать заново|очистить чат)\b/
             .test(command)
@@ -186,13 +241,9 @@ function handleCommand(text) {
     ) {
 
         statusText.textContent =
-            "Обновляю систему, сэр...";
+            "Обновляю систему, сэр.";
 
-        setTimeout(function () {
-
-            location.reload();
-
-        }, 300);
+        location.reload();
 
         return true;
     }
@@ -209,11 +260,7 @@ function handleCommand(text) {
         statusText.textContent =
             "Возвращаюсь назад, сэр.";
 
-        setTimeout(function () {
-
-            history.back();
-
-        }, 300);
+        history.back();
 
         return true;
     }
@@ -298,56 +345,177 @@ function handleCommand(text) {
     }
 
     // ========================================================
-    // ОТКРЫТИЕ ПРИЛОЖЕНИЙ
+    // ПРИЛОЖЕНИЯ
     // ========================================================
 
     const apps = [
 
-        {
-            pattern: /\b(youtube|ютуб|ютаб)\b/i,
-            appUrl: "youtube://",
-            webUrl: "https://www.youtube.com/",
-            name: "YouTube"
-        },
+        // ----------------------------------------------------
+        // YOUTUBE
+        // ----------------------------------------------------
 
         {
-            pattern: /\b(spotify|спотифай)\b/i,
-            appUrl: "spotify://",
-            webUrl: "https://open.spotify.com/",
-            name: "Spotify"
+            name: "YouTube",
+
+            pattern:
+                /\b(youtube|ютуб|ютюб|ютаб)\b/i,
+
+            appUrl:
+                "youtube://",
+
+            webUrl:
+                "https://www.youtube.com/"
         },
 
-        {
-            pattern: /\b(tiktok|тик ток|тикток)\b/i,
-            appUrl: "tiktok://",
-            webUrl: "https://www.tiktok.com/",
-            name: "TikTok"
-        },
+        // ----------------------------------------------------
+        // TELEGRAM
+        // ----------------------------------------------------
 
         {
-            pattern: /\b(telegram|телеграм)\b/i,
-            appUrl: "tg://",
-            webUrl: "https://web.telegram.org/",
-            name: "Telegram"
+            name: "Telegram",
+
+            pattern:
+                /\b(telegram|телеграм|телега)\b/i,
+
+            appUrl:
+                "tg://",
+
+            webUrl:
+                "https://web.telegram.org/"
         },
 
-        {
-            pattern: /\b(github|гитхаб)\b/i,
-            appUrl: null,
-            webUrl: "https://github.com/",
-            name: "GitHub"
-        },
+        // ----------------------------------------------------
+        // TIKTOK
+        // ----------------------------------------------------
 
         {
-            pattern: /\b(google|гугл)\b/i,
-            appUrl: null,
-            webUrl: "https://www.google.com/",
-            name: "Google"
+            name: "TikTok",
+
+            pattern:
+                /\b(tiktok|тик ток|тикток)\b/i,
+
+            appUrl:
+                "tiktok://",
+
+            webUrl:
+                "https://www.tiktok.com/"
+        },
+
+        // ----------------------------------------------------
+        // WHATSAPP
+        // ----------------------------------------------------
+
+        {
+            name: "WhatsApp",
+
+            pattern:
+                /\b(whatsapp|ватсап|вацап|вацапп|вотсап)\b/i,
+
+            appUrl:
+                "whatsapp://",
+
+            webUrl:
+                "https://www.whatsapp.com/"
+        },
+
+        // ----------------------------------------------------
+        // INSTAGRAM
+        // ----------------------------------------------------
+
+        {
+            name: "Instagram",
+
+            pattern:
+                /\b(instagram|инстаграм|инста)\b/i,
+
+            appUrl:
+                "instagram://",
+
+            webUrl:
+                "https://www.instagram.com/"
+        },
+
+        // ----------------------------------------------------
+        // WILDBERRIES
+        // ----------------------------------------------------
+
+        {
+            name: "Wildberries",
+
+            pattern:
+                /\b(wildberries|wildberry|вайлдберриз|вайберриз|вб|вбшоп)\b/i,
+
+            // Не используем неподтверждённый wb://
+            // Для WB надёжнее использовать HTTPS/Universal Link.
+
+            appUrl:
+                null,
+
+            webUrl:
+                "https://www.wildberries.ru/"
+        },
+
+        // ----------------------------------------------------
+        // OZON
+        // ----------------------------------------------------
+
+        {
+            name: "Ozon",
+
+            pattern:
+                /\b(ozon|озон|озон)\b/i,
+
+            appUrl:
+                null,
+
+            webUrl:
+                "https://www.ozon.ru/"
+        },
+
+        // ----------------------------------------------------
+        // TWITCH
+        // ----------------------------------------------------
+
+        {
+            name: "Twitch",
+
+            pattern:
+                /\b(twitch|твич|твиче)\b/i,
+
+            appUrl:
+                "twitch://",
+
+            webUrl:
+                "https://www.twitch.tv/"
+        },
+
+        // ----------------------------------------------------
+        // BLOCK BLAST
+        // ----------------------------------------------------
+
+        {
+            name: "Block Blast",
+
+            pattern:
+                /\b(block blast|blockblast|блок бласт|блокбласт|блок бластер)\b/i,
+
+            // Публичная схема приложения не подтверждена.
+            // Поэтому не придумываем blockblast://
+
+            appUrl:
+                null,
+
+            webUrl:
+                "https://www.blockblast.com/apphome"
         }
     ];
 
+    // ========================================================
+    // ПРОВЕРЯЕМ, ЧТО ПОЛЬЗОВАТЕЛЬ ХОЧЕТ ЧТО-ТО ОТКРЫТЬ
+    // ========================================================
+
     const wantsOpen =
-        /\b(открой|открывай|открыть|запусти|запуск|зайди|перейди|перейти)\b/i
+        /\b(открой|открывай|открыть|запусти|запуск|запустить|зайди|перейди|перейти)\b/i
             .test(command);
 
     if (wantsOpen) {
@@ -363,63 +531,38 @@ function handleCommand(text) {
 
         if (app) {
 
-            // ====================================================
-            // ПОКАЗЫВАЕМ КОМАНДУ
-            // ====================================================
-
-            showJarvisMessage(
-                original,
-                "Открываю " +
-                app.name +
-                ", сэр."
+            launchApp(
+                app,
+                original
             );
 
-            statusText.textContent =
-                "Запускаю " +
-                app.name +
-                "...";
-
-            // ====================================================
-            // ЕСЛИ ЕСТЬ ССЫЛКА НА ПРИЛОЖЕНИЕ
-            // ПЫТАЕМСЯ ОТКРЫТЬ ИМЕННО ПРИЛОЖЕНИЕ
-            // ====================================================
-
-            if (app.appUrl) {
-
-                window.location.href =
-                    app.appUrl;
-
-                /*
-                 * ВАЖНО:
-                 *
-                 * Мы НЕ ставим таймер,
-                 * который через несколько секунд
-                 * говорит "не удалось открыть".
-                 *
-                 * Браузер не сообщает JavaScript
-                 * достоверно, открылось ли приложение.
-                 */
-
-                return true;
-            }
-
-            // ====================================================
-            // ЕСЛИ У ПРИЛОЖЕНИЯ НЕТ DEEP LINK
-            // ОТКРЫВАЕМ ВЕБ-ВЕРСИЮ
-            // ====================================================
-
-            if (app.webUrl) {
-
-                setTimeout(function () {
-
-                    window.location.href =
-                        app.webUrl;
-
-                }, 100);
-
-                return true;
-            }
+            return true;
         }
+    }
+
+    // ========================================================
+    // ЕСЛИ ЧЕЛОВЕК СКАЗАЛ ПРОСТО НАЗВАНИЕ
+    // ========================================================
+
+    const directApp =
+        apps.find(function (item) {
+
+            return (
+                item.pattern.test(command) &&
+                command.length <=
+                    item.name.length + 20
+            );
+
+        });
+
+    if (directApp) {
+
+        launchApp(
+            directApp,
+            original
+        );
+
+        return true;
     }
 
     // ========================================================
@@ -460,7 +603,7 @@ function handleCommand(text) {
                 window.location.href =
                     url;
 
-            }, 500);
+            }, 300);
 
             return true;
         }
@@ -479,17 +622,50 @@ function handleCommand(text) {
 
         const expression =
             calculationMatch[1]
-                .replace(/умножить на/g, "*")
-                .replace(/умножить/g, "*")
-                .replace(/помножить на/g, "*")
-                .replace(/разделить на/g, "/")
-                .replace(/разделить/g, "/")
-                .replace(/плюс/g, "+")
-                .replace(/минус/g, "-")
-                .replace(/в степени/g, "**")
-                .replace(/,/g, ".")
-                .replace(/×/g, "*")
-                .replace(/÷/g, "/")
+                .replace(
+                    /умножить на/g,
+                    "*"
+                )
+                .replace(
+                    /умножить/g,
+                    "*"
+                )
+                .replace(
+                    /помножить на/g,
+                    "*"
+                )
+                .replace(
+                    /разделить на/g,
+                    "/"
+                )
+                .replace(
+                    /разделить/g,
+                    "/"
+                )
+                .replace(
+                    /плюс/g,
+                    "+"
+                )
+                .replace(
+                    /минус/g,
+                    "-"
+                )
+                .replace(
+                    /в степени/g,
+                    "**"
+                )
+                .replace(
+                    /,/g,
+                    "."
+                )
+                .replace(
+                    /×/g,
+                    "*"
+                )
+                .replace(
+                    /÷/g,
+                    "/"
+                )
                 .replace(
                     /[^0-9+\-*/().%\s]/g,
                     ""
@@ -538,7 +714,7 @@ function handleCommand(text) {
             } catch (error) {
 
                 console.log(
-                    "Не удалось вычислить:",
+                    "Ошибка калькулятора:",
                     error
                 );
             }
@@ -546,14 +722,14 @@ function handleCommand(text) {
     }
 
     // ========================================================
-    // НЕ КОМАНДА
+    // НЕ ЛОКАЛЬНАЯ КОМАНДА
     // ========================================================
 
     return false;
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS / GEMINI
+// GEMINI
 // ============================================================
 
 async function askJarvis(text) {
@@ -567,12 +743,17 @@ async function askJarvis(text) {
     }
 
     // ========================================================
-    // СНАЧАЛА ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ КОМАНДЫ
+    // СНАЧАЛА ЛОКАЛЬНЫЕ КОМАНДЫ
     // ========================================================
 
     if (handleCommand(text)) {
         return;
     }
+
+    // ========================================================
+    // ТОЛЬКО ЕСЛИ ЭТО НЕ КОМАНДА
+    // ИДЁМ В GEMINI
+    // ========================================================
 
     requestInProgress = true;
 
@@ -602,11 +783,6 @@ async function askJarvis(text) {
                     })
                 }
             );
-
-        console.log(
-            "Worker HTTP:",
-            response.status
-        );
 
         const raw =
             await response.text();
@@ -670,11 +846,6 @@ async function askJarvis(text) {
         statusText.textContent =
             "Ответ получен, сэр.";
 
-        console.log(
-            "Ответ JARVIS:",
-            data.answer
-        );
-
         speak(
             data.answer
         );
@@ -717,7 +888,7 @@ async function askJarvis(text) {
 }
 
 // ============================================================
-// КНОПКА МИКРОФОНА
+// МИКРОФОН
 // ============================================================
 
 function handleMicClick() {
@@ -761,7 +932,7 @@ function handleMicClick() {
 }
 
 // ============================================================
-// РАСПОЗНАВАНИЕ РЕЧИ
+// SPEECH RECOGNITION
 // ============================================================
 
 if (!SpeechRecognition) {
