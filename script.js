@@ -27,15 +27,11 @@ let requestInProgress = false;
 
 function speak(text) {
 
-    if (!text) {
-        return;
-    }
+    if (!text) return;
 
     if (!("speechSynthesis" in window)) {
-
         statusText.textContent =
             "Синтез речи не поддерживается браузером, сэр.";
-
         return;
     }
 
@@ -46,62 +42,31 @@ function speak(text) {
         const utterance =
             new SpeechSynthesisUtterance(text);
 
-        utterance.lang =
-            "ru-RU";
+        utterance.lang = "ru-RU";
+        utterance.rate = 0.85;
+        utterance.pitch = 0.8;
+        utterance.volume = 1;
 
-        utterance.rate =
-            0.85;
+        utterance.onstart = function () {
+            statusText.textContent = "Говорю, сэр...";
+        };
 
-        utterance.pitch =
-            0.8;
+        utterance.onend = function () {
+            statusText.textContent =
+                "Готов к дальнейшим указаниям, сэр.";
+        };
 
-        utterance.volume =
-            1;
+        utterance.onerror = function (event) {
+            console.error("Ошибка речи:", event);
+            statusText.textContent =
+                "Ошибка воспроизведения голоса, сэр.";
+        };
 
-        utterance.onstart =
-            function () {
-
-                console.log(
-                    "JARVIS начал говорить"
-                );
-
-                statusText.textContent =
-                    "Говорю, сэр...";
-            };
-
-        utterance.onend =
-            function () {
-
-                console.log(
-                    "JARVIS закончил говорить"
-                );
-
-                statusText.textContent =
-                    "Готов к дальнейшим указаниям, сэр.";
-            };
-
-        utterance.onerror =
-            function (event) {
-
-                console.error(
-                    "Ошибка синтеза речи:",
-                    event
-                );
-
-                statusText.textContent =
-                    "Ошибка воспроизведения голоса, сэр.";
-            };
-
-        window.speechSynthesis.speak(
-            utterance
-        );
+        window.speechSynthesis.speak(utterance);
 
     } catch (error) {
 
-        console.error(
-            "Ошибка запуска голоса:",
-            error
-        );
+        console.error(error);
 
         statusText.textContent =
             "Не удалось запустить голос, сэр.";
@@ -109,7 +74,418 @@ function speak(text) {
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS
+// ПОКАЗ ОТВЕТА JARVIS
+// ============================================================
+
+function showJarvisMessage(userText, answer) {
+
+    conversation.innerHTML = `
+
+        <div class="user-message">
+
+            <strong>Вы:</strong>
+
+            ${escapeHTML(userText)}
+
+        </div>
+
+        <div class="jarvis-message">
+
+            <strong>JARVIS:</strong>
+
+            ${escapeHTML(answer)}
+
+        </div>
+
+    `;
+}
+
+// ============================================================
+// ДИНАМИЧЕСКИЕ КОМАНДЫ
+// ============================================================
+
+function handleCommand(text) {
+
+    const original =
+        text.trim();
+
+    const command =
+        original
+            .toLowerCase()
+            .replace(/[!?.,]/g, "")
+            .trim();
+
+    // ========================================================
+    // СТОП
+    // ========================================================
+
+    if (
+        /\b(стоп|остановись|замолчи|хватит|прекрати говорить|останови речь)\b/
+            .test(command)
+    ) {
+
+        window.speechSynthesis.cancel();
+
+        statusText.textContent =
+            "Речь остановлена, сэр.";
+
+        showJarvisMessage(
+            original,
+            "Разумеется, сэр."
+        );
+
+        return true;
+    }
+
+    // ========================================================
+    // ОЧИСТКА ИСТОРИИ
+    // ========================================================
+
+    if (
+        /\b(очисти|удали|сотри)\b.*\b(историю|диалог|чат|сообщения)\b/
+            .test(command)
+        ||
+        /\b(новый диалог|начать заново|очистить чат)\b/
+            .test(command)
+    ) {
+
+        conversation.innerHTML = "";
+
+        statusText.textContent =
+            "История очищена, сэр.";
+
+        speak(
+            "История очищена, сэр."
+        );
+
+        return true;
+    }
+
+    // ========================================================
+    // ОБНОВИТЬ СТРАНИЦУ
+    // ========================================================
+
+    if (
+        /\b(обнови|перезагрузи|обновить|перезагрузить)\b/
+            .test(command)
+        &&
+        /\b(страницу|сайт|страница)\b/
+            .test(command)
+    ) {
+
+        statusText.textContent =
+            "Обновляю систему, сэр...";
+
+        setTimeout(function () {
+            location.reload();
+        }, 300);
+
+        return true;
+    }
+
+    // ========================================================
+    // НАЗАД
+    // ========================================================
+
+    if (
+        /\b(назад|вернись назад|предыдущая страница)\b/
+            .test(command)
+    ) {
+
+        statusText.textContent =
+            "Возвращаюсь назад, сэр.";
+
+        setTimeout(function () {
+            history.back();
+        }, 300);
+
+        return true;
+    }
+
+    // ========================================================
+    // ДАТА
+    // ========================================================
+
+    if (
+        /\b(какая сегодня дата|какое сегодня число|сегодняшняя дата|число сегодня)\b/
+            .test(command)
+    ) {
+
+        const now = new Date();
+
+        const date =
+            now.toLocaleDateString(
+                "ru-RU",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+        const answer =
+            "Сегодня " + date + ", сэр.";
+
+        showJarvisMessage(
+            original,
+            answer
+        );
+
+        statusText.textContent =
+            "Дата получена, сэр.";
+
+        speak(answer);
+
+        return true;
+    }
+
+    // ========================================================
+    // ВРЕМЯ
+    // ========================================================
+
+    if (
+        /\b(сколько времени|который час|текущее время|которое сейчас время|время сейчас)\b/
+            .test(command)
+    ) {
+
+        const now = new Date();
+
+        const time =
+            now.toLocaleTimeString(
+                "ru-RU",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        const answer =
+            "Сейчас " + time + ", сэр.";
+
+        showJarvisMessage(
+            original,
+            answer
+        );
+
+        statusText.textContent =
+            "Время получено, сэр.";
+
+        speak(answer);
+
+        return true;
+    }
+
+    // ========================================================
+    // ОТКРЫТИЕ САЙТОВ
+    // ========================================================
+
+    const sites = [
+
+        {
+            pattern: /\b(youtube|ютуб)\b/,
+            url: "https://www.youtube.com/",
+            name: "YouTube"
+        },
+
+        {
+            pattern: /\b(spotify|спотифай)\b/,
+            url: "https://open.spotify.com/",
+            name: "Spotify"
+        },
+
+        {
+            pattern: /\b(google|гугл)\b/,
+            url: "https://www.google.com/",
+            name: "Google"
+        },
+
+        {
+            pattern: /\b(tiktok|тик ток|тикток)\b/,
+            url: "https://www.tiktok.com/",
+            name: "TikTok"
+        },
+
+        {
+            pattern: /\b(telegram|телеграм)\b/,
+            url: "https://web.telegram.org/",
+            name: "Telegram Web"
+        },
+
+        {
+            pattern: /\b(github|гитхаб)\b/,
+            url: "https://github.com/",
+            name: "GitHub"
+        }
+    ];
+
+    const wantsOpen =
+        /\b(открой|запусти|перейди|перейти|зайди|открывай)\b/
+            .test(command);
+
+    if (wantsOpen) {
+
+        const site =
+            sites.find(function (item) {
+                return item.pattern.test(command);
+            });
+
+        if (site) {
+
+            const answer =
+                "Открываю " +
+                site.name +
+                ", сэр.";
+
+            showJarvisMessage(
+                original,
+                answer
+            );
+
+            statusText.textContent =
+                "Открываю " +
+                site.name +
+                "...";
+
+            speak(answer);
+
+            setTimeout(function () {
+                window.location.href =
+                    site.url;
+            }, 500);
+
+            return true;
+        }
+    }
+
+    // ========================================================
+    // ДИНАМИЧЕСКИЙ ПОИСК
+    // ========================================================
+
+    const searchMatch =
+        command.match(
+            /^(?:джарвис\s+)?(?:найди|поищи|загугли|погугли|поиск|найди в интернете|поищи в интернете)\s+(.+)$/i
+        );
+
+    if (searchMatch) {
+
+        const query =
+            searchMatch[1].trim();
+
+        if (query.length > 0) {
+
+            const answer =
+                "Ищу информацию по запросу, сэр.";
+
+            showJarvisMessage(
+                original,
+                answer
+            );
+
+            statusText.textContent =
+                "Выполняю поиск...";
+
+            speak(answer);
+
+            setTimeout(function () {
+
+                const url =
+                    "https://www.google.com/search?q=" +
+                    encodeURIComponent(query);
+
+                window.location.href =
+                    url;
+
+            }, 500);
+
+            return true;
+        }
+    }
+
+    // ========================================================
+    // КАЛЬКУЛЯТОР
+    // ========================================================
+
+    const calculationMatch =
+        command.match(
+            /(?:посчитай|вычисли|сколько будет|рассчитай)\s+(.+)$/i
+        );
+
+    if (calculationMatch) {
+
+        const expression =
+            calculationMatch[1]
+                .replace(/умножить на/g, "*")
+                .replace(/умножить/g, "*")
+                .replace(/помножить на/g, "*")
+                .replace(/разделить на/g, "/")
+                .replace(/разделить/g, "/")
+                .replace(/плюс/g, "+")
+                .replace(/минус/g, "-")
+                .replace(/в степени/g, "**")
+                .replace(/,/g, ".")
+                .replace(/×/g, "*")
+                .replace(/÷/g, "/")
+                .replace(/[^0-9+\-*/().%\s]/g, "")
+                .trim();
+
+        if (
+            expression &&
+            /^[0-9+\-*/().%\s]+$/.test(expression)
+        ) {
+
+            try {
+
+                // Безопасный математический калькулятор:
+                // выражение предварительно очищено
+                const result =
+                    Function(
+                        '"use strict"; return (' +
+                        expression +
+                        ')'
+                    )();
+
+                if (
+                    Number.isFinite(result)
+                ) {
+
+                    const answer =
+                        expression +
+                        " = " +
+                        result +
+                        ", сэр.";
+
+                    showJarvisMessage(
+                        original,
+                        answer
+                    );
+
+                    statusText.textContent =
+                        "Расчёт выполнен, сэр.";
+
+                    speak(answer);
+
+                    return true;
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "Не удалось вычислить:",
+                    error
+                );
+            }
+        }
+    }
+
+    // ========================================================
+    // НЕ КОМАНДА
+    // ========================================================
+
+    return false;
+}
+
+// ============================================================
+// ЗАПРОС К JARVIS / GEMINI
 // ============================================================
 
 async function askJarvis(text) {
@@ -119,6 +495,14 @@ async function askJarvis(text) {
     }
 
     if (requestInProgress) {
+        return;
+    }
+
+    // ========================================================
+    // СНАЧАЛА ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ КОМАНДЫ
+    // ========================================================
+
+    if (handleCommand(text)) {
         return;
     }
 
@@ -223,10 +607,6 @@ async function askJarvis(text) {
             data.answer
         );
 
-        // ====================================================
-        // ОЗВУЧИВАЕМ ОТВЕТ
-        // ====================================================
-
         speak(
             data.answer
         );
@@ -295,7 +675,6 @@ function handleMicClick() {
     try {
 
         if ("speechSynthesis" in window) {
-
             window.speechSynthesis.cancel();
         }
 
@@ -400,11 +779,9 @@ if (!SpeechRecognition) {
             `;
 
             statusText.textContent =
-                "Отправляю запрос, сэр...";
+                "Обрабатываю запрос, сэр...";
 
-            await askJarvis(
-                text
-            );
+            await askJarvis(text);
         };
 
     recognition.onerror =
