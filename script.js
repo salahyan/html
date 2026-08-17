@@ -1059,3 +1059,299 @@ document.addEventListener(
         passive: true
     }
 );
+// ============================================================
+// ПАМЯТЬ JARVIS — ОКНО УПРАВЛЕНИЯ
+// ============================================================
+
+const memoryButton =
+    document.getElementById("memoryButton");
+
+const memoryModal =
+    document.getElementById("memoryModal");
+
+const closeMemory =
+    document.getElementById("closeMemory");
+
+const refreshMemory =
+    document.getElementById("refreshMemory");
+
+const clearMemory =
+    document.getElementById("clearMemory");
+
+const memoryContent =
+    document.getElementById("memoryContent");
+
+
+// ============================================================
+// ОТКРЫТЬ ПАМЯТЬ
+// ============================================================
+
+function openMemory() {
+
+    if (!memoryModal) {
+        console.error(
+            "JARVIS: элемент memoryModal не найден"
+        );
+        return;
+    }
+
+    updateMemoryWindow();
+
+    memoryModal.classList.add("active");
+
+    memoryModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+}
+
+
+// ============================================================
+// ЗАКРЫТЬ ПАМЯТЬ
+// ============================================================
+
+function closeMemoryWindow() {
+
+    if (!memoryModal) {
+        return;
+    }
+
+    memoryModal.classList.remove("active");
+
+    memoryModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+}
+
+
+// ============================================================
+// ОБНОВИТЬ ОКНО ПАМЯТИ
+// ============================================================
+
+function updateMemoryWindow() {
+
+    if (!memoryContent) {
+        console.error(
+            "JARVIS: элемент memoryContent не найден"
+        );
+        return;
+    }
+
+    if (!memory || memory.length === 0) {
+
+        memoryContent.innerHTML = `
+
+            <div class="memory-empty">
+
+                🧠
+
+                <br><br>
+
+                JARVIS пока ничего не сохранил
+                в локальной памяти.
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    memoryContent.innerHTML =
+        memory
+            .map(function (item) {
+
+                const role =
+                    item.role === "user"
+                        ? "Вы"
+                        : "JARVIS";
+
+                const icon =
+                    item.role === "user"
+                        ? "👤"
+                        : "🤖";
+
+                return `
+
+                    <div class="memory-item">
+
+                        <div class="memory-item-title">
+
+                            ${icon}
+
+                            ${role}
+
+                        </div>
+
+                        <div class="memory-item-text">
+
+                            ${escapeHTML(
+                                item.text
+                            )}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+}
+
+
+// ============================================================
+// КНОПКА «ПАМЯТЬ»
+// ============================================================
+
+if (memoryButton) {
+
+    memoryButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            openMemory();
+
+        }
+    );
+
+} else {
+
+    console.error(
+        "JARVIS: кнопка memoryButton не найдена"
+    );
+}
+
+
+// ============================================================
+// КНОПКА «ЗАКРЫТЬ»
+// ============================================================
+
+if (closeMemory) {
+
+    closeMemory.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            closeMemoryWindow();
+
+        }
+    );
+}
+
+
+// ============================================================
+// КНОПКА «ОБНОВИТЬ»
+// ============================================================
+
+if (refreshMemory) {
+
+    refreshMemory.addEventListener(
+        "click",
+        function () {
+
+            memory =
+                loadMemory();
+
+            updateMemoryWindow();
+
+        }
+    );
+}
+
+
+// ============================================================
+// КНОПКА «ОЧИСТИТЬ ПАМЯТЬ»
+// ============================================================
+
+if (clearMemory) {
+
+    clearMemory.addEventListener(
+        "click",
+        function () {
+
+            const confirmed =
+                confirm(
+                    "Сэр, вы действительно хотите полностью очистить память JARVIS?"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            memory = [];
+
+            localStorage.removeItem(
+                MEMORY_KEY
+            );
+
+            updateMemoryWindow();
+
+            statusText.textContent =
+                "Память очищена, сэр.";
+
+            speak(
+                "Память очищена, сэр."
+            );
+
+        }
+    );
+}
+
+
+// ============================================================
+// ЗАКРЫТИЕ ПРИ НАЖАТИИ НА ФОН
+// ============================================================
+
+if (memoryModal) {
+
+    memoryModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target === memoryModal
+            ) {
+
+                closeMemoryWindow();
+
+            }
+
+        }
+    );
+}
+
+
+// ============================================================
+// ESC — ЗАКРЫТЬ ПАМЯТЬ
+// ============================================================
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape" &&
+            memoryModal &&
+            memoryModal.classList.contains("active")
+        ) {
+
+            closeMemoryWindow();
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// ОБНОВЛЯЕМ ПАМЯТЬ ПРИ ЗАПУСКЕ
+// ============================================================
+
+updateMemoryWindow();
