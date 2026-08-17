@@ -30,8 +30,10 @@ function speak(text) {
     if (!text) return;
 
     if (!("speechSynthesis" in window)) {
+
         statusText.textContent =
             "Синтез речи не поддерживается браузером, сэр.";
+
         return;
     }
 
@@ -48,10 +50,13 @@ function speak(text) {
         utterance.volume = 1;
 
         utterance.onstart = function () {
-            statusText.textContent = "Говорю, сэр...";
+
+            statusText.textContent =
+                "Говорю, сэр.";
         };
 
         utterance.onend = function () {
+
             statusText.textContent =
                 "Готов к дальнейшим указаниям, сэр.";
         };
@@ -120,30 +125,18 @@ function handleCommand(text) {
         original
             .toLowerCase()
             .replace(/[!?.,]/g, "")
-            .replace(/\s+/g, " ")
             .trim();
-
-    console.log(
-        "Проверка команды:",
-        command
-    );
 
     // ========================================================
     // СТОП
     // ========================================================
 
     if (
-        command.includes("стоп") ||
-        command.includes("остановись") ||
-        command.includes("замолчи") ||
-        command.includes("хватит") ||
-        command.includes("прекрати говорить") ||
-        command.includes("останови речь")
+        /\b(стоп|остановись|замолчи|хватит|прекрати говорить|останови речь)\b/
+            .test(command)
     ) {
 
-        if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-        }
+        window.speechSynthesis.cancel();
 
         statusText.textContent =
             "Речь остановлена, сэр.";
@@ -161,17 +154,11 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        (
-            command.includes("очисти") ||
-            command.includes("удали") ||
-            command.includes("сотри")
-        ) &&
-        (
-            command.includes("историю") ||
-            command.includes("диалог") ||
-            command.includes("чат") ||
-            command.includes("сообщения")
-        )
+        /\b(очисти|удали|сотри)\b.*\b(историю|диалог|чат|сообщения)\b/
+            .test(command)
+        ||
+        /\b(новый диалог|начать заново|очистить чат)\b/
+            .test(command)
     ) {
 
         conversation.innerHTML = "";
@@ -186,47 +173,25 @@ function handleCommand(text) {
         return true;
     }
 
-    if (
-        command.includes("новый диалог") ||
-        command.includes("начать заново") ||
-        command.includes("очистить чат")
-    ) {
-
-        conversation.innerHTML = "";
-
-        statusText.textContent =
-            "Новый диалог начат, сэр.";
-
-        speak(
-            "Новый диалог начат, сэр."
-        );
-
-        return true;
-    }
-
     // ========================================================
     // ОБНОВИТЬ СТРАНИЦУ
     // ========================================================
 
     if (
-        (
-            command.includes("обнови") ||
-            command.includes("перезагрузи") ||
-            command.includes("обновить") ||
-            command.includes("перезагрузить")
-        ) &&
-        (
-            command.includes("страницу") ||
-            command.includes("сайт") ||
-            command.includes("страница")
-        )
+        /\b(обнови|перезагрузи|обновить|перезагрузить)\b/
+            .test(command)
+        &&
+        /\b(страницу|сайт|страница)\b/
+            .test(command)
     ) {
 
         statusText.textContent =
             "Обновляю систему, сэр...";
 
         setTimeout(function () {
+
             location.reload();
+
         }, 300);
 
         return true;
@@ -237,16 +202,17 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        command.includes("вернись назад") ||
-        command.includes("предыдущая страница") ||
-        command === "назад"
+        /\b(назад|вернись назад|предыдущая страница)\b/
+            .test(command)
     ) {
 
         statusText.textContent =
             "Возвращаюсь назад, сэр.";
 
         setTimeout(function () {
+
             history.back();
+
         }, 300);
 
         return true;
@@ -257,10 +223,8 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        command.includes("какая сегодня дата") ||
-        command.includes("какое сегодня число") ||
-        command.includes("сегодняшняя дата") ||
-        command.includes("число сегодня")
+        /\b(какая сегодня дата|какое сегодня число|сегодняшняя дата|число сегодня)\b/
+            .test(command)
     ) {
 
         const now = new Date();
@@ -296,11 +260,8 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        command.includes("сколько времени") ||
-        command.includes("который час") ||
-        command.includes("текущее время") ||
-        command.includes("которое сейчас время") ||
-        command.includes("время сейчас")
+        /\b(сколько времени|который час|текущее время|которое сейчас время|время сейчас)\b/
+            .test(command)
     ) {
 
         const now = new Date();
@@ -330,74 +291,103 @@ function handleCommand(text) {
         return true;
     }
 
-   // ========================================================
-// ОТКРЫТИЕ ПРИЛОЖЕНИЙ
-// ========================================================
+    // ========================================================
+    // ПРИЛОЖЕНИЯ
+    // ========================================================
 
-const apps = [
+    const apps = [
 
-    {
-        names: [
-            "youtube",
-            "ютуб",
-            "ютаб"
-        ],
-        scheme: "youtube://",
-        name: "YouTube"
-    },
+        {
+            names: [
+                "youtube",
+                "ютуб",
+                "ютаб"
+            ],
 
-    {
-        names: [
-            "spotify",
-            "спотифай"
-        ],
-        scheme: "spotify://",
-        name: "Spotify"
-    },
+            scheme:
+                "youtube://",
 
-    {
-        names: [
-            "telegram",
-            "телеграм"
-        ],
-        scheme: "tg://",
-        name: "Telegram"
-    },
+            name:
+                "YouTube"
+        },
 
-    {
-        names: [
-            "tiktok",
-            "тик ток",
-            "тикток"
-        ],
-        scheme: "tiktok://",
-        name: "TikTok"
-    }
-];
+        {
+            names: [
+                "spotify",
+                "спотифай"
+            ],
 
-// ========================================================
-// ПРОВЕРЯЕМ КОМАНДУ ОТКРЫТИЯ
-// ========================================================
+            scheme:
+                "spotify://",
 
-const wantsOpen =
-    command.includes("открой") ||
-    command.includes("открыть") ||
-    command.includes("открывай") ||
-    command.includes("запусти") ||
-    command.includes("запустить") ||
-    command.includes("зайди") ||
-    command.includes("перейди") ||
-    command.includes("перейти");
+            name:
+                "Spotify"
+        },
 
-if (wantsOpen) {
+        {
+            names: [
+                "telegram",
+                "телеграм"
+            ],
+
+            scheme:
+                "tg://",
+
+            name:
+                "Telegram"
+        },
+
+        {
+            names: [
+                "tiktok",
+                "тик ток",
+                "тикток"
+            ],
+
+            scheme:
+                "tiktok://",
+
+            name:
+                "TikTok"
+        }
+    ];
+
+    // ========================================================
+    // КОМАНДЫ ОТКРЫТИЯ
+    // ========================================================
+
+    const wantsOpen =
+        command.includes("открой") ||
+        command.includes("открою") ||
+        command.includes("открывай") ||
+        command.includes("открыть") ||
+        command.includes("запусти") ||
+        command.includes("запустить") ||
+        command.includes("запуск") ||
+        command.includes("зайди") ||
+        command.includes("перейди") ||
+        command.includes("перейти");
+
+    // ========================================================
+    // ИЩЕМ ПРИЛОЖЕНИЕ
+    // ========================================================
 
     let selectedApp = null;
 
-    for (let i = 0; i < apps.length; i++) {
+    for (
+        let i = 0;
+        i < apps.length;
+        i++
+    ) {
 
-        const app = apps[i];
+        const app =
+            apps[i];
 
-        for (let j = 0; j < app.names.length; j++) {
+        for (
+            let j = 0;
+            j < app.names.length;
+            j++
+        ) {
 
             if (
                 command.includes(
@@ -405,7 +395,9 @@ if (wantsOpen) {
                 )
             ) {
 
-                selectedApp = app;
+                selectedApp =
+                    app;
+
                 break;
             }
         }
@@ -415,80 +407,129 @@ if (wantsOpen) {
         }
     }
 
-    // ====================================================
-    // ПРИЛОЖЕНИЕ НАЙДЕНО
-    // ====================================================
+    // ========================================================
+    // ЕСЛИ СКАЗАЛИ "ОТКРОЙ YOUTUBE"
+    // ИЛИ ПРОСТО "YOUTUBE"
+    // ========================================================
 
-    if (selectedApp) {
+    const directAppCommand =
+        command === "youtube" ||
+        command === "ютуб" ||
+        command === "ютаб" ||
 
-        console.log(
-            "Попытка открыть приложение:",
-            selectedApp.name
-        );
+        command === "spotify" ||
+        command === "спотифай" ||
 
-        // Останавливаем текущую речь
+        command === "telegram" ||
+        command === "телеграм" ||
 
-        if ("speechSynthesis" in window) {
+        command === "tiktok" ||
+        command === "тик ток" ||
+        command === "тикток";
+
+    if (
+        selectedApp &&
+        (
+            wantsOpen ||
+            directAppCommand
+        )
+    ) {
+
+        // ====================================================
+        // ОСТАНАВЛИВАЕМ РЕЧЬ
+        // ====================================================
+
+        if (
+            "speechSynthesis" in window
+        ) {
+
             window.speechSynthesis.cancel();
         }
 
         statusText.textContent =
-            "Пытаюсь открыть " +
+            "Запускаю " +
             selectedApp.name +
             "...";
 
-        /*
-         * ВАЖНО:
-         * Никакого Gemini.
-         * Никакой веб-версии.
-         * Только попытка открыть приложение.
-         */
+        console.log(
+            "JARVIS пытается открыть приложение:",
+            selectedApp.name
+        );
 
-        const startTime =
-            Date.now();
+        // ====================================================
+        // НЕ ПОКАЗЫВАЕМ ОТВЕТ
+        // И НЕ ОТПРАВЛЯЕМ GEMINI
+        // ====================================================
 
-        window.location.href =
-            selectedApp.scheme;
+        try {
 
-        // ==================================================
-        // ЕСЛИ SAFARI НЕ ПЕРЕДАЛ КОМАНДУ ПРИЛОЖЕНИЮ
-        // ==================================================
+            window.location.href =
+                selectedApp.scheme;
+
+        } catch (error) {
+
+            console.error(
+                "Ошибка запуска приложения:",
+                error
+            );
+
+            const answer =
+                "Извините, сэр, мне не удалось открыть приложение " +
+                selectedApp.name +
+                ".";
+
+            showJarvisMessage(
+                original,
+                answer
+            );
+
+            statusText.textContent =
+                "Не удалось открыть приложение.";
+
+            speak(answer);
+
+            return true;
+        }
+
+        // ====================================================
+        // ЕСЛИ ПРИЛОЖЕНИЕ НЕ ОТКРЫЛОСЬ
+        // ====================================================
 
         setTimeout(function () {
 
             /*
-             * Если страница всё ещё активна,
-             * скорее всего приложение не открылось.
+             * Safari может не позволить определить
+             * результат запуска приложения.
+             *
+             * Поэтому здесь показываем сообщение,
+             * если страница всё ещё активна.
              */
 
-            const elapsed =
-                Date.now() - startTime;
+            if (
+                document.visibilityState ===
+                "visible"
+            ) {
 
-            if (elapsed >= 1200) {
+                const answer =
+                    "Извините, сэр, мне не удалось открыть приложение " +
+                    selectedApp.name +
+                    ".";
+
+                showJarvisMessage(
+                    original,
+                    answer
+                );
 
                 statusText.textContent =
                     "Не удалось открыть приложение.";
 
-                showJarvisMessage(
-                    original,
-                    "Извините, сэр, мне не удалось открыть приложение " +
-                    selectedApp.name +
-                    "."
-                );
-
-                speak(
-                    "Извините, сэр, мне не удалось открыть приложение " +
-                    selectedApp.name +
-                    "."
-                );
+                speak(answer);
             }
 
-        }, 1200);
+        }, 1500);
 
         return true;
     }
-}
-
 
     // ========================================================
     // ДИНАМИЧЕСКИЙ ПОИСК
@@ -547,23 +588,61 @@ if (wantsOpen) {
 
         const expression =
             calculationMatch[1]
-                .replace(/умножить на/g, "*")
-                .replace(/умножить/g, "*")
-                .replace(/помножить на/g, "*")
-                .replace(/разделить на/g, "/")
-                .replace(/разделить/g, "/")
-                .replace(/плюс/g, "+")
-                .replace(/минус/g, "-")
-                .replace(/в степени/g, "**")
-                .replace(/,/g, ".")
-                .replace(/×/g, "*")
-                .replace(/÷/g, "/")
-                .replace(/[^0-9+\-*/().%\s]/g, "")
+                .replace(
+                    /умножить на/g,
+                    "*"
+                )
+                .replace(
+                    /умножить/g,
+                    "*"
+                )
+                .replace(
+                    /помножить на/g,
+                    "*"
+                )
+                .replace(
+                    /разделить на/g,
+                    "/"
+                )
+                .replace(
+                    /разделить/g,
+                    "/"
+                )
+                .replace(
+                    /плюс/g,
+                    "+"
+                )
+                .replace(
+                    /минус/g,
+                    "-"
+                )
+                .replace(
+                    /в степени/g,
+                    "**"
+                )
+                .replace(
+                    /,/g,
+                    "."
+                )
+                .replace(
+                    /×/g,
+                    "*"
+                )
+                .replace(
+                    /÷/g,
+                    "/"
+                )
+                .replace(
+                    /[^0-9+\-*/().%\s]/g,
+                    ""
+                )
                 .trim();
 
         if (
             expression &&
-            /^[0-9+\-*/().%\s]+$/.test(expression)
+            /^[0-9+\-*/().%\s]+$/.test(
+                expression
+            )
         ) {
 
             try {
@@ -609,7 +688,7 @@ if (wantsOpen) {
     }
 
     // ========================================================
-    // НЕ ЛОКАЛЬНАЯ КОМАНДА
+    // НЕ КОМАНДА
     // ========================================================
 
     return false;
@@ -633,16 +712,15 @@ async function askJarvis(text) {
     // СНАЧАЛА ЛОКАЛЬНЫЕ КОМАНДЫ
     // ========================================================
 
-    if (handleCommand(text)) {
+    if (
+        handleCommand(text)
+    ) {
+
         return;
     }
 
-    // ========================================================
-    // ЕСЛИ ЭТО НЕ КОМАНДА —
-    // ОТПРАВЛЯЕМ В GEMINI
-    // ========================================================
-
-    requestInProgress = true;
+    requestInProgress =
+        true;
 
     statusText.textContent =
         "Думаю над ответом, сэр...";
@@ -665,9 +743,10 @@ async function askJarvis(text) {
                             "application/json"
                     },
 
-                    body: JSON.stringify({
-                        text: text
-                    })
+                    body:
+                        JSON.stringify({
+                            text: text
+                        })
                 }
             );
 
@@ -765,7 +844,9 @@ async function askJarvis(text) {
                 <br>
 
                 <small>
-                    ${escapeHTML(error.message)}
+                    ${escapeHTML(
+                        error.message
+                    )}
                 </small>
 
             </div>
@@ -810,7 +891,10 @@ function handleMicClick() {
 
     try {
 
-        if ("speechSynthesis" in window) {
+        if (
+            "speechSynthesis" in window
+        ) {
+
             window.speechSynthesis.cancel();
         }
 
@@ -917,7 +1001,9 @@ if (!SpeechRecognition) {
             statusText.textContent =
                 "Обрабатываю запрос, сэр...";
 
-            await askJarvis(text);
+            await askJarvis(
+                text
+            );
         };
 
     recognition.onerror =
@@ -999,7 +1085,10 @@ function escapeHTML(text) {
 
 function unlockAudio() {
 
-    if (!("speechSynthesis" in window)) {
+    if (
+        !("speechSynthesis" in window)
+    ) {
+
         return;
     }
 
