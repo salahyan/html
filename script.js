@@ -330,145 +330,165 @@ function handleCommand(text) {
         return true;
     }
 
-    // ========================================================
-    // ОТКРЫТИЕ САЙТОВ
-    // ========================================================
+   // ========================================================
+// ОТКРЫТИЕ ПРИЛОЖЕНИЙ
+// ========================================================
 
-    const sites = [
+const apps = [
 
-        {
-            names: [
-                "youtube",
-                "ютуб",
-                "ютаб"
-            ],
-            url: "https://www.youtube.com/"
-        },
+    {
+        names: [
+            "youtube",
+            "ютуб",
+            "ютаб"
+        ],
+        scheme: "youtube://",
+        name: "YouTube"
+    },
 
-        {
-            names: [
-                "spotify",
-                "спотифай"
-            ],
-            url: "https://open.spotify.com/"
-        },
+    {
+        names: [
+            "spotify",
+            "спотифай"
+        ],
+        scheme: "spotify://",
+        name: "Spotify"
+    },
 
-        {
-            names: [
-                "google",
-                "гугл"
-            ],
-            url: "https://www.google.com/"
-        },
+    {
+        names: [
+            "telegram",
+            "телеграм"
+        ],
+        scheme: "tg://",
+        name: "Telegram"
+    },
 
-        {
-            names: [
-                "tiktok",
-                "тик ток",
-                "тикток"
-            ],
-            url: "https://www.tiktok.com/"
-        },
+    {
+        names: [
+            "tiktok",
+            "тик ток",
+            "тикток"
+        ],
+        scheme: "tiktok://",
+        name: "TikTok"
+    }
+];
 
-        {
-            names: [
-                "telegram",
-                "телеграм"
-            ],
-            url: "https://web.telegram.org/"
-        },
+// ========================================================
+// ПРОВЕРЯЕМ КОМАНДУ ОТКРЫТИЯ
+// ========================================================
 
-        {
-            names: [
-                "github",
-                "гитхаб"
-            ],
-            url: "https://github.com/"
-        }
-    ];
+const wantsOpen =
+    command.includes("открой") ||
+    command.includes("открыть") ||
+    command.includes("открывай") ||
+    command.includes("запусти") ||
+    command.includes("запустить") ||
+    command.includes("зайди") ||
+    command.includes("перейди") ||
+    command.includes("перейти");
 
-    // ========================================================
-    // ПРОВЕРЯЕМ, ХОЧЕТ ЛИ ПОЛЬЗОВАТЕЛЬ ЧТО-ТО ОТКРЫТЬ
-    // ========================================================
+if (wantsOpen) {
 
-    const wantsOpen =
-        command.includes("открой") ||
-        command.includes("открою") ||
-        command.includes("открывай") ||
-        command.includes("открыть") ||
-        command.includes("запусти") ||
-        command.includes("запуск") ||
-        command.includes("зайди") ||
-        command.includes("перейди") ||
-        command.includes("перейти");
+    let selectedApp = null;
 
-    if (wantsOpen) {
+    for (let i = 0; i < apps.length; i++) {
 
-        let selectedSite = null;
+        const app = apps[i];
 
-        for (
-            let i = 0;
-            i < sites.length;
-            i++
-        ) {
+        for (let j = 0; j < app.names.length; j++) {
 
-            const site =
-                sites[i];
-
-            for (
-                let j = 0;
-                j < site.names.length;
-                j++
+            if (
+                command.includes(
+                    app.names[j]
+                )
             ) {
 
-                if (
-                    command.includes(
-                        site.names[j]
-                    )
-                ) {
-
-                    selectedSite =
-                        site;
-
-                    break;
-                }
-            }
-
-            if (selectedSite) {
+                selectedApp = app;
                 break;
             }
         }
 
-        // ====================================================
-        // ЕСЛИ САЙТ НАЙДЕН
-        // ====================================================
-
-        if (selectedSite) {
-
-            console.log(
-                "КОМАНДА ОТКРЫТИЯ:",
-                selectedSite.url
-            );
-
-            // НИКАКОГО ОТВЕТА JARVIS
-            // НИКАКОЙ ОЗВУЧКИ
-            // НИКАКОГО GEMINI
-
-            if ("speechSynthesis" in window) {
-                window.speechSynthesis.cancel();
-            }
-
-            statusText.textContent =
-                "Переход...";
-
-            // Сразу открываем в текущей вкладке
-
-            window.location.href =
-                selectedSite.url;
-
-            return true;
+        if (selectedApp) {
+            break;
         }
     }
+
+    // ====================================================
+    // ПРИЛОЖЕНИЕ НАЙДЕНО
+    // ====================================================
+
+    if (selectedApp) {
+
+        console.log(
+            "Попытка открыть приложение:",
+            selectedApp.name
+        );
+
+        // Останавливаем текущую речь
+
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+
+        statusText.textContent =
+            "Пытаюсь открыть " +
+            selectedApp.name +
+            "...";
+
+        /*
+         * ВАЖНО:
+         * Никакого Gemini.
+         * Никакой веб-версии.
+         * Только попытка открыть приложение.
+         */
+
+        const startTime =
+            Date.now();
+
+        window.location.href =
+            selectedApp.scheme;
+
+        // ==================================================
+        // ЕСЛИ SAFARI НЕ ПЕРЕДАЛ КОМАНДУ ПРИЛОЖЕНИЮ
+        // ==================================================
+
+        setTimeout(function () {
+
+            /*
+             * Если страница всё ещё активна,
+             * скорее всего приложение не открылось.
+             */
+
+            const elapsed =
+                Date.now() - startTime;
+
+            if (elapsed >= 1200) {
+
+                statusText.textContent =
+                    "Не удалось открыть приложение.";
+
+                showJarvisMessage(
+                    original,
+                    "Извините, сэр, мне не удалось открыть приложение " +
+                    selectedApp.name +
+                    "."
+                );
+
+                speak(
+                    "Извините, сэр, мне не удалось открыть приложение " +
+                    selectedApp.name +
+                    "."
+                );
+            }
+
+        }, 1200);
+
+        return true;
+    }
+}
+
 
     // ========================================================
     // ДИНАМИЧЕСКИЙ ПОИСК
