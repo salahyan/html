@@ -57,12 +57,19 @@ function speak(text) {
         };
 
         utterance.onerror = function (event) {
-            console.error("Ошибка речи:", event);
+
+            console.error(
+                "Ошибка речи:",
+                event
+            );
+
             statusText.textContent =
                 "Ошибка воспроизведения голоса, сэр.";
         };
 
-        window.speechSynthesis.speak(utterance);
+        window.speechSynthesis.speak(
+            utterance
+        );
 
     } catch (error) {
 
@@ -113,18 +120,30 @@ function handleCommand(text) {
         original
             .toLowerCase()
             .replace(/[!?.,]/g, "")
+            .replace(/\s+/g, " ")
             .trim();
+
+    console.log(
+        "Проверка команды:",
+        command
+    );
 
     // ========================================================
     // СТОП
     // ========================================================
 
     if (
-        /\b(стоп|остановись|замолчи|хватит|прекрати говорить|останови речь)\b/
-            .test(command)
+        command.includes("стоп") ||
+        command.includes("остановись") ||
+        command.includes("замолчи") ||
+        command.includes("хватит") ||
+        command.includes("прекрати говорить") ||
+        command.includes("останови речь")
     ) {
 
-        window.speechSynthesis.cancel();
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
 
         statusText.textContent =
             "Речь остановлена, сэр.";
@@ -142,11 +161,17 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        /\b(очисти|удали|сотри)\b.*\b(историю|диалог|чат|сообщения)\b/
-            .test(command)
-        ||
-        /\b(новый диалог|начать заново|очистить чат)\b/
-            .test(command)
+        (
+            command.includes("очисти") ||
+            command.includes("удали") ||
+            command.includes("сотри")
+        ) &&
+        (
+            command.includes("историю") ||
+            command.includes("диалог") ||
+            command.includes("чат") ||
+            command.includes("сообщения")
+        )
     ) {
 
         conversation.innerHTML = "";
@@ -161,16 +186,40 @@ function handleCommand(text) {
         return true;
     }
 
+    if (
+        command.includes("новый диалог") ||
+        command.includes("начать заново") ||
+        command.includes("очистить чат")
+    ) {
+
+        conversation.innerHTML = "";
+
+        statusText.textContent =
+            "Новый диалог начат, сэр.";
+
+        speak(
+            "Новый диалог начат, сэр."
+        );
+
+        return true;
+    }
+
     // ========================================================
     // ОБНОВИТЬ СТРАНИЦУ
     // ========================================================
 
     if (
-        /\b(обнови|перезагрузи|обновить|перезагрузить)\b/
-            .test(command)
-        &&
-        /\b(страницу|сайт|страница)\b/
-            .test(command)
+        (
+            command.includes("обнови") ||
+            command.includes("перезагрузи") ||
+            command.includes("обновить") ||
+            command.includes("перезагрузить")
+        ) &&
+        (
+            command.includes("страницу") ||
+            command.includes("сайт") ||
+            command.includes("страница")
+        )
     ) {
 
         statusText.textContent =
@@ -188,8 +237,9 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        /\b(назад|вернись назад|предыдущая страница)\b/
-            .test(command)
+        command.includes("вернись назад") ||
+        command.includes("предыдущая страница") ||
+        command === "назад"
     ) {
 
         statusText.textContent =
@@ -207,8 +257,10 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        /\b(какая сегодня дата|какое сегодня число|сегодняшняя дата|число сегодня)\b/
-            .test(command)
+        command.includes("какая сегодня дата") ||
+        command.includes("какое сегодня число") ||
+        command.includes("сегодняшняя дата") ||
+        command.includes("число сегодня")
     ) {
 
         const now = new Date();
@@ -244,8 +296,11 @@ function handleCommand(text) {
     // ========================================================
 
     if (
-        /\b(сколько времени|который час|текущее время|которое сейчас время|время сейчас)\b/
-            .test(command)
+        command.includes("сколько времени") ||
+        command.includes("который час") ||
+        command.includes("текущее время") ||
+        command.includes("которое сейчас время") ||
+        command.includes("время сейчас")
     ) {
 
         const now = new Date();
@@ -276,82 +331,144 @@ function handleCommand(text) {
     }
 
     // ========================================================
-// ОТКРЫТИЕ САЙТОВ
-// ========================================================
+    // ОТКРЫТИЕ САЙТОВ
+    // ========================================================
 
-const sites = [
+    const sites = [
 
-    {
-        pattern: /\b(youtube|ютуб|ютаб)\b/i,
-        url: "https://www.youtube.com/",
-        name: "YouTube"
-    },
+        {
+            names: [
+                "youtube",
+                "ютуб",
+                "ютаб"
+            ],
+            url: "https://www.youtube.com/"
+        },
 
-    {
-        pattern: /\b(spotify|спотифай)\b/i,
-        url: "https://open.spotify.com/",
-        name: "Spotify"
-    },
+        {
+            names: [
+                "spotify",
+                "спотифай"
+            ],
+            url: "https://open.spotify.com/"
+        },
 
-    {
-        pattern: /\b(google|гугл)\b/i,
-        url: "https://www.google.com/",
-        name: "Google"
-    },
+        {
+            names: [
+                "google",
+                "гугл"
+            ],
+            url: "https://www.google.com/"
+        },
 
-    {
-        pattern: /\b(tiktok|тик ток|тикток)\b/i,
-        url: "https://www.tiktok.com/",
-        name: "TikTok"
-    },
+        {
+            names: [
+                "tiktok",
+                "тик ток",
+                "тикток"
+            ],
+            url: "https://www.tiktok.com/"
+        },
 
-    {
-        pattern: /\b(telegram|телеграм)\b/i,
-        url: "https://web.telegram.org/",
-        name: "Telegram"
-    },
+        {
+            names: [
+                "telegram",
+                "телеграм"
+            ],
+            url: "https://web.telegram.org/"
+        },
 
-    {
-        pattern: /\b(github|гитхаб)\b/i,
-        url: "https://github.com/",
-        name: "GitHub"
-    }
-];
+        {
+            names: [
+                "github",
+                "гитхаб"
+            ],
+            url: "https://github.com/"
+        }
+    ];
 
-const wantsOpen =
-    /\b(открой|открою|открывай|открыть|запусти|запуск|зайди|перейди|перейти)\b/i
-        .test(command);
+    // ========================================================
+    // ПРОВЕРЯЕМ, ХОЧЕТ ЛИ ПОЛЬЗОВАТЕЛЬ ЧТО-ТО ОТКРЫТЬ
+    // ========================================================
 
-if (wantsOpen) {
+    const wantsOpen =
+        command.includes("открой") ||
+        command.includes("открою") ||
+        command.includes("открывай") ||
+        command.includes("открыть") ||
+        command.includes("запусти") ||
+        command.includes("запуск") ||
+        command.includes("зайди") ||
+        command.includes("перейди") ||
+        command.includes("перейти");
 
-    const site =
-        sites.find(function (item) {
-            return item.pattern.test(command);
-        });
+    if (wantsOpen) {
 
-    if (site) {
+        let selectedSite = null;
 
-        // Сначала показываем команду
-        showJarvisMessage(
-            original,
-            "Открываю " + site.name + ", сэр."
-        );
+        for (
+            let i = 0;
+            i < sites.length;
+            i++
+        ) {
 
-        statusText.textContent =
-            "Открываю " + site.name + "...";
+            const site =
+                sites[i];
 
-        // Небольшая задержка только для того,
-        // чтобы JARVIS успел показать ответ
-        setTimeout(function () {
+            for (
+                let j = 0;
+                j < site.names.length;
+                j++
+            ) {
+
+                if (
+                    command.includes(
+                        site.names[j]
+                    )
+                ) {
+
+                    selectedSite =
+                        site;
+
+                    break;
+                }
+            }
+
+            if (selectedSite) {
+                break;
+            }
+        }
+
+        // ====================================================
+        // ЕСЛИ САЙТ НАЙДЕН
+        // ====================================================
+
+        if (selectedSite) {
+
+            console.log(
+                "КОМАНДА ОТКРЫТИЯ:",
+                selectedSite.url
+            );
+
+            // НИКАКОГО ОТВЕТА JARVIS
+            // НИКАКОЙ ОЗВУЧКИ
+            // НИКАКОГО GEMINI
+
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            statusText.textContent =
+                "Переход...";
+
+            // Сразу открываем в текущей вкладке
 
             window.location.href =
-                site.url;
+                selectedSite.url;
 
-        }, 300);
-
-        return true;
+            return true;
+        }
     }
-}
 
     // ========================================================
     // ДИНАМИЧЕСКИЙ ПОИСК
@@ -431,8 +548,6 @@ if (wantsOpen) {
 
             try {
 
-                // Безопасный математический калькулятор:
-                // выражение предварительно очищено
                 const result =
                     Function(
                         '"use strict"; return (' +
@@ -474,7 +589,7 @@ if (wantsOpen) {
     }
 
     // ========================================================
-    // НЕ КОМАНДА
+    // НЕ ЛОКАЛЬНАЯ КОМАНДА
     // ========================================================
 
     return false;
@@ -495,12 +610,17 @@ async function askJarvis(text) {
     }
 
     // ========================================================
-    // СНАЧАЛА ПРОВЕРЯЕМ ЛОКАЛЬНЫЕ КОМАНДЫ
+    // СНАЧАЛА ЛОКАЛЬНЫЕ КОМАНДЫ
     // ========================================================
 
     if (handleCommand(text)) {
         return;
     }
+
+    // ========================================================
+    // ЕСЛИ ЭТО НЕ КОМАНДА —
+    // ОТПРАВЛЯЕМ В GEMINI
+    // ========================================================
 
     requestInProgress = true;
 
