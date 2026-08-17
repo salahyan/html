@@ -276,86 +276,82 @@ function handleCommand(text) {
     }
 
     // ========================================================
-    // ОТКРЫТИЕ САЙТОВ
-    // ========================================================
+// ОТКРЫТИЕ САЙТОВ
+// ========================================================
 
-    const sites = [
+const sites = [
 
-        {
-            pattern: /\b(youtube|ютуб)\b/,
-            url: "https://www.youtube.com/",
-            name: "YouTube"
-        },
+    {
+        pattern: /\b(youtube|ютуб|ютаб)\b/i,
+        url: "https://www.youtube.com/",
+        name: "YouTube"
+    },
 
-        {
-            pattern: /\b(spotify|спотифай)\b/,
-            url: "https://open.spotify.com/",
-            name: "Spotify"
-        },
+    {
+        pattern: /\b(spotify|спотифай)\b/i,
+        url: "https://open.spotify.com/",
+        name: "Spotify"
+    },
 
-        {
-            pattern: /\b(google|гугл)\b/,
-            url: "https://www.google.com/",
-            name: "Google"
-        },
+    {
+        pattern: /\b(google|гугл)\b/i,
+        url: "https://www.google.com/",
+        name: "Google"
+    },
 
-        {
-            pattern: /\b(tiktok|тик ток|тикток)\b/,
-            url: "https://www.tiktok.com/",
-            name: "TikTok"
-        },
+    {
+        pattern: /\b(tiktok|тик ток|тикток)\b/i,
+        url: "https://www.tiktok.com/",
+        name: "TikTok"
+    },
 
-        {
-            pattern: /\b(telegram|телеграм)\b/,
-            url: "https://web.telegram.org/",
-            name: "Telegram Web"
-        },
+    {
+        pattern: /\b(telegram|телеграм)\b/i,
+        url: "https://web.telegram.org/",
+        name: "Telegram"
+    },
 
-        {
-            pattern: /\b(github|гитхаб)\b/,
-            url: "https://github.com/",
-            name: "GitHub"
-        }
-    ];
-
-    const wantsOpen =
-        /\b(открой|запусти|перейди|перейти|зайди|открывай)\b/
-            .test(command);
-
-    if (wantsOpen) {
-
-        const site =
-            sites.find(function (item) {
-                return item.pattern.test(command);
-            });
-
-        if (site) {
-
-            const answer =
-                "Открываю " +
-                site.name +
-                ", сэр.";
-
-            showJarvisMessage(
-                original,
-                answer
-            );
-
-            statusText.textContent =
-                "Открываю " +
-                site.name +
-                "...";
-
-            speak(answer);
-
-            setTimeout(function () {
-                window.location.href =
-                    site.url;
-            }, 500);
-
-            return true;
-        }
+    {
+        pattern: /\b(github|гитхаб)\b/i,
+        url: "https://github.com/",
+        name: "GitHub"
     }
+];
+
+const wantsOpen =
+    /\b(открой|открою|открывай|открыть|запусти|запуск|зайди|перейди|перейти)\b/i
+        .test(command);
+
+if (wantsOpen) {
+
+    const site =
+        sites.find(function (item) {
+            return item.pattern.test(command);
+        });
+
+    if (site) {
+
+        // Сначала показываем команду
+        showJarvisMessage(
+            original,
+            "Открываю " + site.name + ", сэр."
+        );
+
+        statusText.textContent =
+            "Открываю " + site.name + "...";
+
+        // Небольшая задержка только для того,
+        // чтобы JARVIS успел показать ответ
+        setTimeout(function () {
+
+            window.location.href =
+                site.url;
+
+        }, 300);
+
+        return true;
+    }
+}
 
     // ========================================================
     // ДИНАМИЧЕСКИЙ ПОИСК
