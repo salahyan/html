@@ -1,58 +1,6 @@
-// ============================================================
-// ТЕСТ ДОСТУПНЫХ ГОЛОСОВ SAFARI
-// ============================================================
-
-function showAvailableVoices() {
-
-    if (!("speechSynthesis" in window)) {
-        console.log("SpeechSynthesis не поддерживается");
-        return;
-    }
-
-    const voices =
-        window.speechSynthesis.getVoices();
-
-    console.log("========== ГОЛОСА SAFARI ==========");
-
-    voices.forEach((voice, index) => {
-
-        console.log(
-            index +
-            " | " +
-            voice.name +
-            " | " +
-            voice.lang +
-            " | default: " +
-            voice.default
-        );
-
-    });
-
-    console.log(
-        "Всего голосов:",
-        voices.length
-    );
-
-    console.log("==================================");
-}
-
-// Сразу пробуем
-showAvailableVoices();
-
-// Safari может загрузить голоса позже
-if ("onvoiceschanged" in window.speechSynthesis) {
-
-    window.speechSynthesis.onvoiceschanged =
-        showAvailableVoices;
-}
-const micButton =
-    document.getElementById("micButton");
-
-const statusText =
-    document.getElementById("status");
-
-const conversation =
-    document.getElementById("conversation");
+const micButton = document.getElementById("micButton");
+const statusText = document.getElementById("status");
+const conversation = document.getElementById("conversation");
 
 // ============================================================
 // CLOUDFLARE WORKER
@@ -70,13 +18,11 @@ const SpeechRecognition =
     window.webkitSpeechRecognition;
 
 let recognition = null;
-
 let isListening = false;
-
 let requestInProgress = false;
 
 // ============================================================
-// ГОЛОС JARVIS
+// ГОЛОС
 // ============================================================
 
 function speak(text) {
@@ -86,10 +32,8 @@ function speak(text) {
     }
 
     if (!("speechSynthesis" in window)) {
-
         statusText.textContent =
             "Синтез речи не поддерживается браузером, сэр.";
-
         return;
     }
 
@@ -97,123 +41,48 @@ function speak(text) {
 
         window.speechSynthesis.cancel();
 
-        const speakNow = () => {
-
-            const voices =
-                window.speechSynthesis.getVoices();
-
-            const russianVoices =
-                voices.filter(
-                    voice =>
-                        voice.lang &&
-                        voice.lang
-                            .toLowerCase()
-                            .startsWith("ru")
-                );
-
-            const preferredVoice =
-                russianVoices.find(
-                    voice =>
-                        /premium|enhanced|natural|neural/i
-                            .test(voice.name)
-                ) ||
-                russianVoices.find(
-                    voice =>
-                        voice.lang
-                            .toLowerCase()
-                            .startsWith("ru-ru")
-                ) ||
-                russianVoices[0];
+        setTimeout(function () {
 
             const utterance =
-                new SpeechSynthesisUtterance(
-                    text
+                new SpeechSynthesisUtterance(text);
+
+            utterance.lang = "ru-RU";
+            utterance.rate = 0.85;
+            utterance.pitch = 0.8;
+            utterance.volume = 1;
+
+            utterance.onstart = function () {
+
+                console.log("JARVIS начал говорить");
+
+                statusText.textContent =
+                    "Говорю, сэр...";
+            };
+
+            utterance.onend = function () {
+
+                console.log("JARVIS закончил говорить");
+
+                statusText.textContent =
+                    "Готов к дальнейшим указаниям, сэр.";
+            };
+
+            utterance.onerror = function (event) {
+
+                console.error(
+                    "Ошибка синтеза речи:",
+                    event
                 );
 
-            utterance.lang =
-                "ru-RU";
-
-            // Быстрая и спокойная речь
-            utterance.rate =
-                0.92;
-
-            // Немного более низкий голос
-            utterance.pitch =
-                0.72;
-
-            utterance.volume =
-                1;
-
-            if (preferredVoice) {
-
-                utterance.voice =
-                    preferredVoice;
-
-                console.log(
-                    "Голос JARVIS:",
-                    preferredVoice.name,
-                    preferredVoice.lang
-                );
-            }
-
-            utterance.onstart =
-                function () {
-
-                    console.log(
-                        "JARVIS начал говорить"
-                    );
-
-                    statusText.textContent =
-                        "Говорю, сэр...";
-                };
-
-            utterance.onend =
-                function () {
-
-                    console.log(
-                        "JARVIS закончил говорить"
-                    );
-
-                    statusText.textContent =
-                        "Готов к дальнейшим указаниям, сэр.";
-                };
-
-            utterance.onerror =
-                function (event) {
-
-                    console.error(
-                        "Ошибка синтеза речи:",
-                        event
-                    );
-
-                    statusText.textContent =
-                        "Ошибка воспроизведения голоса, сэр.";
-                };
+                statusText.textContent =
+                    "Ошибка воспроизведения голоса, сэр.";
+            };
 
             window.speechSynthesis.speak(
                 utterance
             );
-        };
 
-        const voices =
-            window.speechSynthesis.getVoices();
-
-        if (voices.length > 0) {
-
-            speakNow();
-
-        } else {
-
-            window.speechSynthesis.onvoiceschanged =
-                function () {
-
-                    window.speechSynthesis
-                        .onvoiceschanged =
-                        null;
-
-                    speakNow();
-                };
-        }
+        }, 100);
 
     } catch (error) {
 
@@ -238,10 +107,6 @@ async function askJarvis(text) {
     }
 
     if (requestInProgress) {
-
-        statusText.textContent =
-            "Я ещё обрабатываю предыдущий запрос, сэр.";
-
         return;
     }
 
@@ -314,7 +179,7 @@ async function askJarvis(text) {
 
             throw new Error(
                 data.error ||
-                "JARVIS не получил ответ AI"
+                "JARVIS не получил ответ Gemini"
             );
         }
 
@@ -326,9 +191,7 @@ async function askJarvis(text) {
 
             <div class="user-message">
 
-                <strong>
-                    Вы:
-                </strong>
+                <strong>Вы:</strong>
 
                 ${escapeHTML(text)}
 
@@ -336,9 +199,7 @@ async function askJarvis(text) {
 
             <div class="jarvis-message">
 
-                <strong>
-                    JARVIS:
-                </strong>
+                <strong>JARVIS:</strong>
 
                 ${escapeHTML(data.answer)}
 
@@ -355,7 +216,7 @@ async function askJarvis(text) {
         );
 
         // ====================================================
-        // ОЗВУЧИВАЕМ
+        // ОЗВУЧИВАЕМ ОТВЕТ
         // ====================================================
 
         speak(data.answer);
@@ -371,9 +232,7 @@ async function askJarvis(text) {
 
             <div class="jarvis-message">
 
-                <strong>
-                    JARVIS:
-                </strong>
+                <strong>JARVIS:</strong>
 
                 Ошибка связи с сервером, сэр.
 
@@ -425,7 +284,6 @@ function handleMicClick() {
     try {
 
         if ("speechSynthesis" in window) {
-
             window.speechSynthesis.cancel();
         }
 
@@ -519,9 +377,7 @@ if (!SpeechRecognition) {
 
                 <div class="user-message">
 
-                    <strong>
-                        Вы:
-                    </strong>
+                    <strong>Вы:</strong>
 
                     ${escapeHTML(text)}
 
@@ -529,9 +385,7 @@ if (!SpeechRecognition) {
 
                 <div class="jarvis-message">
 
-                    <strong>
-                        JARVIS:
-                    </strong>
+                    <strong>JARVIS:</strong>
 
                     Обрабатываю запрос, сэр...
 
@@ -546,7 +400,7 @@ if (!SpeechRecognition) {
         };
 
     // ========================================================
-    // ОШИБКА
+    // ОШИБКА МИКРОФОНА
     // ========================================================
 
     recognition.onerror =
@@ -625,7 +479,7 @@ function escapeHTML(text) {
 }
 
 // ============================================================
-// РАЗБЛОКИРОВКА AUDIO НА IPHONE
+// РАЗБЛОКИРОВКА AUDIO НА iPHONE
 // ============================================================
 
 function unlockAudio() {
@@ -701,3 +555,203 @@ document.addEventListener(
         passive: true
     }
 );
+
+// ============================================================
+// ПОКАЗ ДОСТУПНЫХ ГОЛОСОВ SAFARI
+// ============================================================
+
+let availableVoices = [];
+
+function showAvailableVoices() {
+
+    if (!("speechSynthesis" in window)) {
+        return;
+    }
+
+    const voices =
+        window.speechSynthesis.getVoices();
+
+    if (!voices.length) {
+        return;
+    }
+
+    availableVoices = voices;
+
+    let box =
+        document.getElementById(
+            "voiceTestBox"
+        );
+
+    if (!box) {
+
+        box =
+            document.createElement("div");
+
+        box.id =
+            "voiceTestBox";
+
+        box.style.cssText = `
+            margin: 25px auto;
+            padding: 18px;
+            max-width: 600px;
+            background: rgba(0, 15, 25, 0.95);
+            border: 1px solid rgba(0, 220, 255, 0.35);
+            border-radius: 16px;
+            color: #dffaff;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            text-align: left;
+            box-shadow: 0 0 25px rgba(0, 200, 255, 0.12);
+        `;
+
+        document.body.appendChild(box);
+    }
+
+    box.innerHTML = "";
+
+    const title =
+        document.createElement("div");
+
+    title.textContent =
+        "🎙️ ДОСТУПНЫЕ ГОЛОСА SAFARI";
+
+    title.style.cssText = `
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    `;
+
+    box.appendChild(title);
+
+    const info =
+        document.createElement("div");
+
+    info.textContent =
+        "Найдено голосов: " +
+        voices.length +
+        ". Нажмите на голос, чтобы его проверить.";
+
+    info.style.cssText = `
+        opacity: 0.65;
+        margin-bottom: 14px;
+        line-height: 1.5;
+    `;
+
+    box.appendChild(info);
+
+    voices.forEach(
+        function (voice, index) {
+
+            const button =
+                document.createElement("button");
+
+            button.type =
+                "button";
+
+            button.textContent =
+                "🔊 " +
+                (index + 1) +
+                ". " +
+                voice.name +
+                " — " +
+                voice.lang;
+
+            button.style.cssText = `
+                display: block;
+                width: 100%;
+                margin: 7px 0;
+                padding: 11px;
+                border-radius: 10px;
+                border: 1px solid rgba(0, 220, 255, 0.25);
+                background: rgba(0, 100, 130, 0.15);
+                color: #ffffff;
+                text-align: left;
+                font-size: 13px;
+            `;
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    testVoice(index);
+                }
+            );
+
+            box.appendChild(button);
+        }
+    );
+}
+
+// ============================================================
+// ТЕСТ КОНКРЕТНОГО ГОЛОСА
+// ============================================================
+
+function testVoice(index) {
+
+    if (!availableVoices[index]) {
+        return;
+    }
+
+    const voice =
+        availableVoices[index];
+
+    if ("speechSynthesis" in window) {
+
+        window.speechSynthesis.cancel();
+
+        const utterance =
+            new SpeechSynthesisUtterance(
+                "Добрый вечер, сэр. Я JARVIS. Все системы готовы к работе."
+            );
+
+        utterance.voice =
+            voice;
+
+        utterance.lang =
+            voice.lang;
+
+        utterance.rate =
+            0.85;
+
+        utterance.pitch =
+            0.8;
+
+        utterance.volume =
+            1;
+
+        console.log(
+            "Тестируем голос:",
+            voice.name,
+            voice.lang
+        );
+
+        window.speechSynthesis.speak(
+            utterance
+        );
+    }
+}
+
+// ============================================================
+// ЗАГРУЗКА ГОЛОСОВ SAFARI
+// ============================================================
+
+if ("speechSynthesis" in window) {
+
+    showAvailableVoices();
+
+    window.speechSynthesis.onvoiceschanged =
+        function () {
+
+            showAvailableVoices();
+        };
+
+    setTimeout(
+        showAvailableVoices,
+        1000
+    );
+
+    setTimeout(
+        showAvailableVoices,
+        3000
+    );
+}
