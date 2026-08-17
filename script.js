@@ -1,12 +1,6 @@
-const micButton =
-    document.getElementById("micButton");
-
-const statusText =
-    document.getElementById("status");
-
-const conversation =
-    document.getElementById("conversation");
-
+const micButton = document.getElementById("micButton");
+const statusText = document.getElementById("status");
+const conversation = document.getElementById("conversation");
 
 // ============================================================
 // CLOUDFLARE WORKER
@@ -14,7 +8,6 @@ const conversation =
 
 const JARVIS_API =
     "https://jarvis.salahyansergei2006.workers.dev/";
-
 
 // ============================================================
 // SPEECH RECOGNITION
@@ -25,76 +18,40 @@ const SpeechRecognition =
     window.webkitSpeechRecognition;
 
 let recognition = null;
-
 let isListening = false;
-
 let requestInProgress = false;
 
-
 // ============================================================
-// ПАМЯТЬ ИСТОРИИ
+// ПАМЯТЬ
 // ============================================================
 
-const MEMORY_KEY =
-    "jarvis_conversation_memory";
+const MEMORY_KEY = "jarvis_conversation_memory";
 
-let memory =
-    loadMemory();
-
-
-// ============================================================
-// ЗАГРУЗКА ПАМЯТИ
-// ============================================================
+let memory = loadMemory();
 
 function loadMemory() {
-
     try {
-
-        const saved =
-            localStorage.getItem(
-                MEMORY_KEY
-            );
+        const saved = localStorage.getItem(MEMORY_KEY);
 
         if (!saved) {
             return [];
         }
 
-        const parsed =
-            JSON.parse(saved);
+        const parsed = JSON.parse(saved);
 
-        if (!Array.isArray(parsed)) {
-            return [];
-        }
-
-        return parsed;
+        return Array.isArray(parsed) ? parsed : [];
 
     } catch (error) {
-
-        console.error(
-            "Ошибка загрузки памяти:",
-            error
-        );
-
+        console.error("Ошибка загрузки памяти:", error);
         return [];
     }
 }
 
-
-// ============================================================
-// СОХРАНЕНИЕ ПАМЯТИ
-// ============================================================
-
 function saveMemory() {
-
     try {
 
-        /*
-         * Храним разумное количество сообщений,
-         * чтобы память браузера не разрасталась бесконечно.
-         */
-
-        memory =
-            memory.slice(-30);
+        // Храним последние 40 сообщений
+        memory = memory.slice(-40);
 
         localStorage.setItem(
             MEMORY_KEY,
@@ -102,23 +59,11 @@ function saveMemory() {
         );
 
     } catch (error) {
-
-        console.error(
-            "Ошибка сохранения памяти:",
-            error
-        );
+        console.error("Ошибка сохранения памяти:", error);
     }
 }
 
-
-// ============================================================
-// ДОБАВИТЬ В ПАМЯТЬ
-// ============================================================
-
-function addToMemory(
-    role,
-    text
-) {
+function addToMemory(role, text) {
 
     if (!text) {
         return;
@@ -131,10 +76,7 @@ function addToMemory(
     });
 
     saveMemory();
-
-    updateMemoryWindow();
 }
-
 
 // ============================================================
 // ОЧИСТКА ПАМЯТИ
@@ -144,20 +86,20 @@ function clearJarvisMemory() {
 
     memory = [];
 
-    localStorage.removeItem(
-        MEMORY_KEY
-    );
-
-    updateMemoryWindow();
+    localStorage.removeItem(MEMORY_KEY);
 
     statusText.textContent =
         "Память очищена, сэр.";
+
+    showJarvisMessage(
+        "",
+        "Память очищена, сэр."
+    );
 
     speak(
         "Память очищена, сэр."
     );
 }
-
 
 // ============================================================
 // ГОЛОС JARVIS
@@ -182,44 +124,32 @@ function speak(text) {
         window.speechSynthesis.cancel();
 
         const utterance =
-            new SpeechSynthesisUtterance(
-                text
+            new SpeechSynthesisUtterance(text);
+
+        utterance.lang = "ru-RU";
+        utterance.rate = 0.85;
+        utterance.pitch = 0.8;
+        utterance.volume = 1;
+
+        utterance.onstart = function () {
+
+            statusText.textContent =
+                "Говорю, сэр...";
+        };
+
+        utterance.onend = function () {
+
+            statusText.textContent =
+                "Готов к дальнейшим указаниям, сэр.";
+        };
+
+        utterance.onerror = function (event) {
+
+            console.error(
+                "Ошибка синтеза речи:",
+                event
             );
-
-        utterance.lang =
-            "ru-RU";
-
-        utterance.rate =
-            0.85;
-
-        utterance.pitch =
-            0.8;
-
-        utterance.volume =
-            1;
-
-        utterance.onstart =
-            function () {
-
-                statusText.textContent =
-                    "Говорю, сэр.";
-            };
-
-        utterance.onend =
-            function () {
-
-                statusText.textContent =
-                    "Готов к дальнейшим указаниям, сэр.";
-            };
-
-        utterance.onerror =
-            function (event) {
-
-                console.error(
-                    "Ошибка речи:",
-                    event
-                );
-            };
+        };
 
         window.speechSynthesis.speak(
             utterance
@@ -234,67 +164,54 @@ function speak(text) {
     }
 }
 
-
 // ============================================================
 // ПОКАЗ СООБЩЕНИЯ
 // ============================================================
 
-function showJarvisMessage(
-    userText,
-    answer
-) {
+function showJarvisMessage(userText, answer) {
+
+    let userHTML = "";
+
+    if (userText) {
+
+        userHTML = `
+            <div class="user-message">
+                <strong>Вы:</strong>
+                ${escapeHTML(userText)}
+            </div>
+        `;
+    }
 
     conversation.innerHTML = `
-
-        <div class="user-message">
-
-            <strong>Вы:</strong>
-
-            ${escapeHTML(userText)}
-
-        </div>
+        ${userHTML}
 
         <div class="jarvis-message">
-
             <strong>JARVIS:</strong>
-
             ${escapeHTML(answer)}
-
         </div>
-
     `;
 }
 
-
 // ============================================================
-// ДИНАМИЧЕСКИЕ КОМАНДЫ
+// КОМАНДЫ
 // ============================================================
 
 function handleCommand(text) {
 
-    const original =
-        text.trim();
+    const original = text.trim();
 
-    const command =
-        original
-            .toLowerCase()
-            .replace(/[!?.,]/g, "")
-            .trim();
-
+    const command = original
+        .toLowerCase()
+        .replace(/[!?.,]/g, "")
+        .trim();
 
     // ========================================================
     // СТОП
     // ========================================================
 
     if (
-        /\b(
-            стоп|
-            остановись|
-            замолчи|
-            хватит|
-            прекрати говорить|
-            останови речь
-        )\b/x.test(command)
+        /\b(стоп|остановись|замолчи|хватит|прекрати говорить|останови речь)\b/
+            .test(command)
     ) {
 
         window.speechSynthesis.cancel();
@@ -310,25 +227,31 @@ function handleCommand(text) {
         return true;
     }
 
+    // ========================================================
+    // ОЧИСТИТЬ ПАМЯТЬ
+    // ========================================================
+
+    if (
+        /\b(очисти память|очистить память|удали память|сотри память)\b/
+            .test(command)
+    ) {
+
+        clearJarvisMemory();
+
+        return true;
+    }
 
     // ========================================================
-    // ОЧИСТКА ЧАТА
+    // ОЧИСТИТЬ ДИАЛОГ
     // ========================================================
 
     if (
         (
-            /\b(очисти|удали|сотри)\b/
-                .test(command)
-            &&
-            /\b(историю|диалог|чат|сообщения)\b/
-                .test(command)
-        )
-        ||
-        /\b(
-            новый диалог|
-            начать заново|
-            очистить чат
-        )\b/x.test(command)
+            /\b(очисти|удали|сотри)\b/.test(command) &&
+            /\b(историю|диалог|чат|сообщения)\b/.test(command)
+        ) ||
+        /\b(новый диалог|начать заново|очистить чат)\b/
+            .test(command)
     ) {
 
         conversation.innerHTML = "";
@@ -343,100 +266,56 @@ function handleCommand(text) {
         return true;
     }
 
-
     // ========================================================
-    // ОЧИСТКА ПАМЯТИ
-    // ========================================================
-
-    if (
-        /\b(
-            очисти память|
-            очистить память|
-            удали память|
-            сотри память
-        )\b/x.test(command)
-    ) {
-
-        clearJarvisMemory();
-
-        return true;
-    }
-
-
-    // ========================================================
-    // ОБНОВЛЕНИЕ СТРАНИЦЫ
+    // ОБНОВИТЬ СТРАНИЦУ
     // ========================================================
 
     if (
-        /\b(
-            обнови|
-            перезагрузи|
-            обновить|
-            перезагрузить
-        )\b/x.test(command)
-        &&
-        /\b(
-            страницу|
-            сайт|
-            страница
-        )\b/x.test(command)
+        /\b(обнови|перезагрузи|обновить|перезагрузить)\b/
+            .test(command) &&
+        /\b(страницу|сайт|страница)\b/
+            .test(command)
     ) {
 
         statusText.textContent =
             "Обновляю систему, сэр...";
 
-        setTimeout(
-            function () {
-                location.reload();
-            },
-            100
-        );
+        setTimeout(function () {
+            location.reload();
+        }, 100);
 
         return true;
     }
-
 
     // ========================================================
     // НАЗАД
     // ========================================================
 
     if (
-        /\b(
-            назад|
-            вернись назад|
-            предыдущая страница
-        )\b/x.test(command)
+        /\b(назад|вернись назад|предыдущая страница)\b/
+            .test(command)
     ) {
 
         statusText.textContent =
             "Возвращаюсь назад, сэр.";
 
-        setTimeout(
-            function () {
-                history.back();
-            },
-            100
-        );
+        setTimeout(function () {
+            history.back();
+        }, 100);
 
         return true;
     }
-
 
     // ========================================================
     // ДАТА
     // ========================================================
 
     if (
-        /\b(
-            какая сегодня дата|
-            какое сегодня число|
-            сегодняшняя дата|
-            число сегодня
-        )\b/x.test(command)
+        /\b(какая сегодня дата|какое сегодня число|сегодняшняя дата|число сегодня)\b/
+            .test(command)
     ) {
 
-        const now =
-            new Date();
+        const now = new Date();
 
         const date =
             now.toLocaleDateString(
@@ -449,9 +328,7 @@ function handleCommand(text) {
             );
 
         const answer =
-            "Сегодня " +
-            date +
-            ", сэр.";
+            "Сегодня " + date + ", сэр.";
 
         showJarvisMessage(
             original,
@@ -463,23 +340,16 @@ function handleCommand(text) {
         return true;
     }
 
-
     // ========================================================
     // ВРЕМЯ
     // ========================================================
 
     if (
-        /\b(
-            сколько времени|
-            который час|
-            текущее время|
-            какое сейчас время|
-            время сейчас
-        )\b/x.test(command)
+        /\b(сколько времени|который час|текущее время|какое сейчас время|время сейчас)\b/
+            .test(command)
     ) {
 
-        const now =
-            new Date();
+        const now = new Date();
 
         const time =
             now.toLocaleTimeString(
@@ -491,9 +361,7 @@ function handleCommand(text) {
             );
 
         const answer =
-            "Сейчас " +
-            time +
-            ", сэр.";
+            "Сейчас " + time + ", сэр.";
 
         showJarvisMessage(
             original,
@@ -505,184 +373,112 @@ function handleCommand(text) {
         return true;
     }
 
-
     // ========================================================
-    // ПРИЛОЖЕНИЯ / САЙТЫ
+    // ПРИЛОЖЕНИЯ
     // ========================================================
 
-    const sites = [
+    const apps = [
 
         {
             pattern: /\b(youtube|ютуб|ютаб)\b/i,
             url: "youtube://",
-            fallback:
-                "https://www.youtube.com/",
+            fallback: "https://www.youtube.com/",
             name: "YouTube"
         },
 
         {
             pattern: /\b(telegram|телеграм)\b/i,
             url: "tg://",
-            fallback:
-                "https://web.telegram.org/",
+            fallback: "https://web.telegram.org/",
             name: "Telegram"
         },
 
         {
             pattern: /\b(tiktok|тик ток|тикток)\b/i,
             url: "tiktok://",
-            fallback:
-                "https://www.tiktok.com/",
+            fallback: "https://www.tiktok.com/",
             name: "TikTok"
         },
 
         {
-            pattern: /\b(whatsapp|ватсап|вацап)\b/i,
+            pattern: /\b(whatsapp|ватсап|вацап|вотсап)\b/i,
             url: "whatsapp://",
-            fallback:
-                "https://web.whatsapp.com/",
+            fallback: "https://web.whatsapp.com/",
             name: "WhatsApp"
         },
 
         {
             pattern: /\b(instagram|инстаграм)\b/i,
             url: "instagram://",
-            fallback:
-                "https://www.instagram.com/",
+            fallback: "https://www.instagram.com/",
             name: "Instagram"
         },
 
         {
-            pattern: /\b(
-                wildberries|
-                вайлдберриз|
-                валберис
-            )\b/xi,
+            pattern: /\b(wildberries|вайблдберриз|вайблдберис|вайлдберриз|валберис)\b/i,
             url: "wb://",
-            fallback:
-                "https://www.wildberries.ru/",
+            fallback: "https://www.wildberries.ru/",
             name: "Wildberries"
         },
 
         {
-            pattern: /\b(
-                ozon|
-                озон
-            )\b/xi,
+            pattern: /\b(ozon|озон)\b/i,
             url: "ozon://",
-            fallback:
-                "https://www.ozon.ru/",
+            fallback: "https://www.ozon.ru/",
             name: "Ozon"
         },
 
         {
-            pattern: /\b(
-                twitch|
-                твич
-            )\b/xi,
+            pattern: /\b(twitch|твич)\b/i,
             url: "twitch://",
-            fallback:
-                "https://www.twitch.tv/",
+            fallback: "https://www.twitch.tv/",
             name: "Twitch"
         },
 
         {
-            pattern: /\b(
-                bloc blast|
-                block blast|
-                блок бласт
-            )\b/xi,
+            pattern: /\b(bloc blast|block blast|блок бласт)\b/i,
             url: "blocblast://",
-            fallback:
-                null,
+            fallback: null,
             name: "Bloc Blast"
         }
 
     ];
 
-
     const wantsOpen =
-        /\b(
-            открой|
-            открыть|
-            запусти|
-            запустить|
-            открывай|
-            зайди|
-            перейти|
-            перейди
-        )\b/xi.test(command);
-
+        /\b(открой|открыть|запусти|запустить|открывай|зайди|перейди|перейти)\b/
+            .test(command);
 
     if (wantsOpen) {
 
-        const site =
-            sites.find(
-                function (item) {
+        const app =
+            apps.find(function (item) {
+                return item.pattern.test(command);
+            });
 
-                    return item.pattern.test(
-                        command
-                    );
-                }
-            );
-
-
-        if (site) {
-
-            /*
-             * ВАЖНО:
-             * JARVIS ничего не отправляет в AI.
-             * Команда выполняется моментально.
-             */
+        if (app) {
 
             statusText.textContent =
                 "Открываю " +
-                site.name +
+                app.name +
                 ", сэр...";
 
+            let leftPage = false;
 
-            /*
-             * Сначала пробуем открыть
-             * нативное приложение.
-             */
-
-            let appOpened =
-                false;
-
-            const startTime =
-                Date.now();
-
-
-            function visibilityCheck() {
-
-                /*
-                 * Если браузер потерял фокус,
-                 * скорее всего приложение открылось.
-                 */
-
-                if (
-                    document.hidden ||
-                    Date.now() - startTime < 700
-                ) {
-
-                    appOpened = true;
+            function detectAppOpen() {
+                if (document.hidden) {
+                    leftPage = true;
                 }
             }
 
-
             document.addEventListener(
                 "visibilitychange",
-                visibilityCheck,
-                {
-                    once: true
-                }
+                detectAppOpen
             );
-
 
             try {
 
                 window.location.href =
-                    site.url;
+                    app.url;
 
             } catch (error) {
 
@@ -692,39 +488,29 @@ function handleCommand(text) {
                 );
             }
 
+            setTimeout(function () {
 
-            /*
-             * Если приложение не открылось,
-             * используем веб-версию.
-             */
+                document.removeEventListener(
+                    "visibilitychange",
+                    detectAppOpen
+                );
 
-            setTimeout(
-                function () {
+                /*
+                 * Если приложение не открылось,
+                 * открываем веб-версию.
+                 */
 
-                    document.removeEventListener(
-                        "visibilitychange",
-                        visibilityCheck
-                    );
+                if (!leftPage && app.fallback) {
 
+                    window.location.href =
+                        app.fallback;
+                }
 
-                    if (
-                        !appOpened &&
-                        site.fallback
-                    ) {
-
-                        window.location.href =
-                            site.fallback;
-                    }
-
-                },
-                1200
-            );
-
+            }, 1500);
 
             return true;
         }
     }
-
 
     // ========================================================
     // ПОИСК
@@ -735,12 +521,10 @@ function handleCommand(text) {
             /^(?:джарвис\s+)?(?:найди|поищи|загугли|погугли|поиск|найди в интернете|поищи в интернете)\s+(.+)$/i
         );
 
-
     if (searchMatch) {
 
         const query =
             searchMatch[1].trim();
-
 
         if (query) {
 
@@ -754,26 +538,20 @@ function handleCommand(text) {
 
             speak(answer);
 
+            setTimeout(function () {
 
-            setTimeout(
-                function () {
+                const url =
+                    "https://www.google.com/search?q=" +
+                    encodeURIComponent(query);
 
-                    const url =
-                        "https://www.google.com/search?q=" +
-                        encodeURIComponent(query);
+                window.location.href =
+                    url;
 
-                    window.location.href =
-                        url;
-
-                },
-                200
-            );
-
+            }, 150);
 
             return true;
         }
     }
-
 
     // ========================================================
     // КАЛЬКУЛЯТОР
@@ -784,66 +562,27 @@ function handleCommand(text) {
             /(?:посчитай|вычисли|сколько будет|рассчитай)\s+(.+)$/i
         );
 
-
     if (calculationMatch) {
 
         const expression =
             calculationMatch[1]
-                .replace(
-                    /умножить на/g,
-                    "*"
-                )
-                .replace(
-                    /умножить/g,
-                    "*"
-                )
-                .replace(
-                    /помножить на/g,
-                    "*"
-                )
-                .replace(
-                    /разделить на/g,
-                    "/"
-                )
-                .replace(
-                    /разделить/g,
-                    "/"
-                )
-                .replace(
-                    /плюс/g,
-                    "+"
-                )
-                .replace(
-                    /минус/g,
-                    "-"
-                )
-                .replace(
-                    /в степени/g,
-                    "**"
-                )
-                .replace(
-                    /,/g,
-                    "."
-                )
-                .replace(
-                    /×/g,
-                    "*"
-                )
-                .replace(
-                    /÷/g,
-                    "/"
-                )
-                .replace(
-                    /[^0-9+\-*/().%\s]/g,
-                    ""
-                )
+                .replace(/умножить на/g, "*")
+                .replace(/умножить/g, "*")
+                .replace(/помножить на/g, "*")
+                .replace(/разделить на/g, "/")
+                .replace(/разделить/g, "/")
+                .replace(/плюс/g, "+")
+                .replace(/минус/g, "-")
+                .replace(/в степени/g, "**")
+                .replace(/,/g, ".")
+                .replace(/×/g, "*")
+                .replace(/÷/g, "/")
+                .replace(/[^0-9+\-*/().%\s]/g, "")
                 .trim();
-
 
         if (
             expression &&
-            /^[0-9+\-*/().%\s]+$/
-                .test(expression)
+            /^[0-9+\-*/().%\s]+$/.test(expression)
         ) {
 
             try {
@@ -855,14 +594,10 @@ function handleCommand(text) {
                         ')'
                     )();
 
-
-                if (
-                    Number.isFinite(result)
-                ) {
+                if (Number.isFinite(result)) {
 
                     const answer =
-                        result +
-                        ", сэр.";
+                        result + ", сэр.";
 
                     showJarvisMessage(
                         original,
@@ -884,10 +619,8 @@ function handleCommand(text) {
         }
     }
 
-
     return false;
 }
-
 
 // ============================================================
 // ЗАПРОС К JARVIS
@@ -899,7 +632,6 @@ async function askJarvis(text) {
         return;
     }
 
-
     if (requestInProgress) {
 
         statusText.textContent =
@@ -908,40 +640,38 @@ async function askJarvis(text) {
         return;
     }
 
-
-    /*
-     * Сначала выполняем мгновенные команды.
-     */
-
+    // Сначала локальные команды
     if (handleCommand(text)) {
-
-        /*
-         * Команды не отправляются в Gemini.
-         */
-
         return;
     }
 
+    requestInProgress = true;
 
-    requestInProgress =
-        true;
-
-
-    /*
-     * Сохраняем запрос в память.
-     */
-
+    // Сохраняем вопрос
     addToMemory(
         "user",
         text
     );
 
-
     statusText.textContent =
         "Думаю над ответом, сэр...";
 
-
     try {
+
+        /*
+         * Передаём Worker не только текущий вопрос,
+         * но и последние сообщения памяти.
+         */
+
+        const context =
+            memory.slice(-20).map(function (item) {
+
+                return {
+                    role: item.role,
+                    text: item.text
+                };
+
+            });
 
         const response =
             await fetch(
@@ -955,18 +685,16 @@ async function askJarvis(text) {
                     },
 
                     body: JSON.stringify({
-                        text: text
+                        text: text,
+                        memory: context
                     })
                 }
             );
 
-
         const raw =
             await response.text();
 
-
         let data;
-
 
         try {
 
@@ -980,7 +708,6 @@ async function askJarvis(text) {
             );
         }
 
-
         if (!response.ok) {
 
             throw new Error(
@@ -988,7 +715,6 @@ async function askJarvis(text) {
                 "Ошибка Worker"
             );
         }
-
 
         if (!data.answer) {
 
@@ -998,33 +724,24 @@ async function askJarvis(text) {
             );
         }
 
-
         const answer =
             data.answer.trim();
 
-
-        /*
-         * Сохраняем ответ JARVIS.
-         */
-
+        // Сохраняем ответ
         addToMemory(
             "jarvis",
             answer
         );
-
 
         showJarvisMessage(
             text,
             answer
         );
 
-
         statusText.textContent =
             "Ответ получен, сэр.";
 
-
         speak(answer);
-
 
     } catch (error) {
 
@@ -1032,7 +749,6 @@ async function askJarvis(text) {
             "Ошибка JARVIS:",
             error
         );
-
 
         conversation.innerHTML += `
 
@@ -1045,26 +761,21 @@ async function askJarvis(text) {
                 <br>
 
                 <small>
-                    ${escapeHTML(
-                        error.message
-                    )}
+                    ${escapeHTML(error.message)}
                 </small>
 
             </div>
 
         `;
 
-
         statusText.textContent =
             "Не удалось получить ответ, сэр.";
 
     } finally {
 
-        requestInProgress =
-            false;
+        requestInProgress = false;
     }
 }
-
 
 // ============================================================
 // МИКРОФОН
@@ -1076,7 +787,6 @@ function handleMicClick() {
         return;
     }
 
-
     if (requestInProgress) {
 
         statusText.textContent =
@@ -1085,15 +795,13 @@ function handleMicClick() {
         return;
     }
 
-
     if (!SpeechRecognition) {
 
         statusText.textContent =
-            "Распознавание речи не поддерживается.";
+            "Распознавание речи не поддерживается этим браузером.";
 
         return;
     }
-
 
     try {
 
@@ -1103,13 +811,12 @@ function handleMicClick() {
 
     } catch (error) {
 
-        console.log(
-            "Ошибка микрофона:",
+        console.error(
+            "Ошибка запуска микрофона:",
             error
         );
     }
 }
-
 
 // ============================================================
 // SPEECH RECOGNITION
@@ -1118,44 +825,36 @@ function handleMicClick() {
 if (!SpeechRecognition) {
 
     statusText.textContent =
-        "Распознавание речи не поддерживается.";
+        "Распознавание речи не поддерживается этим браузером.";
 
-    micButton.disabled =
-        true;
+    micButton.disabled = true;
 
 } else {
 
     recognition =
         new SpeechRecognition();
 
-
     recognition.lang =
         "ru-RU";
-
 
     recognition.continuous =
         false;
 
-
     recognition.interimResults =
         false;
 
-
     recognition.maxAlternatives =
         1;
-
 
     micButton.addEventListener(
         "click",
         handleMicClick
     );
 
-
     recognition.onstart =
         function () {
 
-            isListening =
-                true;
+            isListening = true;
 
             micButton.classList.add(
                 "listening"
@@ -1165,7 +864,6 @@ if (!SpeechRecognition) {
                 "Слушаю вас, сэр...";
         };
 
-
     recognition.onresult =
         async function (event) {
 
@@ -1174,6 +872,10 @@ if (!SpeechRecognition) {
                     .transcript
                     .trim();
 
+            console.log(
+                "Распознано:",
+                text
+            );
 
             if (!text) {
 
@@ -1182,7 +884,6 @@ if (!SpeechRecognition) {
 
                 return;
             }
-
 
             conversation.innerHTML = `
 
@@ -1204,16 +905,11 @@ if (!SpeechRecognition) {
 
             `;
 
-
             statusText.textContent =
                 "Обрабатываю запрос, сэр...";
 
-
-            await askJarvis(
-                text
-            );
+            await askJarvis(text);
         };
-
 
     recognition.onerror =
         function (event) {
@@ -1223,15 +919,11 @@ if (!SpeechRecognition) {
                 event.error
             );
 
-
-            isListening =
-                false;
-
+            isListening = false;
 
             micButton.classList.remove(
                 "listening"
             );
-
 
             if (
                 event.error ===
@@ -1264,273 +956,16 @@ if (!SpeechRecognition) {
             }
         };
 
-
     recognition.onend =
         function () {
 
-            isListening =
-                false;
+            isListening = false;
 
             micButton.classList.remove(
                 "listening"
             );
         };
 }
-
-
-// ============================================================
-// MEMORY UI
-// ============================================================
-
-const memoryButton =
-    document.getElementById(
-        "memoryButton"
-    );
-
-const memoryModal =
-    document.getElementById(
-        "memoryModal"
-    );
-
-const closeMemory =
-    document.getElementById(
-        "closeMemory"
-    );
-
-const refreshMemory =
-    document.getElementById(
-        "refreshMemory"
-    );
-
-const clearMemory =
-    document.getElementById(
-        "clearMemory"
-    );
-
-const memoryContent =
-    document.getElementById(
-        "memoryContent"
-    );
-
-
-// ============================================================
-// ОТКРЫТЬ ПАМЯТЬ
-// ============================================================
-
-function openMemory() {
-
-    updateMemoryWindow();
-
-    memoryModal.classList.add(
-        "active"
-    );
-
-    memoryModal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-}
-
-
-// ============================================================
-// ЗАКРЫТЬ ПАМЯТЬ
-// ============================================================
-
-function closeMemoryWindow() {
-
-    memoryModal.classList.remove(
-        "active"
-    );
-
-    memoryModal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-}
-
-
-// ============================================================
-// ОБНОВЛЕНИЕ ОКНА ПАМЯТИ
-// ============================================================
-
-function updateMemoryWindow() {
-
-    if (!memoryContent) {
-        return;
-    }
-
-
-    if (!memory.length) {
-
-        memoryContent.innerHTML = `
-
-            <div class="memory-empty">
-
-                🧠
-
-                <br><br>
-
-                JARVIS пока ничего не сохранил
-                в локальной памяти.
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    memoryContent.innerHTML =
-        memory
-            .map(
-                function (item) {
-
-                    const role =
-                        item.role === "user"
-                            ? "Вы"
-                            : "JARVIS";
-
-
-                    const icon =
-                        item.role === "user"
-                            ? "👤"
-                            : "🤖";
-
-
-                    return `
-
-                        <div class="memory-item">
-
-                            <div class="memory-item-title">
-
-                                ${icon}
-
-                                ${role}
-
-                            </div>
-
-                            <div class="memory-item-text">
-
-                                ${escapeHTML(
-                                    item.text
-                                )}
-
-                            </div>
-
-                        </div>
-
-                    `;
-                }
-            )
-            .join("");
-}
-
-
-// ============================================================
-// КНОПКИ ПАМЯТИ
-// ============================================================
-
-if (memoryButton) {
-
-    memoryButton.addEventListener(
-        "click",
-        openMemory
-    );
-}
-
-
-if (closeMemory) {
-
-    closeMemory.addEventListener(
-        "click",
-        closeMemoryWindow
-    );
-}
-
-
-if (refreshMemory) {
-
-    refreshMemory.addEventListener(
-        "click",
-        function () {
-
-            memory =
-                loadMemory();
-
-            updateMemoryWindow();
-
-        }
-    );
-}
-
-
-if (clearMemory) {
-
-    clearMemory.addEventListener(
-        "click",
-        function () {
-
-            const confirmed =
-                confirm(
-                    "Сэр, вы действительно хотите очистить память JARVIS?"
-                );
-
-
-            if (confirmed) {
-
-                clearJarvisMemory();
-            }
-
-        }
-    );
-}
-
-
-// ============================================================
-// ЗАКРЫТИЕ ПО ФОНУ
-// ============================================================
-
-if (memoryModal) {
-
-    memoryModal.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                event.target ===
-                memoryModal
-            ) {
-
-                closeMemoryWindow();
-            }
-
-        }
-    );
-}
-
-
-// ============================================================
-// ESC
-// ============================================================
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (
-            event.key === "Escape" &&
-            memoryModal.classList.contains(
-                "active"
-            )
-        ) {
-
-            closeMemoryWindow();
-        }
-
-    }
-);
-
 
 // ============================================================
 // ЗАЩИТА HTML
@@ -1539,16 +974,13 @@ document.addEventListener(
 function escapeHTML(text) {
 
     const div =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     div.textContent =
         text;
 
     return div.innerHTML;
 }
-
 
 // ============================================================
 // AUDIO UNLOCK
@@ -1560,25 +992,18 @@ function unlockAudio() {
         return;
     }
 
-
     try {
 
         window.speechSynthesis.cancel();
 
-
         const audio =
-            new SpeechSynthesisUtterance(
-                ""
-            );
-
+            new SpeechSynthesisUtterance("");
 
         audio.lang =
             "ru-RU";
 
-
         audio.volume =
             0;
-
 
         window.speechSynthesis.speak(
             audio
@@ -1592,7 +1017,6 @@ function unlockAudio() {
         );
     }
 }
-
 
 // ============================================================
 // ПЕРВОЕ КАСАНИЕ
@@ -1614,7 +1038,6 @@ document.addEventListener(
         passive: true
     }
 );
-
 
 // ============================================================
 // ПЕРВЫЙ КЛИК
