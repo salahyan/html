@@ -655,7 +655,7 @@ async function askJarvis(text) {
     }
 
     if (!data.answer) {
-      throw new Error("Нет ответа от AI");
+      throw new Error(data.error || "Нет ответа от AI");
     }
 
     const answer = data.answer.trim();
@@ -669,7 +669,9 @@ async function askJarvis(text) {
     
     let errorMessage = "Ошибка связи с сервером, сэр.";
     if (error.message.includes("ключ")) {
-      errorMessage = "Ошибка: " + error.message;
+      errorMessage = "Проблема с API-ключами, сэр.";
+    } else if (error.message.includes("AI-сервисы")) {
+      errorMessage = "AI-сервисы временно недоступны, сэр.";
     }
     
     conversation.innerHTML += `
@@ -677,7 +679,7 @@ async function askJarvis(text) {
         <strong>JARVIS:</strong>
         ${errorMessage}
         <br>
-        <small style="color:#888;">${escapeHTML(error.message)}</small>
+        <small style="color:#888; font-size:12px;">${escapeHTML(error.message)}</small>
       </div>
     `;
     statusText.textContent = "Ошибка, сэр.";
@@ -686,6 +688,7 @@ async function askJarvis(text) {
     requestInProgress = false;
   }
 }
+
 // ============================================================
 // МИКРОФОН
 // ============================================================
@@ -968,6 +971,7 @@ document.addEventListener(
         passive: true
     }
 );
+
 // ============================================================
 // ПАМЯТЬ JARVIS — ОКНО УПРАВЛЕНИЯ
 // ============================================================
