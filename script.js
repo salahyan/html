@@ -102,65 +102,53 @@ function clearJarvisMemory() {
 }
 
 // ============================================================
-// ГОЛОС JARVIS
+// ГОЛОС JARVIS (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 // ============================================================
 
 function speak(text) {
+    console.log("JARVIS говорит:", text);
 
     if (!text) {
+        console.warn("Нет текста для озвучивания");
         return;
     }
 
     if (!("speechSynthesis" in window)) {
-
-        statusText.textContent =
-            "Синтез речи не поддерживается, сэр.";
-
+        console.error("Синтез речи не поддерживается");
+        statusText.textContent = "Синтез речи не поддерживается, сэр.";
         return;
     }
 
     try {
-
+        // Отменяем предыдущую речь
         window.speechSynthesis.cancel();
 
-        const utterance =
-            new SpeechSynthesisUtterance(text);
-
+        const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "ru-RU";
         utterance.rate = 0.85;
         utterance.pitch = 0.8;
         utterance.volume = 1;
 
         utterance.onstart = function () {
-
-            statusText.textContent =
-                "Говорю, сэр...";
+            console.log("Начало речи");
+            statusText.textContent = "Говорю, сэр...";
         };
 
         utterance.onend = function () {
-
-            statusText.textContent =
-                "Готов к дальнейшим указаниям, сэр.";
+            console.log("Речь завершена");
+            statusText.textContent = "Готов, сэр.";
         };
 
         utterance.onerror = function (event) {
-
-            console.error(
-                "Ошибка синтеза речи:",
-                event
-            );
+            console.error("Ошибка речи:", event);
+            statusText.textContent = "Ошибка синтеза речи, сэр.";
         };
 
-        window.speechSynthesis.speak(
-            utterance
-        );
+        window.speechSynthesis.speak(utterance);
 
     } catch (error) {
-
-        console.error(
-            "Ошибка запуска речи:",
-            error
-        );
+        console.error("Ошибка в speak():", error);
+        statusText.textContent = "Ошибка речи, сэр.";
     }
 }
 
@@ -623,70 +611,72 @@ function handleCommand(text) {
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS
+// ЗАПРОС К JARVIS (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 // ============================================================
 
 async function askJarvis(text) {
-  if (!text) return;
-  
-  if (requestInProgress) {
-    statusText.textContent = "Я ещё обрабатываю запрос, сэр.";
-    return;
-  }
+    if (!text) return;
 
-  // Сначала локальные команды
-  if (handleCommand(text)) return;
-
-  requestInProgress = true;
-  addToMemory("user", text);
-  statusText.textContent = "Думаю, сэр...";
-
-  try {
-    const response = await fetch(JARVIS_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Ошибка сервера");
+    if (requestInProgress) {
+        statusText.textContent = "Я ещё обрабатываю запрос, сэр.";
+        return;
     }
 
-    if (!data.answer) {
-      throw new Error(data.error || "Нет ответа от AI");
+    // Сначала локальные команды
+    if (handleCommand(text)) return;
+
+    requestInProgress = true;
+    addToMemory("user", text);
+    statusText.textContent = "Думаю, сэр...";
+
+    try {
+        const response = await fetch(JARVIS_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Ошибка сервера");
+        }
+
+        if (!data.answer) {
+            throw new Error(data.error || "Нет ответа от AI");
+        }
+
+        const answer = data.answer.trim();
+        addToMemory("jarvis", answer);
+        showJarvisMessage(text, answer);
+        statusText.textContent = "Готов, сэр.";
+
+        // ===== ГОВОРИМ =====
+        speak(answer);
+
+    } catch (error) {
+        console.error("JARVIS error:", error);
+
+        let errorMessage = "Ошибка связи с сервером, сэр.";
+        if (error.message.includes("ключ")) {
+            errorMessage = "Проблема с API-ключами, сэр.";
+        } else if (error.message.includes("AI-сервисы")) {
+            errorMessage = "AI-сервисы временно недоступны, сэр.";
+        }
+
+        conversation.innerHTML += `
+            <div class="jarvis-message">
+                <strong>JARVIS:</strong>
+                ${errorMessage}
+                <br>
+                <small style="color:#888; font-size:12px;">${escapeHTML(error.message)}</small>
+            </div>
+        `;
+        statusText.textContent = "Ошибка, сэр.";
+
+    } finally {
+        requestInProgress = false;
     }
-
-    const answer = data.answer.trim();
-    addToMemory("jarvis", answer);
-    showJarvisMessage(text, answer);
-    statusText.textContent = "Готов, сэр.";
-    speak(answer);
-
-  } catch (error) {
-    console.error("JARVIS error:", error);
-    
-    let errorMessage = "Ошибка связи с сервером, сэр.";
-    if (error.message.includes("ключ")) {
-      errorMessage = "Проблема с API-ключами, сэр.";
-    } else if (error.message.includes("AI-сервисы")) {
-      errorMessage = "AI-сервисы временно недоступны, сэр.";
-    }
-    
-    conversation.innerHTML += `
-      <div class="jarvis-message">
-        <strong>JARVIS:</strong>
-        ${errorMessage}
-        <br>
-        <small style="color:#888; font-size:12px;">${escapeHTML(error.message)}</small>
-      </div>
-    `;
-    statusText.textContent = "Ошибка, сэр.";
-
-  } finally {
-    requestInProgress = false;
-  }
 }
 
 // ============================================================
@@ -945,8 +935,7 @@ document.addEventListener(
             firstTouch
         );
 
-    },
-    {
+    }, {
         passive: true
     }
 );
@@ -966,8 +955,7 @@ document.addEventListener(
             firstClick
         );
 
-    },
-    {
+    }, {
         passive: true
     }
 );
@@ -1077,14 +1065,14 @@ function updateMemoryWindow() {
             .map(function (item) {
 
                 const role =
-                    item.role === "user"
-                        ? "Вы"
-                        : "JARVIS";
+                    item.role === "user" ?
+                    "Вы" :
+                    "JARVIS";
 
                 const icon =
-                    item.role === "user"
-                        ? "👤"
-                        : "🤖";
+                    item.role === "user" ?
+                    "👤" :
+                    "🤖";
 
                 return `
 
@@ -1123,7 +1111,7 @@ if (memoryButton) {
 
     memoryButton.addEventListener(
         "click",
-        function (event) {
+        function(event) {
 
             event.preventDefault();
 
@@ -1148,7 +1136,7 @@ if (closeMemory) {
 
     closeMemory.addEventListener(
         "click",
-        function (event) {
+        function(event) {
 
             event.preventDefault();
 
@@ -1167,7 +1155,7 @@ if (refreshMemory) {
 
     refreshMemory.addEventListener(
         "click",
-        function () {
+        function() {
 
             memory =
                 loadMemory();
@@ -1187,7 +1175,7 @@ if (clearMemory) {
 
     clearMemory.addEventListener(
         "click",
-        function () {
+        function() {
 
             const confirmed =
                 confirm(
@@ -1226,7 +1214,7 @@ if (memoryModal) {
 
     memoryModal.addEventListener(
         "click",
-        function (event) {
+        function(event) {
 
             if (
                 event.target === memoryModal
@@ -1247,7 +1235,7 @@ if (memoryModal) {
 
 document.addEventListener(
     "keydown",
-    function (event) {
+    function(event) {
 
         if (
             event.key === "Escape" &&
