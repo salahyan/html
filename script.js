@@ -627,156 +627,65 @@ function handleCommand(text) {
 // ============================================================
 
 async function askJarvis(text) {
+  if (!text) return;
+  
+  if (requestInProgress) {
+    statusText.textContent = "Я ещё обрабатываю запрос, сэр.";
+    return;
+  }
 
-    if (!text) {
-        return;
+  // Сначала локальные команды
+  if (handleCommand(text)) return;
+
+  requestInProgress = true;
+  addToMemory("user", text);
+  statusText.textContent = "Думаю, сэр...";
+
+  try {
+    const response = await fetch(JARVIS_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Ошибка сервера");
     }
 
-    if (requestInProgress) {
-
-        statusText.textContent =
-            "Я ещё обрабатываю предыдущий запрос, сэр.";
-
-        return;
+    if (!data.answer) {
+      throw new Error("Нет ответа от AI");
     }
 
-    // Сначала локальные команды
-    if (handleCommand(text)) {
-        return;
+    const answer = data.answer.trim();
+    addToMemory("jarvis", answer);
+    showJarvisMessage(text, answer);
+    statusText.textContent = "Готов, сэр.";
+    speak(answer);
+
+  } catch (error) {
+    console.error("JARVIS error:", error);
+    
+    let errorMessage = "Ошибка связи с сервером, сэр.";
+    if (error.message.includes("ключ")) {
+      errorMessage = "Ошибка: " + error.message;
     }
+    
+    conversation.innerHTML += `
+      <div class="jarvis-message">
+        <strong>JARVIS:</strong>
+        ${errorMessage}
+        <br>
+        <small style="color:#888;">${escapeHTML(error.message)}</small>
+      </div>
+    `;
+    statusText.textContent = "Ошибка, сэр.";
 
-    requestInProgress = true;
-
-    // Сохраняем вопрос
-    addToMemory(
-        "user",
-        text
-    );
-
-    statusText.textContent =
-        "Думаю над ответом, сэр...";
-
-    try {
-
-        /*
-         * Передаём Worker не только текущий вопрос,
-         * но и последние сообщения памяти.
-         */
-
-        const context =
-            memory.slice(-20).map(function (item) {
-
-                return {
-                    role: item.role,
-                    text: item.text
-                };
-
-            });
-
-        const response =
-            await fetch(
-                JARVIS_API,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        text: text,
-                        memory: context
-                    })
-                }
-            );
-
-        const raw =
-            await response.text();
-
-        let data;
-
-        try {
-
-            data =
-                JSON.parse(raw);
-
-        } catch (error) {
-
-            throw new Error(
-                "Worker вернул не JSON"
-            );
-        }
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.error ||
-                "Ошибка Worker"
-            );
-        }
-
-        if (!data.answer) {
-
-            throw new Error(
-                data.error ||
-                "JARVIS не получил ответ"
-            );
-        }
-
-        const answer =
-            data.answer.trim();
-
-        // Сохраняем ответ
-        addToMemory(
-            "jarvis",
-            answer
-        );
-
-        showJarvisMessage(
-            text,
-            answer
-        );
-
-        statusText.textContent =
-            "Ответ получен, сэр.";
-
-        speak(answer);
-
-    } catch (error) {
-
-        console.error(
-            "Ошибка JARVIS:",
-            error
-        );
-
-        conversation.innerHTML += `
-
-            <div class="jarvis-message">
-
-                <strong>JARVIS:</strong>
-
-                Ошибка связи с сервером, сэр.
-
-                <br>
-
-                <small>
-                    ${escapeHTML(error.message)}
-                </small>
-
-            </div>
-
-        `;
-
-        statusText.textContent =
-            "Не удалось получить ответ, сэр.";
-
-    } finally {
-
-        requestInProgress = false;
-    }
+  } finally {
+    requestInProgress = false;
+  }
 }
-
 // ============================================================
 // МИКРОФОН
 // ============================================================
