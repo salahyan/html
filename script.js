@@ -1,6 +1,6 @@
 // ============================================================
-// JARVIS — SCRIPT.JS v5.0
-// РЕАЛЬНЫЙ АНАЛИЗ ФОТО через Hugging Face
+// JARVIS — SCRIPT.JS v6.0
+// РЕАЛЬНЫЙ АНАЛИЗ ФОТО через Cloudflare Worker
 // ============================================================
 
 // ============================================================
@@ -28,21 +28,14 @@ const clearMemoryBtn = document.getElementById("clearMemory");
 const memoryButton = document.getElementById("memoryButton");
 
 // ============================================================
-// ⚠️ СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ HUGGING FACE
-// ============================================================
-
-const HF_API_KEY = "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"; // ← ВСТАВЬ СВОЙ КЛЮЧ СЮДА!
-
-// ============================================================
-// НАСТРОЙКИ
+// API НАСТРОЙКИ
 // ============================================================
 
 const JARVIS_API = "https://jarvis.salahyansergei2006.workers.dev/";
 
-const HF_MODELS = {
-    caption: "microsoft/git-base-coco",
-    caption2: "nlpconnect/vit-gpt2-image-captioning"
-};
+// ⚠️ КЛЮЧ HF_API_KEY НЕ НУЖНО ВСТАВЛЯТЬ В КОД!
+// Он хранится в Cloudflare Workers как переменная окружения
+// Фото отправляется через Worker, который использует ключ
 
 // ============================================================
 // ПАМЯТЬ
@@ -62,20 +55,31 @@ function loadMemory() {
         if (saved) {
             const parsed = JSON.parse(saved);
             memory = Array.isArray(parsed) ? parsed : [];
+            console.log(`📝 Загружено ${memory.length} сообщений`);
         }
-    } catch (error) { memory = []; }
+    } catch (error) {
+        console.error("Ошибка загрузки памяти:", error);
+        memory = [];
+    }
 }
 
 function saveMemory() {
     try {
         memory = memory.slice(-MAX_MESSAGES);
         localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
-    } catch (error) {}
+        console.log(`💾 Сохранено ${memory.length} сообщений`);
+    } catch (error) {
+        console.error("Ошибка сохранения памяти:", error);
+    }
 }
 
 function addToMemory(role, text) {
     if (!text || !text.trim()) return;
-    memory.push({ role: role, text: text.trim(), time: new Date().toISOString() });
+    memory.push({
+        role: role,
+        text: text.trim(),
+        time: new Date().toISOString()
+    });
     saveMemory();
 }
 
@@ -85,15 +89,22 @@ function loadFacts() {
         if (saved) {
             const parsed = JSON.parse(saved);
             smartFacts = Array.isArray(parsed) ? parsed : [];
+            console.log(`📌 Загружено ${smartFacts.length} фактов`);
         }
-    } catch (error) { smartFacts = []; }
+    } catch (error) {
+        console.error("Ошибка загрузки фактов:", error);
+        smartFacts = [];
+    }
 }
 
 function saveFacts() {
     try {
         smartFacts = smartFacts.slice(-30);
         localStorage.setItem(FACTS_KEY, JSON.stringify(smartFacts));
-    } catch (error) {}
+        console.log(`💾 Сохранено ${smartFacts.length} фактов`);
+    } catch (error) {
+        console.error("Ошибка сохранения фактов:", error);
+    }
 }
 
 function addSmartFact(text) {
@@ -103,6 +114,7 @@ function addSmartFact(text) {
     if (exists) return;
     smartFacts.push(fact);
     saveFacts();
+    console.log(`📌 Добавлен факт: ${fact}`);
 }
 
 function detectSmartFact(text) {
@@ -110,16 +122,46 @@ function detectSmartFact(text) {
     const value = text.trim();
 
     const rememberMatch = value.match(/^(?:джарвис\s+)?(?:запомни|запиши|сохрани)\s+(.+)$/i);
-    if (rememberMatch) { addSmartFact(rememberMatch[1].trim()); return true; }
+    if (rememberMatch) {
+        addSmartFact(rememberMatch[1].trim());
+        return true;
+    }
 
     const nameMatch = value.match(/(?:меня зовут|моё имя|мое имя)\s+([А-Яа-яЁёA-Za-z-]+)/i);
-    if (nameMatch) { addSmartFact("Имя пользователя: " + nameMatch[1]); return true; }
+    if (nameMatch) {
+        addSmartFact("Имя пользователя: " + nameMatch[1]);
+        return true;
+    }
 
     const preferenceMatch = value.match(/(?:я люблю|мне нравится|я предпочитаю|мне нравится больше)\s+(.+)/i);
-    if (preferenceMatch) { addSmartFact("Предпочтение пользователя: " + preferenceMatch[1].trim()); return true; }
+    if (preferenceMatch) {
+        addSmartFact("Предпочтение пользователя: " + preferenceMatch[1].trim());
+        return true;
+    }
 
     return false;
 }
+
+// ============================================================
+// ЧАСТИЦЫ (фон)
+// ============================================================
+
+function createParticles() {
+    const container = document.getElementById('particles');
+    if (!container) return;
+    for (let i = 0; i < 40; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = (Math.random() * 2 + 1) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDuration = (Math.random() * 25 + 15) + 's';
+        particle.style.animationDelay = (Math.random() * 25) + 's';
+        particle.style.opacity = Math.random() * 0.3 + 0.05;
+        container.appendChild(particle);
+    }
+}
+createParticles();
 
 // ============================================================
 // ВКЛАДКИ
@@ -187,7 +229,10 @@ function hidePhotoLoading() {
 
 function speak(text) {
     if (!text) return;
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window)) {
+        statusText.textContent = "Синтез речи не поддерживается.";
+        return;
+    }
 
     try {
         window.speechSynthesis.cancel();
@@ -202,7 +247,9 @@ function speak(text) {
         utterance.onerror = () => statusText.textContent = "Ошибка речи, сэр.";
 
         window.speechSynthesis.speak(utterance);
-    } catch (error) {}
+    } catch (error) {
+        console.error("Ошибка speak():", error);
+    }
 }
 
 // ============================================================
@@ -274,6 +321,7 @@ async function askJarvis(text, source = 'voice') {
 
     } catch (error) {
         if (source === 'text') removeTyping(source);
+        console.error("JARVIS error:", error);
         showMessage(cleanText, "Ошибка: " + error.message, source);
         statusText.textContent = "Ошибка, сэр.";
     } finally {
@@ -282,74 +330,7 @@ async function askJarvis(text, source = 'voice') {
 }
 
 // ============================================================
-// РЕАЛЬНЫЙ АНАЛИЗ ФОТО
-// ============================================================
-
-async function analyzePhotoWithHF(imageData, question = '') {
-    try {
-        // Конвертируем base64 в Blob
-        const response = await fetch(imageData);
-        const blob = await response.blob();
-
-        // Отправляем на Hugging Face
-        const hfResponse = await fetch(
-            "https://api-inference.huggingface.co/models/" + HF_MODELS.caption,
-            {
-                headers: {
-                    "Authorization": `Bearer ${HF_API_KEY}`
-                },
-                method: "POST",
-                body: blob
-            }
-        );
-
-        // Если ошибка - пробуем другую модель
-        if (!hfResponse.ok) {
-            console.log("Пробуем альтернативную модель...");
-
-            const hfResponse2 = await fetch(
-                "https://api-inference.huggingface.co/models/" + HF_MODELS.caption2,
-                {
-                    headers: {
-                        "Authorization": `Bearer ${HF_API_KEY}`
-                    },
-                    method: "POST",
-                    body: blob
-                }
-            );
-
-            if (!hfResponse2.ok) {
-                const errorText = await hfResponse2.text();
-                console.error("HF Error:", errorText);
-                throw new Error("Модель не может описать это фото. Попробуйте другое изображение.");
-            }
-
-            const result = await hfResponse2.json();
-            let description = result[0]?.generated_text || "Не удалось описать фото";
-
-            return formatPhotoAnswer(description, question);
-        }
-
-        const result = await hfResponse.json();
-        let description = result[0]?.generated_text || "Не удалось описать фото";
-
-        return formatPhotoAnswer(description, question);
-
-    } catch (error) {
-        console.error("HF Error:", error);
-        throw new Error("Не удалось проанализировать фото. Попробуйте другое изображение или повторите попытку.");
-    }
-}
-
-function formatPhotoAnswer(description, question) {
-    if (question.trim() && question.trim() !== "Опиши, что ты видишь на этом фото.") {
-        return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, могу сказать, что это изображение содержит ${description}.`;
-    }
-    return `Сэр, я вижу на этом фото: ${description}`;
-}
-
-// ============================================================
-// ЗАПРОС С ФОТО
+// ЗАПРОС С ФОТО (через Worker)
 // ============================================================
 
 let uploadedFile = null;
@@ -384,16 +365,16 @@ async function askWithPhoto(question) {
     requestInProgress = true;
     statusText.textContent = "Анализирую фото, сэр...";
 
-    // Сохраняем данные фото для чата
+    // Сохраняем данные фото
     const photoData = uploadedImageData;
     const fileName = uploadedFile ? uploadedFile.name : 'фото';
 
-    // Показываем фото в чате
+    // ✅ ПОКАЗЫВАЕМ ФОТО В ЧАТЕ
     const photoThumbnail = `<div class="user-message"><strong>Вы:</strong> [Фото: ${fileName}] <br><img src="${photoData}" style="max-width:100%;max-height:150px;border-radius:10px;margin-top:6px;border:1px solid rgba(0,180,255,0.1);"></div>`;
     textConversation.innerHTML += photoThumbnail;
     textConversation.scrollTop = textConversation.scrollHeight;
 
-    // Показываем вопрос (если есть)
+    // ✅ ПОКАЗЫВАЕМ ВОПРОС (если есть)
     if (cleanQuestion && cleanQuestion !== "Опиши, что ты видишь на этом фото.") {
         const questionHTML = `<div class="user-message" style="margin-top:-4px;"><strong>Вопрос:</strong> ${escapeHTML(cleanQuestion)}</div>`;
         textConversation.innerHTML += questionHTML;
@@ -406,10 +387,43 @@ async function askWithPhoto(question) {
     showTyping('text');
 
     try {
-        // Анализируем фото
-        let answer = await analyzePhotoWithHF(photoData, cleanQuestion);
+        // Отправляем фото через Worker
+        const response = await fetch(JARVIS_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: cleanQuestion,
+                image: photoData, // Отправляем фото в base64
+                history: memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
+                    role: msg.role === "user" ? "user" : "assistant",
+                    content: msg.text
+                })),
+                facts: smartFacts
+            })
+        });
+
+        const data = await response.json();
 
         removeTyping('text');
+
+        if (!response.ok) {
+            throw new Error(data.error || data.details || "Ошибка сервера");
+        }
+
+        if (!data.answer) {
+            throw new Error("AI не вернул ответ");
+        }
+
+        let answer = String(data.answer).trim()
+            .replace(/<think>[\s\S]*?<\/think>/gi, "")
+            .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
+            .trim();
+
+        if (!answer) {
+            throw new Error("После очистки AI не вернул текст");
+        }
 
         addToMemory("user", "[Фото] " + cleanQuestion);
         addToMemory("assistant", answer);
@@ -426,6 +440,7 @@ async function askWithPhoto(question) {
         const errorHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(error.message)}</div>`;
         textConversation.innerHTML += errorHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
+        console.error("Photo error:", error);
     } finally {
         requestInProgress = false;
     }
@@ -447,6 +462,7 @@ function sendTextMessage() {
 
     if (!text) return;
 
+    // Сразу показываем сообщение пользователя
     showUserMessageOnly(text, 'text');
     textInput.value = '';
     askJarvis(text, 'text');
@@ -524,7 +540,9 @@ function handleMicClick() {
     try {
         window.speechSynthesis.cancel();
         recognition.start();
-    } catch (error) {}
+    } catch (error) {
+        console.error("Ошибка запуска микрофона:", error);
+    }
 }
 
 if (!SpeechRecognition) {
@@ -553,11 +571,13 @@ if (!SpeechRecognition) {
             statusText.textContent = "Я не расслышал вас, сэр.";
             return;
         }
+        // Сразу показываем сообщение пользователя
         showUserMessageOnly(text, 'voice');
         await askJarvis(text, 'voice');
     };
 
     recognition.onerror = function(event) {
+        console.error("Speech error:", event.error);
         isListening = false;
         if (micButton) micButton.classList.remove("listening");
         if (event.error === "not-allowed") {
@@ -694,7 +714,7 @@ function escapeHTML(text) {
 }
 
 // ============================================================
-// AUDIO UNLOCK
+// AUDIO UNLOCK ДЛЯ IPHONE
 // ============================================================
 
 function unlockAudio() {
@@ -705,7 +725,9 @@ function unlockAudio() {
         audio.lang = "ru-RU";
         audio.volume = 0;
         window.speechSynthesis.speak(audio);
-    } catch (error) {}
+    } catch (error) {
+        console.log("Audio unlock:", error);
+    }
 }
 
 document.addEventListener("touchstart", function firstTouch() {
@@ -760,17 +782,22 @@ function setupButtons() {
 }
 
 // ============================================================
-// ЗАГРУЗКА
+// ЗАГРУЗКА ПРИ СТАРТЕ
 // ============================================================
 
 loadMemory();
 loadFacts();
 
+console.log("📝 Текущая память:", memory.length, "сообщений");
+console.log("📌 Текущие факты:", smartFacts.length, "фактов");
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        console.log("📄 DOM загружен, настраиваем...");
         setTimeout(setupButtons, 300);
     });
 } else {
+    console.log("📄 DOM уже загружен, настраиваем...");
     setTimeout(setupButtons, 300);
 }
 
@@ -788,7 +815,12 @@ window.JARVIS = {
     showMemory: showMemoryDialog
 };
 
-console.log("✅ JARVIS v5.0 by Sergo загружен");
-console.log("📝 Сообщений: " + memory.length);
-console.log("📌 Фактов: " + smartFacts.length);
-console.log("📷 Анализ фото через Hugging Face");
+// ============================================================
+// ГОТОВО
+// ============================================================
+
+console.log("✅ JARVIS v6.0 by Sergo загружен");
+console.log(`📝 Сообщений: ${memory.length}`);
+console.log(`📌 Фактов: ${smartFacts.length}`);
+console.log("📷 Анализ фото через Cloudflare Worker");
+console.log("🔧 Ключ HF_API_KEY хранится в Cloudflare Workers (НЕ В КОДЕ!)");
