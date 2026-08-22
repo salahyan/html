@@ -11,7 +11,6 @@ const micButton = document.getElementById("micButton");
 const statusText = document.getElementById("status");
 const conversation = document.getElementById("conversation");
 const textConversation = document.getElementById("textConversation");
-const photoConversation = document.getElementById("photoConversation");
 const textInput = document.getElementById("textInput");
 const sendTextBtn = document.getElementById("sendTextBtn");
 const photoInput = document.getElementById("photoInput");
@@ -24,9 +23,31 @@ const memoryContent = document.getElementById("memoryContent");
 const closeMemoryBtn = document.getElementById("closeMemory");
 const refreshMemoryBtn = document.getElementById("refreshMemory");
 const clearMemoryBtn = document.getElementById("clearMemory");
+const clearChatBtn = document.getElementById("clearChatBtn");
 const memoryButton = document.getElementById("memoryButton");
 
 const JARVIS_API = "https://jarvis.salahyansergei2006.workers.dev/";
+
+// ============================================================
+// ЧАСТИЦЫ (фон)
+// ============================================================
+
+function createParticles() {
+    const container = document.getElementById('particles');
+    if (!container) return;
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = (Math.random() * 3 + 1) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+        particle.style.animationDelay = (Math.random() * 20) + 's';
+        particle.style.opacity = Math.random() * 0.3 + 0.05;
+        container.appendChild(particle);
+    }
+}
+createParticles();
 
 // ============================================================
 // НАСТРОЙКИ ПАМЯТИ
@@ -166,6 +187,69 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ============================================================
+// ПОКАЗ СООБЩЕНИЙ
+// ============================================================
+
+function showMessage(userText, answer, source = 'voice') {
+    let container;
+    if (source === 'voice') container = conversation;
+    else container = textConversation;
+
+    const userHTML = `<div class="user-message"><strong>Вы:</strong> ${escapeHTML(userText)}</div>`;
+    const jarvisHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(answer)}</div>`;
+
+    if (source === 'voice') {
+        container.innerHTML = userHTML + jarvisHTML;
+    } else {
+        container.innerHTML += userHTML + jarvisHTML;
+    }
+
+    container.scrollTop = container.scrollHeight;
+}
+
+function showTyping(source = 'voice') {
+    const container = source === 'voice' ? conversation : textConversation;
+    const typingHTML = `<div class="typing-indicator">JARVIS печатает...</div>`;
+    container.innerHTML += typingHTML;
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping(source = 'voice') {
+    const container = source === 'voice' ? conversation : textConversation;
+    const typing = container.querySelector('.typing-indicator');
+    if (typing) typing.remove();
+}
+
+// ============================================================
+// ГОЛОС (только для голосового режима)
+// ============================================================
+
+function speak(text) {
+    if (!text) return;
+    if (!("speechSynthesis" in window)) {
+        statusText.textContent = "Синтез речи не поддерживается.";
+        return;
+    }
+
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "ru-RU";
+        utterance.rate = 0.88;
+        utterance.pitch = 0.82;
+        utterance.volume = 1;
+
+        utterance.onstart = () => statusText.textContent = "Говорю, сэр...";
+        utterance.onend = () => statusText.textContent = "Готов, сэр.";
+        utterance.onerror = () => statusText.textContent = "Ошибка речи, сэр.";
+
+        window.speechSynthesis.speak(utterance);
+    } catch (error) {
+        console.error("Ошибка speak():", error);
+    }
+}
+
+// ============================================================
 // ОБЩИЙ ЗАПРОС К JARVIS
 // ============================================================
 
@@ -185,7 +269,7 @@ async function askJarvis(text, source = 'voice') {
         addToMemory("user", text);
         addToMemory("assistant", answer);
         showMessage(text, answer, source);
-        speak(answer);
+        if (source === 'voice') speak(answer);
         return;
     }
 
@@ -195,6 +279,7 @@ async function askJarvis(text, source = 'voice') {
     addToMemory("user", cleanText);
 
     statusText.textContent = "Обрабатываю запрос, сэр...";
+    showTyping(source);
 
     try {
         const context = memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
@@ -214,6 +299,8 @@ async function askJarvis(text, source = 'voice') {
 
         const data = await response.json();
 
+        removeTyping(source);
+
         if (!response.ok) throw new Error(data.error || "Ошибка сервера");
         if (!data.answer) throw new Error("AI не вернул ответ");
 
@@ -227,9 +314,11 @@ async function askJarvis(text, source = 'voice') {
         addToMemory("assistant", answer);
         showMessage(cleanText, answer, source);
         statusText.textContent = "Готов, сэр.";
-        speak(answer);
+
+        if (source === 'voice') speak(answer);
 
     } catch (error) {
+        removeTyping(source);
         console.error("JARVIS error:", error);
         const errorMessage = "Ошибка связи с сервером, сэр.";
         showMessage(cleanText, errorMessage + "\n\n" + error.message, source);
@@ -240,54 +329,75 @@ async function askJarvis(text, source = 'voice') {
 }
 
 // ============================================================
-// ПОКАЗ СООБЩЕНИЙ
+// ЗАПРОС С ФОТО
 // ============================================================
 
-function showMessage(userText, answer, source = 'voice') {
-    let container;
-    if (source === 'voice') container = conversation;
-    else if (source === 'text') container = textConversation;
-    else if (source === 'photo') container = photoConversation;
-    else container = conversation;
+let uploadedFile = null;
+let uploadedImageData = null;
 
-    const userHTML = `<div class="user-message"><strong>Вы:</strong> ${escapeHTML(userText)}</div>`;
-    const jarvisHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(answer)}</div>`;
-
-    if (source === 'text') {
-        container.innerHTML += userHTML + jarvisHTML;
-    } else {
-        container.innerHTML = userHTML + jarvisHTML;
-    }
-
-    container.scrollTop = container.scrollHeight;
-}
-
-// ============================================================
-// ГОЛОС
-// ============================================================
-
-function speak(text) {
-    if (!text) return;
-    if (!("speechSynthesis" in window)) {
-        statusText.textContent = "Синтез речи не поддерживается, сэр.";
+async function askWithPhoto(question) {
+    if (!uploadedImageData) {
+        statusText.textContent = "Сначала загрузите фото, сэр.";
         return;
     }
 
+    if (requestInProgress) {
+        statusText.textContent = "Я ещё обрабатываю запрос, сэр.";
+        return;
+    }
+
+    const cleanQuestion = question.trim() || "Опиши, что ты видишь на этом фото.";
+
+    requestInProgress = true;
+    statusText.textContent = "Анализирую фото, сэр...";
+    showTyping('text');
+
     try {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "ru-RU";
-        utterance.rate = 0.88;
-        utterance.pitch = 0.82;
-        utterance.volume = 1;
+        const context = memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
+            role: msg.role === "user" ? "user" : "assistant",
+            content: msg.text
+        }));
 
-        utterance.onstart = () => statusText.textContent = "Говорю, сэр...";
-        utterance.onend = () => statusText.textContent = "Готов, сэр.";
-        utterance.onerror = () => statusText.textContent = "Ошибка речи, сэр.";
+        const response = await fetch(JARVIS_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: cleanQuestion,
+                image: uploadedImageData,
+                history: context,
+                facts: smartFacts
+            })
+        });
 
-        window.speechSynthesis.speak(utterance);
+        const data = await response.json();
+
+        removeTyping('text');
+
+        if (!response.ok) throw new Error(data.error || "Ошибка сервера");
+        if (!data.answer) throw new Error("AI не вернул ответ");
+
+        let answer = String(data.answer).trim()
+            .replace(/<think>[\s\S]*?<\/think>/gi, "")
+            .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
+            .trim();
+
+        if (!answer) throw new Error("После очистки AI не вернул текст");
+
+        addToMemory("user", "[Фото] " + cleanQuestion);
+        addToMemory("assistant", answer);
+
+        showMessage("[Фото] " + cleanQuestion, answer, 'text');
+        statusText.textContent = "Готов, сэр.";
+
+        photoQuestion.value = '';
+
     } catch (error) {
-        console.error("Ошибка speak():", error);
+        removeTyping('text');
+        console.error("Photo analysis error:", error);
+        statusText.textContent = "Ошибка анализа, сэр.";
+        showMessage("[Фото] " + cleanQuestion, "Ошибка: " + error.message, 'text');
+    } finally {
+        requestInProgress = false;
     }
 }
 
@@ -311,9 +421,6 @@ textInput.addEventListener('keydown', (e) => {
 // ФОТО — ЗАГРУЗКА
 // ============================================================
 
-let uploadedFile = null;
-let uploadedImageData = null;
-
 photoInput.addEventListener('change', function(e) {
     const file = this.files[0];
     if (!file) return;
@@ -335,61 +442,16 @@ photoInput.addEventListener('change', function(e) {
 // ФОТО — АНАЛИЗ
 // ============================================================
 
-analyzePhotoBtn.addEventListener('click', analyzePhoto);
+analyzePhotoBtn.addEventListener('click', () => {
+    askWithPhoto(photoQuestion.value);
+});
 
-async function analyzePhoto() {
-    if (!uploadedImageData) {
-        statusText.textContent = "Сначала загрузите фото, сэр.";
-        return;
+photoQuestion.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        askWithPhoto(photoQuestion.value);
     }
-
-    const question = photoQuestion.value.trim() || "Опиши, что ты видишь на этом фото.";
-
-    statusText.textContent = "Анализирую фото, сэр...";
-
-    try {
-        // Отправляем фото в формате base64
-        const response = await fetch(JARVIS_API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                text: question,
-                image: uploadedImageData,
-                history: memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
-                    role: msg.role === "user" ? "user" : "assistant",
-                    content: msg.text
-                })),
-                facts: smartFacts
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.error || "Ошибка сервера");
-        if (!data.answer) throw new Error("AI не вернул ответ");
-
-        let answer = String(data.answer).trim()
-            .replace(/<think>[\s\S]*?<\/think>/gi, "")
-            .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
-            .trim();
-
-        if (!answer) throw new Error("После очистки AI не вернул текст");
-
-        addToMemory("user", "[Фото] " + question);
-        addToMemory("assistant", answer);
-
-        showMessage("[Фото] " + question, answer, 'photo');
-        statusText.textContent = "Готов, сэр.";
-        speak(answer);
-
-        photoQuestion.value = '';
-
-    } catch (error) {
-        console.error("Photo analysis error:", error);
-        statusText.textContent = "Ошибка анализа, сэр.";
-        showMessage("[Фото] " + question, "Ошибка: " + error.message, 'photo');
-    }
-}
+});
 
 // ============================================================
 // МИКРОФОН
@@ -474,8 +536,6 @@ if (!SpeechRecognition) {
 // ============================================================
 
 function showMemoryDialog() {
-    console.log("🔍 Показываем память...");
-
     const modal = document.getElementById('memoryModal');
     const content = document.getElementById('memoryContent');
 
@@ -502,7 +562,7 @@ function showMemoryDialog() {
             const text = msg.text.length > 80 ? msg.text.substring(0, 80) + "..." : msg.text;
             html += `<div class="memory-item ${msg.role}">${role}: ${escapeHTML(text)}</div>`;
         });
-        html += `<div class="memory-item" style="color:#888;font-size:12px;margin-top:10px;">📊 Всего сообщений: ${memory.length}</div>`;
+        html += `<div class="memory-item" style="color:#3a6a8a;font-size:11px;margin-top:8px;">📊 Всего сообщений: ${memory.length}</div>`;
         html += '</div>';
     }
 
@@ -517,8 +577,6 @@ function showMemoryDialog() {
     modal.style.opacity = '1';
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-
-    console.log("✅ Модальное окно открыто");
 }
 
 function hideMemoryDialog() {
@@ -562,7 +620,7 @@ function showMemoryAlert() {
 }
 
 // ============================================================
-// ОЧИСТКА ПАМЯТИ
+// ОЧИСТКА
 // ============================================================
 
 function clearJarvisMemory() {
@@ -574,6 +632,14 @@ function clearJarvisMemory() {
     showMessage("", "Память полностью очищена, сэр.", 'voice');
     speak("Память полностью очищена, сэр.");
     hideMemoryDialog();
+}
+
+function clearChat() {
+    if (confirm('Очистить весь диалог, сэр?')) {
+        conversation.innerHTML = `<div class="jarvis-message">Добро пожаловать, сэр. Я готов.</div>`;
+        textConversation.innerHTML = `<div class="jarvis-message">Напишите или загрузите фото, сэр.</div>`;
+        statusText.textContent = "Чат очищен, сэр.";
+    }
 }
 
 // ============================================================
@@ -617,22 +683,24 @@ document.addEventListener("click", function firstClick() {
 // ПРИВЯЗКА КНОПОК
 // ============================================================
 
-function setupMemoryButton() {
-    const memoryBtn = document.getElementById('memoryButton');
-    if (memoryBtn) {
-        const newBtn = memoryBtn.cloneNode(true);
-        memoryBtn.parentNode.replaceChild(newBtn, memoryBtn);
+function setupButtons() {
+    // Кнопка памяти
+    if (memoryButton) {
+        const newBtn = memoryButton.cloneNode(true);
+        memoryButton.parentNode.replaceChild(newBtn, memoryButton);
         newBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             showMemoryDialog();
         });
-        newBtn.style.cursor = 'pointer';
-        console.log("✅ Кнопка 'Память' привязана");
     }
-}
 
-function setupModal() {
+    // Кнопка очистки чата
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener('click', clearChat);
+    }
+
+    // Модальное окно
     if (closeMemoryBtn) {
         closeMemoryBtn.addEventListener('click', hideMemoryDialog);
     }
@@ -656,7 +724,8 @@ function setupModal() {
             }
         });
     }
-    console.log("✅ Модальное окно настроено");
+
+    console.log("✅ Все кнопки привязаны");
 }
 
 // ============================================================
@@ -671,16 +740,10 @@ console.log("📌 Текущие факты:", smartFacts.length, "фактов"
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            setupMemoryButton();
-            setupModal();
-        }, 300);
+        setTimeout(setupButtons, 300);
     });
 } else {
-    setTimeout(() => {
-        setupMemoryButton();
-        setupModal();
-    }, 300);
+    setTimeout(setupButtons, 300);
 }
 
 // ============================================================
@@ -697,7 +760,7 @@ window.JARVIS = {
     showMemory: showMemoryDialog
 };
 
-console.log("✅ JARVIS загружен");
+console.log("✅ JARVIS v2.0 by Sergo загружен");
 console.log(`📝 Сообщений: ${memory.length}`);
 console.log(`📌 Фактов: ${smartFacts.length}`);
 console.log("💡 Кнопка 'Память' показывает историю");
