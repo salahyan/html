@@ -1,5 +1,6 @@
 // ============================================================
-// JARVIS — SCRIPT.JS v4.0
+// JARVIS — SCRIPT.JS v5.0
+// РЕАЛЬНЫЙ АНАЛИЗ ФОТО через Hugging Face
 // ============================================================
 
 // ============================================================
@@ -26,7 +27,20 @@ const refreshMemoryBtn = document.getElementById("refreshMemory");
 const clearMemoryBtn = document.getElementById("clearMemory");
 const memoryButton = document.getElementById("memoryButton");
 
+// ============================================================
+// API НАСТРОЙКИ
+// ============================================================
+
 const JARVIS_API = "https://jarvis.salahyansergei2006.workers.dev/";
+
+// Hugging Face API для анализа фото (бесплатно)
+const HF_API_KEY = "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"; // Замени на свой токен
+
+const HF_MODELS = {
+    caption: "microsoft/git-base-coco",           // Описание фото
+    caption2: "nlpconnect/vit-gpt2-image-captioning", // Альтернатива
+    classify: "google/vit-base-patch16-224"      // Классификация
+};
 
 // ============================================================
 // ЧАСТИЦЫ
@@ -68,9 +82,7 @@ function loadMemory() {
             const parsed = JSON.parse(saved);
             memory = Array.isArray(parsed) ? parsed : [];
         }
-    } catch (error) {
-        memory = [];
-    }
+    } catch (error) { memory = []; }
 }
 
 function saveMemory() {
@@ -93,9 +105,7 @@ function loadFacts() {
             const parsed = JSON.parse(saved);
             smartFacts = Array.isArray(parsed) ? parsed : [];
         }
-    } catch (error) {
-        smartFacts = [];
-    }
+    } catch (error) { smartFacts = []; }
 }
 
 function saveFacts() {
@@ -215,7 +225,7 @@ function speak(text) {
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS
+// ЗАПРОС К JARVIS (ТЕКСТ)
 // ============================================================
 
 let requestInProgress = false;
@@ -291,7 +301,74 @@ async function askJarvis(text, source = 'voice') {
 }
 
 // ============================================================
-// ЗАПРОС С ФОТО
+// РЕАЛЬНЫЙ АНАЛИЗ ФОТО через Hugging Face
+// ============================================================
+
+async function analyzePhotoWithHF(imageData, question = '') {
+    try {
+        // Преобразуем base64 в blob
+        const response = await fetch(imageData);
+        const blob = await response.blob();
+
+        // Отправляем на Hugging Face
+        const hfResponse = await fetch(
+            "https://api-inference.huggingface.co/models/" + HF_MODELS.caption,
+            {
+                headers: {
+                    "Authorization": `Bearer ${HF_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                method: "POST",
+                body: JSON.stringify({ inputs: blob })
+            }
+        );
+
+        if (!hfResponse.ok) {
+            // Пробуем альтернативную модель
+            const hfResponse2 = await fetch(
+                "https://api-inference.huggingface.co/models/" + HF_MODELS.caption2,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${HF_API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    method: "POST",
+                    body: JSON.stringify({ inputs: blob })
+                }
+            );
+
+            if (!hfResponse2.ok) {
+                throw new Error("Не удалось распознать фото");
+            }
+
+            const result = await hfResponse2.json();
+            let description = result[0]?.generated_text || "Не удалось описать фото";
+
+            // Если есть вопрос, формируем ответ
+            if (question.trim()) {
+                return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, я могу сказать, что это изображение содержит ${description}.`;
+            }
+
+            return `Сэр, я вижу на этом фото: ${description}`;
+        }
+
+        const result = await hfResponse.json();
+        let description = result[0]?.generated_text || "Не удалось описать фото";
+
+        if (question.trim()) {
+            return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, я могу сказать, что это изображение содержит ${description}.`;
+        }
+
+        return `Сэр, я вижу на этом фото: ${description}`;
+
+    } catch (error) {
+        console.error("HF Error:", error);
+        throw new Error("Ошибка анализа фото: " + error.message);
+    }
+}
+
+// ============================================================
+// ЗАПРОС С ФОТО (РЕАЛЬНЫЙ АНАЛИЗ)
 // ============================================================
 
 let uploadedFile = null;
@@ -328,44 +405,31 @@ async function askWithPhoto(question) {
     // Показываем анимацию отправки
     photoPreview.classList.add('sending');
 
-    // Показываем сообщение пользователя
-    showUserMessageOnly("[Фото] " + cleanQuestion, 'text');
+    // Показываем миниатюру фото в чате
+    const photoThumbnail = `<div class="user-message"><strong>Вы:</strong> [Фото] <br><img src="${uploadedImageData}" style="max-width:100%;max-height:150px;border-radius:10px;margin-top:6px;border:1px solid rgba(0,180,255,0.1);"></div>`;
+    textConversation.innerHTML += photoThumbnail;
+    textConversation.scrollTop = textConversation.scrollHeight;
+
+    // Если есть вопрос, показываем его
+    if (cleanQuestion && cleanQuestion !== "Опиши, что ты видишь на этом фото.") {
+        const questionHTML = `<div class="user-message" style="margin-top:-4px;"><strong>Вопрос:</strong> ${escapeHTML(cleanQuestion)}</div>`;
+        textConversation.innerHTML += questionHTML;
+        textConversation.scrollTop = textConversation.scrollHeight;
+    }
+
     showTyping('text');
 
     try {
-        const context = memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
-            role: msg.role === "user" ? "user" : "assistant",
-            content: msg.text
-        }));
-
-        const response = await fetch(JARVIS_API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                text: cleanQuestion,
-                image: uploadedImageData,
-                history: context,
-                facts: smartFacts
-            })
-        });
-
-        const data = await response.json();
+        // Реальный анализ фото
+        let answer = await analyzePhotoWithHF(uploadedImageData, cleanQuestion);
 
         removeTyping('text');
 
-        if (!response.ok) throw new Error(data.error || "Ошибка сервера");
-        if (!data.answer) throw new Error("AI не вернул ответ");
-
-        let answer = String(data.answer).trim()
-            .replace(/<think>[\s\S]*?<\/think>/gi, "")
-            .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
-            .trim();
-
-        if (!answer) throw new Error("После очистки AI не вернул текст");
-
+        // Добавляем в память
         addToMemory("user", "[Фото] " + cleanQuestion);
         addToMemory("assistant", answer);
 
+        // Показываем ответ JARVIS
         const jarvisHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(answer)}</div>`;
         textConversation.innerHTML += jarvisHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
@@ -384,7 +448,6 @@ async function askWithPhoto(question) {
         textConversation.innerHTML += errorHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
 
-        // Возвращаем фото если ошибка
         photoPreview.classList.remove('sending');
     } finally {
         requestInProgress = false;
@@ -397,7 +460,6 @@ async function askWithPhoto(question) {
 
 function sendTextMessage() {
     const text = textInput.value.trim();
-    if (!text) return;
 
     // Если есть фото, отправляем с фото
     if (uploadedImageData) {
@@ -406,6 +468,9 @@ function sendTextMessage() {
         return;
     }
 
+    if (!text) return;
+
+    // Сразу показываем сообщение пользователя
     showUserMessageOnly(text, 'text');
     textInput.value = '';
     askJarvis(text, 'text');
@@ -424,7 +489,6 @@ photoInput.addEventListener('change', function(e) {
     const file = this.files[0];
     if (!file) return;
 
-    // Показываем загрузку
     showPhotoLoading('Фото загружается, сэр...');
 
     uploadedFile = file;
@@ -437,7 +501,6 @@ photoInput.addEventListener('change', function(e) {
         photoPreview.src = uploadedImageData;
         photoPreview.classList.add('show');
 
-        // Скрываем загрузку, показываем готовность
         hidePhotoLoading();
 
         // Показываем сообщение в чате
@@ -515,6 +578,7 @@ if (!SpeechRecognition) {
             statusText.textContent = "Я не расслышал вас, сэр.";
             return;
         }
+        // Сразу показываем сообщение пользователя
         showUserMessageOnly(text, 'voice');
         await askJarvis(text, 'voice');
     };
@@ -626,7 +690,7 @@ function showMemoryAlert() {
 }
 
 // ============================================================
-// ОЧИСТКА ПАМЯТИ (в модальном окне)
+// ОЧИСТКА ПАМЯТИ
 // ============================================================
 
 function clearJarvisMemory() {
@@ -635,17 +699,13 @@ function clearJarvisMemory() {
     localStorage.removeItem(MEMORY_KEY);
     localStorage.removeItem(FACTS_KEY);
 
-    // Голосовой ответ
     const clearMsg = "Память полностью очищена, сэр.";
     statusText.textContent = clearMsg;
 
-    // Очищаем чаты
     conversation.innerHTML = `<div class="jarvis-message">Добро пожаловать, сэр. Я готов.</div>`;
     textConversation.innerHTML = `<div class="jarvis-message">Напишите сообщение или загрузите фото, сэр.</div>`;
 
-    // Говорим
     speak(clearMsg);
-
     hideMemoryDialog();
 }
 
@@ -689,7 +749,6 @@ document.addEventListener("click", function firstClick() {
 // ============================================================
 
 function setupButtons() {
-    // Кнопка памяти
     if (memoryButton) {
         const newBtn = memoryButton.cloneNode(true);
         memoryButton.parentNode.replaceChild(newBtn, memoryButton);
@@ -700,7 +759,6 @@ function setupButtons() {
         });
     }
 
-    // Модальное окно
     if (closeMemoryBtn) {
         closeMemoryBtn.addEventListener('click', hideMemoryDialog);
     }
@@ -756,6 +814,7 @@ window.JARVIS = {
     showMemory: showMemoryDialog
 };
 
-console.log("✅ JARVIS v4.0 by Sergo загружен");
-console.log(`📝 Сообщений: ${memory.length}`);
-console.log(`📌 Фактов: ${smartFacts.length}`);
+console.log("✅ JARVIS v5.0 by Sergo загружен");
+console.log("📝 Сообщений: " + memory.length);
+console.log("📌 Фактов: " + smartFacts.length);
+console.log("📷 Анализ фото через Hugging Face");
