@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#02060a">
+    <meta name="theme-color" content="#010208">
     <title>JARVIS — by Sergo</title>
 
     <style>
         /* ============================================================
-           CSS СТИЛИ — JARVIS IRON MAN THEME
+           CSS СТИЛИ — JARVIS IRON MAN THEME v3.0
            ============================================================ */
 
         /* --- БАЗА --- */
@@ -19,9 +19,11 @@
             box-sizing: border-box;
         }
 
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #010408;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #010208;
             color: #e8e8e8;
             min-height: 100vh;
             display: flex;
@@ -29,11 +31,11 @@
             align-items: center;
             padding: 20px;
             margin: 0;
-            position: relative;
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* Анимированный фон */
+        /* Анимированный фон с сеткой */
         body::before {
             content: '';
             position: fixed;
@@ -42,10 +44,25 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(ellipse at 20% 50%, rgba(0, 100, 255, 0.03) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 50%, rgba(0, 200, 255, 0.03) 0%, transparent 60%);
+                radial-gradient(ellipse at 20% 50%, rgba(0, 80, 200, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 200, 255, 0.04) 0%, transparent 60%);
             pointer-events: none;
             z-index: 0;
+        }
+
+        /* Сетка как в фильме */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(0, 80, 200, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 80, 200, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
 
         /* Парящие частицы */
@@ -64,7 +81,7 @@
             position: absolute;
             width: 2px;
             height: 2px;
-            background: rgba(0, 180, 255, 0.15);
+            background: rgba(0, 180, 255, 0.12);
             border-radius: 50%;
             animation: float-particle linear infinite;
         }
@@ -88,19 +105,19 @@
 
         /* --- ОСНОВНОЙ КОНТЕЙНЕР --- */
         .jarvis {
-            max-width: 580px;
+            max-width: 560px;
             width: 100%;
-            background: linear-gradient(160deg, rgba(10, 18, 30, 0.92), rgba(5, 10, 18, 0.96));
-            border-radius: 32px;
-            padding: 28px 24px 24px;
+            background: linear-gradient(165deg, rgba(8, 16, 30, 0.94), rgba(2, 6, 14, 0.97));
+            border-radius: 34px;
+            padding: 24px 22px 22px;
             box-shadow:
-                0 30px 100px rgba(0, 0, 0, 0.95),
-                0 0 80px rgba(0, 100, 255, 0.04),
-                inset 0 1px 0 rgba(0, 180, 255, 0.04);
-            border: 1px solid rgba(0, 180, 255, 0.06);
+                0 30px 120px rgba(0, 0, 0, 0.95),
+                0 0 80px rgba(0, 80, 200, 0.04),
+                inset 0 1px 0 rgba(0, 180, 255, 0.05);
+            border: 1px solid rgba(0, 180, 255, 0.05);
             position: relative;
             z-index: 1;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             transition: all 0.3s ease;
         }
 
@@ -109,10 +126,10 @@
             content: '';
             position: absolute;
             top: -1px;
-            left: 20%;
-            right: 20%;
+            left: 15%;
+            right: 15%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.15), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.12), transparent);
             border-radius: 100%;
         }
 
@@ -120,10 +137,10 @@
             content: '';
             position: absolute;
             bottom: -1px;
-            left: 30%;
-            right: 30%;
+            left: 25%;
+            right: 25%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.08), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.06), transparent);
             border-radius: 100%;
         }
 
@@ -132,20 +149,20 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid rgba(0, 180, 255, 0.04);
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #00e676;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
@@ -156,12 +173,12 @@
         .status-dot::after {
             content: '';
             position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
             border-radius: 50%;
-            border: 1px solid rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.08);
             animation: pulse-ring 2s infinite;
         }
 
@@ -172,8 +189,8 @@
                 transform: scale(1);
             }
             50% {
-                opacity: 0.5;
-                transform: scale(0.85);
+                opacity: 0.4;
+                transform: scale(0.8);
             }
         }
 
@@ -190,63 +207,71 @@
         }
 
         .header-title {
-            font-size: 14px;
+            font-family: 'Orbitron', monospace;
+            font-size: 15px;
             font-weight: 700;
-            letter-spacing: 2.5px;
-            color: #4a8aaa;
+            letter-spacing: 3px;
+            color: #3a7a9a;
             text-transform: uppercase;
         }
 
-        .header-title span {
+        .header-title .highlight {
             color: #00d4ff;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-shadow: 0 0 20px rgba(0, 180, 255, 0.15);
         }
 
         .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 9px;
-            background: rgba(0, 180, 255, 0.06);
-            padding: 3px 10px;
+            background: rgba(0, 180, 255, 0.05);
+            padding: 3px 12px;
             border-radius: 20px;
             color: #2a6a8a;
             border: 1px solid rgba(0, 180, 255, 0.04);
             letter-spacing: 0.5px;
             font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .header-badge .badge-dot {
+            width: 4px;
+            height: 4px;
+            background: #00e676;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite;
         }
 
         /* --- ORB (Голограмма) --- */
         .orb-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             position: relative;
         }
 
         .orb-container::before {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 20px;
-            background: radial-gradient(ellipse, rgba(0, 100, 255, 0.06), transparent 70%);
+            width: 100px;
+            height: 15px;
+            background: radial-gradient(ellipse, rgba(0, 80, 200, 0.05), transparent 70%);
             border-radius: 50%;
-            filter: blur(10px);
+            filter: blur(8px);
         }
 
         .orb {
-            width: 100px;
-            height: 100px;
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #1a3a5a, #0a1a2a);
             box-shadow:
-                0 0 60px rgba(0, 100, 255, 0.08),
-                inset 0 0 60px rgba(0, 100, 255, 0.03);
+                0 0 50px rgba(0, 80, 200, 0.06),
+                inset 0 0 50px rgba(0, 80, 200, 0.02);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -257,13 +282,13 @@
         .orb::before {
             content: '';
             position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
             border-radius: 50%;
             border: 1px solid rgba(0, 180, 255, 0.04);
-            animation: orb-ring 4s linear infinite;
+            animation: orb-ring 6s linear infinite;
         }
 
         @keyframes orb-ring {
@@ -272,7 +297,7 @@
                 border-color: rgba(0, 180, 255, 0.04);
             }
             50% {
-                border-color: rgba(0, 180, 255, 0.1);
+                border-color: rgba(0, 180, 255, 0.08);
             }
             100% {
                 transform: rotate(360deg);
@@ -281,11 +306,11 @@
         }
 
         .orb-inner {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #4a8ab5, #0a2a4a);
-            box-shadow: 0 0 40px rgba(0, 100, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 80, 200, 0.08);
             animation: orb-pulse 3s ease-in-out infinite;
         }
 
@@ -304,20 +329,41 @@
         /* --- ЗАГОЛОВОК --- */
         .title-section {
             text-align: center;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            position: relative;
+        }
+
+        .title-section .creator {
+            font-size: 10px;
+            color: #1a4a6a;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 300;
+            margin-bottom: 2px;
+        }
+
+        .title-section .creator span {
+            color: #2a6a8a;
+            font-weight: 400;
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .title {
-            font-size: 34px;
-            font-weight: 800;
-            letter-spacing: 5px;
+            font-family: 'Orbitron', monospace;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 6px;
             background: linear-gradient(135deg, #4a9eff, #00d4ff, #4a9eff);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: shimmer-text 4s ease-in-out infinite;
-            text-shadow: 0 0 60px rgba(0, 100, 255, 0.05);
+            text-shadow: 0 0 60px rgba(0, 80, 200, 0.05);
+            line-height: 1.1;
         }
 
         @keyframes shimmer-text {
@@ -332,33 +378,34 @@
 
         .subtitle {
             text-align: center;
-            font-size: 11px;
-            color: #2a5a7a;
-            letter-spacing: 3px;
+            font-size: 10px;
+            color: #1a4a6a;
+            letter-spacing: 4px;
             text-transform: uppercase;
             font-weight: 300;
-            margin-top: -2px;
+            margin-top: 0px;
         }
 
         /* --- СТАТУС --- */
         #status {
-            font-size: 13px;
-            color: #4a7a9a;
+            font-size: 12px;
+            color: #3a6a8a;
             text-align: center;
-            min-height: 24px;
+            min-height: 22px;
             font-weight: 400;
             letter-spacing: 0.3px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             padding: 4px 0;
-            background: rgba(0, 100, 200, 0.02);
+            background: rgba(0, 80, 200, 0.02);
             border-radius: 10px;
+            transition: all 0.3s ease;
         }
 
         /* --- ВКЛАДКИ --- */
         .tabs {
             display: flex;
             gap: 4px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             background: rgba(0, 20, 40, 0.3);
             border-radius: 14px;
             padding: 4px;
@@ -367,24 +414,27 @@
 
         .tab-btn {
             flex: 1;
-            padding: 8px 10px;
+            padding: 9px 10px;
             border: none;
             border-radius: 11px;
             background: transparent;
-            color: #3a6a8a;
+            color: #2a5a7a;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 6px;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .tab-btn:hover {
-            color: #6aaac0;
-            background: rgba(0, 100, 200, 0.04);
+            color: #5a8aaa;
+            background: rgba(0, 80, 200, 0.04);
         }
 
         .tab-btn.active {
@@ -394,27 +444,47 @@
         }
 
         .tab-btn .icon {
-            font-size: 14px;
+            font-size: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* --- ЧАТ (общий) --- */
         .conversation {
-            background: rgba(10, 20, 35, 0.4);
+            background: rgba(10, 20, 35, 0.35);
             border-radius: 16px;
             padding: 14px 16px;
             min-height: 130px;
-            max-height: 260px;
+            max-height: 250px;
             overflow-y: auto;
             margin-bottom: 12px;
             text-align: left;
             font-size: 14px;
             line-height: 1.6;
-            border: 1px solid rgba(0, 180, 255, 0.04);
+            border: 1px solid rgba(0, 180, 255, 0.03);
             scroll-behavior: smooth;
         }
 
         .conversation::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
         .conversation::-webkit-scrollbar-track {
             background: transparent;
@@ -428,14 +498,15 @@
             color: #7ab8e0;
             margin-bottom: 8px;
             padding: 8px 14px;
-            background: rgba(0, 100, 200, 0.05);
+            background: rgba(0, 80, 200, 0.05);
             border-radius: 12px 12px 12px 4px;
             border-left: 3px solid #4a9eff;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.25s ease;
         }
 
         .user-message strong {
             color: #4a9eff;
+            font-weight: 600;
         }
 
         .jarvis-message {
@@ -450,12 +521,13 @@
 
         .jarvis-message strong {
             color: #00d4ff;
+            font-weight: 600;
         }
 
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(6px);
             }
             to {
                 opacity: 1;
@@ -464,10 +536,11 @@
         }
 
         .typing-indicator {
-            color: #3a6a8a;
+            color: #2a5a7a;
             font-size: 13px;
             padding: 8px 14px;
             animation: blink 1.2s infinite;
+            font-style: italic;
         }
 
         @keyframes blink {
@@ -480,7 +553,96 @@
             }
         }
 
-        /* --- ТЕКСТОВЫЙ ВВОД + ФОТО (объединенный режим) --- */
+        /* --- МИКРОФОН (ГОЛОСОВОЙ РЕЖИМ) --- */
+        .mic-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .mic-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
+            color: #5a8aaa;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(0, 80, 180, 0.08);
+            position: relative;
+        }
+
+        .mic-button::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 40px rgba(0, 80, 180, 0.12);
+        }
+
+        .mic-button:hover::before {
+            border-color: rgba(0, 180, 255, 0.08);
+        }
+
+        .mic-button:active {
+            transform: scale(0.92);
+        }
+
+        .mic-button.listening {
+            background: linear-gradient(135deg, #1a4a7a, #4a9eff);
+            color: #fff;
+            box-shadow: 0 0 50px rgba(0, 80, 200, 0.2);
+            animation: mic-pulse 1.2s infinite;
+        }
+
+        .mic-button.listening::before {
+            border-color: rgba(0, 180, 255, 0.12);
+            animation: ring-pulse 1.2s infinite;
+        }
+
+        @keyframes mic-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(0, 80, 180, 0.12);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(0, 80, 200, 0.25);
+            }
+        }
+
+        @keyframes ring-pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #1a4a6a;
+            letter-spacing: 0.5px;
+            font-weight: 300;
+        }
+
+        /* --- ТЕКСТОВЫЙ ЧАТ + ФОТО (объединенный режим) --- */
         .input-area {
             display: flex;
             flex-direction: column;
@@ -496,22 +658,24 @@
             flex: 1;
             padding: 10px 14px;
             border-radius: 12px;
-            border: 1px solid rgba(0, 180, 255, 0.06);
-            background: rgba(10, 20, 40, 0.5);
+            border: 1px solid rgba(0, 180, 255, 0.05);
+            background: rgba(10, 20, 40, 0.4);
             color: #c8d8e8;
             font-size: 14px;
             outline: none;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         .input-row input[type="text"]:focus {
-            border-color: rgba(0, 180, 255, 0.15);
-            background: rgba(10, 20, 40, 0.7);
+            border-color: rgba(0, 180, 255, 0.12);
+            background: rgba(10, 20, 40, 0.6);
             box-shadow: 0 0 30px rgba(0, 80, 180, 0.02);
         }
 
         .input-row input[type="text"]::placeholder {
-            color: #2a4a6a;
+            color: #1a3a5a;
+            font-weight: 300;
         }
 
         .input-row .send-btn {
@@ -519,7 +683,7 @@
             border-radius: 12px;
             border: none;
             background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
-            color: #6aaac0;
+            color: #4a8aaa;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -528,7 +692,7 @@
 
         .input-row .send-btn:hover {
             background: linear-gradient(135deg, #1a3a5a, #2a5a8a);
-            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.1);
+            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.08);
             transform: scale(1.02);
         }
 
@@ -566,38 +730,40 @@
             gap: 6px;
             padding: 8px 14px;
             border-radius: 12px;
-            border: 1px dashed rgba(0, 180, 255, 0.08);
-            background: rgba(10, 20, 40, 0.3);
-            color: #3a6a8a;
+            border: 1px dashed rgba(0, 180, 255, 0.06);
+            background: rgba(10, 20, 40, 0.25);
+            color: #2a5a7a;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
+            font-weight: 400;
         }
 
         .photo-row .file-label:hover {
-            border-color: rgba(0, 180, 255, 0.2);
-            background: rgba(10, 20, 40, 0.5);
-            color: #5a8aaa;
+            border-color: rgba(0, 180, 255, 0.15);
+            background: rgba(10, 20, 40, 0.4);
+            color: #4a7a9a;
         }
 
         .photo-row .file-label.has-file {
             border-color: #4a9eff;
-            background: rgba(0, 80, 180, 0.06);
-            color: #6aaac0;
+            background: rgba(0, 80, 180, 0.05);
+            color: #5a8aaa;
         }
 
         .photo-preview {
             max-width: 100%;
-            max-height: 100px;
+            max-height: 90px;
             border-radius: 10px;
             margin-bottom: 8px;
             display: none;
-            border: 1px solid rgba(0, 180, 255, 0.06);
+            border: 1px solid rgba(0, 180, 255, 0.05);
         }
 
         .photo-preview.show {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
         .photo-actions {
@@ -610,7 +776,7 @@
             border-radius: 12px;
             border: none;
             background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
-            color: #6aaac0;
+            color: #4a8aaa;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -620,98 +786,16 @@
 
         .photo-actions .analyze-btn:hover {
             background: linear-gradient(135deg, #1a3a5a, #2a5a8a);
-            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.1);
+            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.08);
         }
 
         .photo-actions .analyze-btn:active {
             transform: scale(0.95);
         }
 
-        /* --- МИКРОФОН (ГОЛОСОВОЙ) --- */
-        .mic-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .mic-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
-            color: #6aaac0;
-            font-size: 28px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 30px rgba(0, 80, 180, 0.1);
-            position: relative;
-        }
-
-        .mic-button::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 180, 255, 0.04);
-            transition: all 0.3s ease;
-        }
-
-        .mic-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 40px rgba(0, 80, 180, 0.15);
-        }
-
-        .mic-button:hover::before {
-            border-color: rgba(0, 180, 255, 0.08);
-        }
-
-        .mic-button:active {
-            transform: scale(0.92);
-        }
-
-        .mic-button.listening {
-            background: linear-gradient(135deg, #1a4a7a, #4a9eff);
-            color: #fff;
-            box-shadow: 0 0 50px rgba(0, 100, 255, 0.25);
-            animation: mic-pulse 1.2s infinite;
-        }
-
-        .mic-button.listening::before {
-            border-color: rgba(0, 180, 255, 0.15);
-            animation: ring-pulse 1.2s infinite;
-        }
-
-        @keyframes mic-pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 30px rgba(0, 80, 180, 0.15);
-            }
-            50% {
-                box-shadow: 0 0 60px rgba(0, 100, 255, 0.3);
-            }
-        }
-
-        @keyframes ring-pulse {
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.5);
-                opacity: 0;
-            }
-        }
-
-        .hint {
-            font-size: 11px;
-            color: #2a5a7a;
-            letter-spacing: 0.3px;
+        .photo-actions .analyze-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         /* --- КНОПКИ ВНИЗУ --- */
@@ -722,13 +806,13 @@
             margin-top: 14px;
             flex-wrap: wrap;
             padding-top: 14px;
-            border-top: 1px solid rgba(0, 180, 255, 0.04);
+            border-top: 1px solid rgba(0, 180, 255, 0.03);
         }
 
         .memory-button {
-            background: rgba(0, 80, 180, 0.04);
-            color: #3a6a8a;
-            border: 1px solid rgba(0, 180, 255, 0.04);
+            background: rgba(0, 80, 180, 0.03);
+            color: #2a5a7a;
+            border: 1px solid rgba(0, 180, 255, 0.03);
             padding: 7px 18px;
             border-radius: 20px;
             font-size: 12px;
@@ -738,42 +822,25 @@
             align-items: center;
             gap: 5px;
             font-weight: 500;
+            font-family: 'Inter', sans-serif;
         }
 
         .memory-button:hover {
-            background: rgba(0, 80, 180, 0.08);
-            color: #5a8aaa;
-            border-color: rgba(0, 180, 255, 0.08);
+            background: rgba(0, 80, 180, 0.06);
+            color: #4a7a9a;
+            border-color: rgba(0, 180, 255, 0.06);
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 80, 180, 0.04);
+            box-shadow: 0 4px 20px rgba(0, 80, 180, 0.03);
         }
 
         .memory-button:active {
             transform: scale(0.95);
         }
 
-        /* --- FOOTER --- */
-        .footer {
-            text-align: center;
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0, 180, 255, 0.03);
-        }
-
-        .footer-text {
-            font-size: 11px;
-            color: #1a3a5a;
-            letter-spacing: 1px;
-            font-weight: 300;
-        }
-
-        .footer-text span {
-            color: #2a5a7a;
-            font-weight: 400;
-            background: linear-gradient(135deg, #4a9eff, #00d4ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .memory-button.danger:hover {
+            background: rgba(233, 69, 96, 0.06);
+            color: #e94560;
+            border-color: rgba(233, 69, 96, 0.06);
         }
 
         /* ============================================================
@@ -787,9 +854,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -801,32 +868,21 @@
             display: flex !important;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
         .memory-panel {
-            background: linear-gradient(145deg, #0a1a2a, #050a12);
+            background: linear-gradient(160deg, #0a1a2a, #050a12);
             border-radius: 24px;
             padding: 24px 26px 26px;
-            max-width: 520px;
+            max-width: 500px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
-            border: 1px solid rgba(0, 180, 255, 0.06);
+            border: 1px solid rgba(0, 180, 255, 0.05);
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
             position: relative;
         }
 
         .memory-panel::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
         .memory-panel::-webkit-scrollbar-track {
             background: transparent;
@@ -842,7 +898,7 @@
             right: 16px;
             background: none;
             border: none;
-            color: #3a6a8a;
+            color: #2a5a7a;
             font-size: 18px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -852,17 +908,18 @@
 
         .memory-close:hover {
             color: #e94560;
-            background: rgba(233, 69, 96, 0.06);
+            background: rgba(233, 69, 96, 0.05);
         }
 
         .memory-icon {
-            font-size: 32px;
+            font-size: 30px;
             text-align: center;
             margin-bottom: 2px;
         }
 
         .memory-panel h2 {
-            font-size: 20px;
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
             font-weight: 700;
             text-align: center;
             background: linear-gradient(135deg, #4a9eff, #00d4ff);
@@ -870,31 +927,33 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 2px;
+            letter-spacing: 2px;
         }
 
         .memory-description {
             text-align: center;
-            color: #3a5a7a;
-            font-size: 12px;
+            color: #2a4a6a;
+            font-size: 11px;
             margin-bottom: 14px;
+            letter-spacing: 0.5px;
         }
 
         .memory-content {
-            background: rgba(10, 20, 35, 0.3);
+            background: rgba(10, 20, 35, 0.25);
             border-radius: 14px;
             padding: 12px 14px;
-            min-height: 70px;
-            max-height: 300px;
+            min-height: 60px;
+            max-height: 280px;
             overflow-y: auto;
             margin-bottom: 14px;
-            border: 1px solid rgba(0, 180, 255, 0.03);
+            border: 1px solid rgba(0, 180, 255, 0.02);
             text-align: left;
             font-size: 13px;
             line-height: 1.7;
         }
 
         .memory-content::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
         .memory-content::-webkit-scrollbar-track {
             background: transparent;
@@ -905,24 +964,25 @@
         }
 
         .memory-section {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .memory-section-title {
             color: #4a9eff;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
             padding-bottom: 4px;
-            border-bottom: 1px solid rgba(0, 180, 255, 0.04);
+            border-bottom: 1px solid rgba(0, 180, 255, 0.03);
+            text-transform: uppercase;
         }
 
         .memory-item {
             padding: 2px 0 2px 8px;
             color: #b0c8d8;
             font-size: 12px;
-            border-left: 2px solid rgba(0, 180, 255, 0.04);
+            border-left: 2px solid rgba(0, 180, 255, 0.03);
             margin-bottom: 2px;
         }
 
@@ -937,7 +997,7 @@
         }
 
         .memory-empty {
-            color: #2a4a6a;
+            color: #1a3a5a;
             text-align: center;
             padding: 14px 0;
             font-style: italic;
@@ -952,27 +1012,28 @@
         }
 
         .memory-action {
-            background: rgba(0, 80, 180, 0.04);
-            color: #3a6a8a;
-            border: 1px solid rgba(0, 180, 255, 0.04);
+            background: rgba(0, 80, 180, 0.03);
+            color: #2a5a7a;
+            border: 1px solid rgba(0, 180, 255, 0.03);
             padding: 6px 16px;
             border-radius: 16px;
             font-size: 11px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-family: 'Inter', sans-serif;
         }
 
         .memory-action:hover {
-            background: rgba(0, 80, 180, 0.08);
-            color: #5a8aaa;
-            border-color: rgba(0, 180, 255, 0.08);
+            background: rgba(0, 80, 180, 0.06);
+            color: #4a7a9a;
+            border-color: rgba(0, 180, 255, 0.06);
         }
 
         .memory-action.danger:hover {
-            background: rgba(233, 69, 96, 0.08);
+            background: rgba(233, 69, 96, 0.06);
             color: #e94560;
-            border-color: rgba(233, 69, 96, 0.08);
+            border-color: rgba(233, 69, 96, 0.06);
         }
 
         /* ============================================================
@@ -986,23 +1047,23 @@
             }
 
             .orb {
-                width: 76px;
-                height: 76px;
+                width: 68px;
+                height: 68px;
             }
             .orb-inner {
-                width: 36px;
-                height: 36px;
+                width: 32px;
+                height: 32px;
             }
 
             .title {
-                font-size: 26px;
-                letter-spacing: 3px;
+                font-size: 24px;
+                letter-spacing: 4px;
             }
 
             .mic-button {
-                width: 50px;
-                height: 50px;
-                font-size: 22px;
+                width: 54px;
+                height: 54px;
+                font-size: 24px;
             }
 
             .memory-panel {
@@ -1011,23 +1072,24 @@
             }
 
             .memory-content {
-                max-height: 180px;
+                max-height: 160px;
                 font-size: 12px;
                 padding: 10px 12px;
             }
 
             .conversation {
-                max-height: 180px;
+                max-height: 160px;
                 font-size: 13px;
                 padding: 10px 12px;
             }
 
             .tab-btn {
                 font-size: 10px;
-                padding: 5px 6px;
+                padding: 6px 6px;
+                letter-spacing: 0px;
             }
             .tab-btn .icon {
-                font-size: 12px;
+                font-size: 13px;
             }
 
             .input-row input[type="text"] {
@@ -1045,8 +1107,13 @@
                 padding: 6px 10px;
             }
 
-            .footer-text {
-                font-size: 10px;
+            .header-title {
+                font-size: 12px;
+                letter-spacing: 2px;
+            }
+            .header-badge {
+                font-size: 8px;
+                padding: 2px 10px;
             }
         }
 
@@ -1066,23 +1133,38 @@
                 padding: 4px 4px;
             }
             .tab-btn .icon {
-                font-size: 10px;
-            }
-
-            .header-title {
                 font-size: 11px;
-                letter-spacing: 1.5px;
             }
 
             .title {
-                font-size: 20px;
+                font-size: 18px;
                 letter-spacing: 2px;
+            }
+            .title-section .creator {
+                font-size: 8px;
+                letter-spacing: 2px;
+            }
+
+            .conversation {
+                min-height: 100px;
+                max-height: 140px;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+
+            .mic-button {
+                width: 46px;
+                height: 46px;
+                font-size: 20px;
             }
         }
     </style>
 </head>
 
 <body>
+
+    <!-- СЕТКА -->
+    <div class="grid-overlay"></div>
 
     <!-- ПАРЯЩИЕ ЧАСТИЦЫ -->
     <div class="particles" id="particles"></div>
@@ -1096,10 +1178,13 @@
         <div class="header">
             <div class="header-left">
                 <div class="status-dot"></div>
-                <span class="header-title">J<span>AR</span>VIS</span>
+                <span class="header-title">J<span class="highlight">AR</span>VIS</span>
             </div>
             <div class="header-right">
-                <span class="header-badge">● ONLINE</span>
+                <span class="header-badge">
+                    <span class="badge-dot"></span>
+                    ONLINE
+                </span>
             </div>
         </div>
 
@@ -1110,8 +1195,9 @@
             </div>
         </div>
 
-        <!-- ЗАГОЛОВОК -->
+        <!-- ЗАГОЛОВОК С СОЗДАТЕЛЕМ -->
         <div class="title-section">
+            <div class="creator">by <span>Sergo</span></div>
             <div class="title">JARVIS</div>
             <div class="subtitle">Персональный AI-помощник</div>
         </div>
@@ -1122,15 +1208,15 @@
         <!-- ВКЛАДКИ -->
         <div class="tabs" id="tabs">
             <button class="tab-btn active" data-tab="voice">
-                <span class="icon">🎙️</span> Голос
+                <span class="icon">🎙️</span> Голосовой
             </button>
             <button class="tab-btn" data-tab="text">
-                <span class="icon">💬</span> Чат
+                <span class="icon">💬</span> Текстовый
             </button>
         </div>
 
         <!-- =========================================================
-             ВКЛАДКА: ГОЛОСОВОЙ
+             ВКЛАДКА 1: ГОЛОСОВОЙ ЧАТ (ТОЛЬКО ГОЛОС)
         ========================================================== -->
         <div class="tab-content active" id="tab-voice">
             <div id="conversation" class="conversation">
@@ -1144,11 +1230,11 @@
         </div>
 
         <!-- =========================================================
-             ВКЛАДКА: ТЕКСТОВЫЙ ЧАТ + ФОТО (ОБЪЕДИНЕНЫ)
+             ВКЛАДКА 2: ТЕКСТОВЫЙ ЧАТ + ФОТО (ОБЪЕДИНЕНЫ)
         ========================================================== -->
         <div class="tab-content" id="tab-text">
             <div id="textConversation" class="conversation">
-                <div class="jarvis-message">Напишите или загрузите фото, сэр.</div>
+                <div class="jarvis-message">Напишите сообщение или загрузите фото, сэр.</div>
             </div>
 
             <!-- Превью фото -->
@@ -1182,12 +1268,7 @@
         <!-- КНОПКИ ВНИЗУ -->
         <div class="bottom-row">
             <button id="memoryButton" class="memory-button" type="button">🧠 Память</button>
-            <button id="clearChatBtn" class="memory-button" type="button">🗑️ Очистить</button>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="footer">
-            <p class="footer-text">by <span>Sergo</span> — JARVIS v2.0</p>
+            <button id="clearChatBtn" class="memory-button danger" type="button">🗑️ Очистить</button>
         </div>
 
     </main>
