@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#02060a">
-    <title>JARVIS</title>
+    <title>JARVIS — by Sergo</title>
 
     <style>
         /* ============================================================
-           CSS СТИЛИ — Стиль JARVIS
+           CSS СТИЛИ — JARVIS IRON MAN THEME
            ============================================================ */
 
         /* --- БАЗА --- */
@@ -21,27 +21,110 @@
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #02060a;
-            color: #e0e0e0;
+            background: #010408;
+            color: #e8e8e8;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
             margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Анимированный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(0, 100, 255, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 200, 255, 0.03) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Парящие частицы */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 180, 255, 0.15);
+            border-radius: 50%;
+            animation: float-particle linear infinite;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         /* --- ОСНОВНОЙ КОНТЕЙНЕР --- */
         .jarvis {
-            max-width: 560px;
+            max-width: 580px;
             width: 100%;
-            background: linear-gradient(160deg, #0a121f, #050a12);
+            background: linear-gradient(160deg, rgba(10, 18, 30, 0.92), rgba(5, 10, 18, 0.96));
             border-radius: 32px;
-            padding: 28px 24px 30px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 150, 255, 0.04);
+            padding: 28px 24px 24px;
+            box-shadow:
+                0 30px 100px rgba(0, 0, 0, 0.95),
+                0 0 80px rgba(0, 100, 255, 0.04),
+                inset 0 1px 0 rgba(0, 180, 255, 0.04);
             border: 1px solid rgba(0, 180, 255, 0.06);
             position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+        }
+
+        /* Свечение по краям */
+        .jarvis::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.15), transparent);
+            border-radius: 100%;
+        }
+
+        .jarvis::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 30%;
+            right: 30%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.08), transparent);
+            border-radius: 100%;
         }
 
         /* --- ШАПКА --- */
@@ -49,13 +132,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 22px;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 1.2px;
-            color: #4a7a9a;
-            text-transform: uppercase;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(0, 180, 255, 0.04);
         }
 
         .header-left {
@@ -69,8 +148,21 @@
             height: 10px;
             background: #00e676;
             border-radius: 50%;
-            box-shadow: 0 0 14px #00e67688;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
             animation: pulse-dot 2s infinite;
+            position: relative;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 230, 118, 0.1);
+            animation: pulse-ring 2s infinite;
         }
 
         @keyframes pulse-dot {
@@ -80,39 +172,81 @@
                 transform: scale(1);
             }
             50% {
-                opacity: 0.4;
+                opacity: 0.5;
                 transform: scale(0.85);
             }
+        }
+
+        @keyframes pulse-ring {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        .header-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: #4a8aaa;
+            text-transform: uppercase;
+        }
+
+        .header-title span {
+            color: #00d4ff;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .header-badge {
-            font-size: 10px;
-            background: rgba(0, 180, 255, 0.08);
-            padding: 4px 12px;
+            font-size: 9px;
+            background: rgba(0, 180, 255, 0.06);
+            padding: 3px 10px;
             border-radius: 20px;
-            color: #3a8aaa;
-            border: 1px solid rgba(0, 180, 255, 0.06);
+            color: #2a6a8a;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
-        /* --- ORB --- */
+        /* --- ORB (Голограмма) --- */
         .orb-container {
             display: flex;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        .orb-container::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 20px;
+            background: radial-gradient(ellipse, rgba(0, 100, 255, 0.06), transparent 70%);
+            border-radius: 50%;
+            filter: blur(10px);
         }
 
         .orb {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #1a3a5a, #0a1a2a);
-            box-shadow: 0 0 60px rgba(0, 150, 255, 0.12), inset 0 0 60px rgba(0, 150, 255, 0.04);
+            box-shadow:
+                0 0 60px rgba(0, 100, 255, 0.08),
+                inset 0 0 60px rgba(0, 100, 255, 0.03);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -120,12 +254,38 @@
             transition: all 0.5s ease;
         }
 
+        .orb::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            animation: orb-ring 4s linear infinite;
+        }
+
+        @keyframes orb-ring {
+            0% {
+                transform: rotate(0deg);
+                border-color: rgba(0, 180, 255, 0.04);
+            }
+            50% {
+                border-color: rgba(0, 180, 255, 0.1);
+            }
+            100% {
+                transform: rotate(360deg);
+                border-color: rgba(0, 180, 255, 0.04);
+            }
+        }
+
         .orb-inner {
-            width: 55px;
-            height: 55px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #4a8ab5, #0a2a4a);
-            box-shadow: 0 0 40px rgba(0, 150, 255, 0.15);
+            box-shadow: 0 0 40px rgba(0, 100, 255, 0.1);
             animation: orb-pulse 3s ease-in-out infinite;
         }
 
@@ -136,104 +296,120 @@
                 opacity: 0.8;
             }
             50% {
-                transform: scale(1.08);
+                transform: scale(1.1);
                 opacity: 1;
             }
         }
 
         /* --- ЗАГОЛОВОК --- */
-        .title {
+        .title-section {
             text-align: center;
-            font-size: 30px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            margin-bottom: 4px;
+        }
+
+        .title {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            background: linear-gradient(135deg, #4a9eff, #00d4ff, #4a9eff);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 4px;
-            text-shadow: 0 0 40px rgba(0, 150, 255, 0.1);
+            animation: shimmer-text 4s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(0, 100, 255, 0.05);
+        }
+
+        @keyframes shimmer-text {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         .subtitle {
             text-align: center;
-            font-size: 13px;
-            color: #3a5a7a;
-            margin-bottom: 16px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            color: #2a5a7a;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+            margin-top: -2px;
         }
 
         /* --- СТАТУС --- */
         #status {
-            font-size: 14px;
-            color: #5a8aaa;
+            font-size: 13px;
+            color: #4a7a9a;
             text-align: center;
-            min-height: 26px;
+            min-height: 24px;
             font-weight: 400;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
             margin-bottom: 14px;
+            padding: 4px 0;
+            background: rgba(0, 100, 200, 0.02);
+            border-radius: 10px;
         }
 
         /* --- ВКЛАДКИ --- */
         .tabs {
             display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            background: rgba(0, 20, 40, 0.4);
+            gap: 4px;
+            margin-bottom: 14px;
+            background: rgba(0, 20, 40, 0.3);
             border-radius: 14px;
             padding: 4px;
-            border: 1px solid rgba(0, 180, 255, 0.05);
+            border: 1px solid rgba(0, 180, 255, 0.04);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border: none;
             border-radius: 11px;
             background: transparent;
-            color: #4a7a9a;
-            font-size: 13px;
+            color: #3a6a8a;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .tab-btn:hover {
-            color: #7ab8e0;
-            background: rgba(0, 100, 200, 0.05);
+            color: #6aaac0;
+            background: rgba(0, 100, 200, 0.04);
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, rgba(0, 100, 200, 0.2), rgba(0, 180, 255, 0.1));
-            color: #8ac8e8;
-            box-shadow: 0 2px 20px rgba(0, 100, 200, 0.05);
+            background: linear-gradient(135deg, rgba(0, 80, 180, 0.15), rgba(0, 160, 255, 0.05));
+            color: #7ab8e0;
+            box-shadow: 0 2px 20px rgba(0, 80, 180, 0.04);
         }
 
-        .tab-content {
-            display: none;
+        .tab-btn .icon {
+            font-size: 14px;
         }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        /* --- ЧАТ --- */
+        /* --- ЧАТ (общий) --- */
         .conversation {
-            background: rgba(10, 20, 35, 0.5);
+            background: rgba(10, 20, 35, 0.4);
             border-radius: 16px;
-            padding: 16px 18px;
-            min-height: 140px;
-            max-height: 280px;
+            padding: 14px 16px;
+            min-height: 130px;
+            max-height: 260px;
             overflow-y: auto;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             text-align: left;
             font-size: 14px;
             line-height: 1.6;
-            border: 1px solid rgba(0, 180, 255, 0.05);
+            border: 1px solid rgba(0, 180, 255, 0.04);
             scroll-behavior: smooth;
         }
 
@@ -250,11 +426,12 @@
 
         .user-message {
             color: #7ab8e0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding: 8px 14px;
-            background: rgba(0, 100, 200, 0.06);
+            background: rgba(0, 100, 200, 0.05);
             border-radius: 12px 12px 12px 4px;
             border-left: 3px solid #4a9eff;
+            animation: slideIn 0.3s ease;
         }
 
         .user-message strong {
@@ -263,30 +440,64 @@
 
         .jarvis-message {
             color: #b0d0e8;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding: 8px 14px;
-            background: rgba(0, 200, 255, 0.03);
+            background: rgba(0, 200, 255, 0.02);
             border-radius: 12px 12px 4px 12px;
             border-right: 3px solid #00d4ff;
+            animation: slideIn 0.3s ease;
         }
 
         .jarvis-message strong {
             color: #00d4ff;
         }
 
-        /* --- ТЕКСТОВЫЙ ВВОД --- */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            color: #3a6a8a;
+            font-size: 13px;
+            padding: 8px 14px;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* --- ТЕКСТОВЫЙ ВВОД + ФОТО (объединенный режим) --- */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .input-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
         }
 
         .input-row input[type="text"] {
             flex: 1;
-            padding: 12px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(0, 180, 255, 0.08);
-            background: rgba(10, 20, 40, 0.6);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 180, 255, 0.06);
+            background: rgba(10, 20, 40, 0.5);
             color: #c8d8e8;
             font-size: 14px;
             outline: none;
@@ -294,30 +505,30 @@
         }
 
         .input-row input[type="text"]:focus {
-            border-color: rgba(0, 180, 255, 0.25);
-            background: rgba(10, 20, 40, 0.8);
-            box-shadow: 0 0 30px rgba(0, 100, 200, 0.03);
+            border-color: rgba(0, 180, 255, 0.15);
+            background: rgba(10, 20, 40, 0.7);
+            box-shadow: 0 0 30px rgba(0, 80, 180, 0.02);
         }
 
         .input-row input[type="text"]::placeholder {
-            color: #3a5a7a;
+            color: #2a4a6a;
         }
 
         .input-row .send-btn {
-            padding: 12px 20px;
-            border-radius: 14px;
+            padding: 10px 16px;
+            border-radius: 12px;
             border: none;
             background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
-            color: #7ab8e0;
-            font-size: 18px;
+            color: #6aaac0;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 50px;
+            min-width: 44px;
         }
 
         .input-row .send-btn:hover {
             background: linear-gradient(135deg, #1a3a5a, #2a5a8a);
-            box-shadow: 0 4px 30px rgba(0, 100, 200, 0.15);
+            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.1);
             transform: scale(1.02);
         }
 
@@ -328,15 +539,14 @@
         /* --- ФОТО ЗАГРУЗКА --- */
         .photo-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .photo-row .file-input-wrap {
             flex: 1;
             position: relative;
-            min-width: 120px;
+            min-width: 100px;
         }
 
         .photo-row .file-input-wrap input[type="file"] {
@@ -353,67 +563,111 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 14px;
-            border: 1px dashed rgba(0, 180, 255, 0.15);
-            background: rgba(10, 20, 40, 0.4);
-            color: #5a8aaa;
-            font-size: 13px;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px dashed rgba(0, 180, 255, 0.08);
+            background: rgba(10, 20, 40, 0.3);
+            color: #3a6a8a;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
         }
 
         .photo-row .file-label:hover {
-            border-color: rgba(0, 180, 255, 0.3);
-            background: rgba(10, 20, 40, 0.6);
-            color: #8ac0e0;
+            border-color: rgba(0, 180, 255, 0.2);
+            background: rgba(10, 20, 40, 0.5);
+            color: #5a8aaa;
         }
 
         .photo-row .file-label.has-file {
             border-color: #4a9eff;
-            background: rgba(0, 100, 200, 0.08);
-            color: #7ab8e0;
+            background: rgba(0, 80, 180, 0.06);
+            color: #6aaac0;
         }
 
         .photo-preview {
             max-width: 100%;
-            max-height: 120px;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            max-height: 100px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             display: none;
-            border: 1px solid rgba(0, 180, 255, 0.08);
+            border: 1px solid rgba(0, 180, 255, 0.06);
         }
 
         .photo-preview.show {
             display: block;
         }
 
-        /* --- МИКРОФОН (ГОЛОСОВОЙ РЕЖИМ) --- */
+        .photo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .photo-actions .analyze-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
+            color: #6aaac0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .photo-actions .analyze-btn:hover {
+            background: linear-gradient(135deg, #1a3a5a, #2a5a8a);
+            box-shadow: 0 4px 25px rgba(0, 80, 180, 0.1);
+        }
+
+        .photo-actions .analyze-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- МИКРОФОН (ГОЛОСОВОЙ) --- */
         .mic-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .mic-button {
-            width: 68px;
-            height: 68px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
             background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
-            color: #7ab8e0;
-            font-size: 32px;
+            color: #6aaac0;
+            font-size: 28px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 30px rgba(0, 100, 200, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 80, 180, 0.1);
+            position: relative;
+        }
+
+        .mic-button::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            transition: all 0.3s ease;
         }
 
         .mic-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 6px 40px rgba(0, 150, 255, 0.25);
+            box-shadow: 0 6px 40px rgba(0, 80, 180, 0.15);
+        }
+
+        .mic-button:hover::before {
+            border-color: rgba(0, 180, 255, 0.08);
         }
 
         .mic-button:active {
@@ -423,60 +677,103 @@
         .mic-button.listening {
             background: linear-gradient(135deg, #1a4a7a, #4a9eff);
             color: #fff;
-            box-shadow: 0 0 50px rgba(0, 150, 255, 0.35);
+            box-shadow: 0 0 50px rgba(0, 100, 255, 0.25);
             animation: mic-pulse 1.2s infinite;
+        }
+
+        .mic-button.listening::before {
+            border-color: rgba(0, 180, 255, 0.15);
+            animation: ring-pulse 1.2s infinite;
         }
 
         @keyframes mic-pulse {
             0%,
             100% {
-                box-shadow: 0 0 30px rgba(0, 150, 255, 0.25);
+                box-shadow: 0 0 30px rgba(0, 80, 180, 0.15);
             }
             50% {
-                box-shadow: 0 0 60px rgba(0, 150, 255, 0.5);
+                box-shadow: 0 0 60px rgba(0, 100, 255, 0.3);
+            }
+        }
+
+        @keyframes ring-pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0;
             }
         }
 
         .hint {
-            font-size: 12px;
-            color: #3a5a7a;
+            font-size: 11px;
+            color: #2a5a7a;
             letter-spacing: 0.3px;
         }
 
-        /* --- КНОПКА ПАМЯТИ --- */
+        /* --- КНОПКИ ВНИЗУ --- */
         .bottom-row {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             margin-top: 14px;
             flex-wrap: wrap;
+            padding-top: 14px;
+            border-top: 1px solid rgba(0, 180, 255, 0.04);
         }
 
         .memory-button {
-            background: rgba(0, 100, 200, 0.06);
-            color: #4a7a9a;
-            border: 1px solid rgba(0, 180, 255, 0.06);
-            padding: 8px 20px;
-            border-radius: 22px;
-            font-size: 13px;
+            background: rgba(0, 80, 180, 0.04);
+            color: #3a6a8a;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            padding: 7px 18px;
+            border-radius: 20px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             font-weight: 500;
         }
 
         .memory-button:hover {
-            background: rgba(0, 100, 200, 0.12);
-            color: #7ab8e0;
-            border-color: rgba(0, 180, 255, 0.15);
+            background: rgba(0, 80, 180, 0.08);
+            color: #5a8aaa;
+            border-color: rgba(0, 180, 255, 0.08);
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 100, 200, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 80, 180, 0.04);
         }
 
         .memory-button:active {
             transform: scale(0.95);
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 180, 255, 0.03);
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: #1a3a5a;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        .footer-text span {
+            color: #2a5a7a;
+            font-weight: 400;
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* ============================================================
@@ -490,9 +787,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -518,12 +815,12 @@
         .memory-panel {
             background: linear-gradient(145deg, #0a1a2a, #050a12);
             border-radius: 24px;
-            padding: 26px 28px 28px;
+            padding: 24px 26px 26px;
             max-width: 520px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
-            border: 1px solid rgba(0, 180, 255, 0.08);
+            border: 1px solid rgba(0, 180, 255, 0.06);
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
             position: relative;
         }
@@ -541,31 +838,31 @@
 
         .memory-close {
             position: absolute;
-            top: 14px;
-            right: 18px;
+            top: 12px;
+            right: 16px;
             background: none;
             border: none;
-            color: #4a7a9a;
-            font-size: 20px;
+            color: #3a6a8a;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s ease;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 8px;
         }
 
         .memory-close:hover {
             color: #e94560;
-            background: rgba(233, 69, 96, 0.08);
+            background: rgba(233, 69, 96, 0.06);
         }
 
         .memory-icon {
-            font-size: 36px;
+            font-size: 32px;
             text-align: center;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .memory-panel h2 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             text-align: center;
             background: linear-gradient(135deg, #4a9eff, #00d4ff);
@@ -577,20 +874,20 @@
 
         .memory-description {
             text-align: center;
-            color: #4a6a8a;
-            font-size: 13px;
-            margin-bottom: 16px;
+            color: #3a5a7a;
+            font-size: 12px;
+            margin-bottom: 14px;
         }
 
         .memory-content {
-            background: rgba(10, 20, 35, 0.4);
+            background: rgba(10, 20, 35, 0.3);
             border-radius: 14px;
-            padding: 14px 16px;
-            min-height: 80px;
-            max-height: 320px;
+            padding: 12px 14px;
+            min-height: 70px;
+            max-height: 300px;
             overflow-y: auto;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0, 180, 255, 0.04);
+            margin-bottom: 14px;
+            border: 1px solid rgba(0, 180, 255, 0.03);
             text-align: left;
             font-size: 13px;
             line-height: 1.7;
@@ -608,24 +905,24 @@
         }
 
         .memory-section {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .memory-section-title {
             color: #4a9eff;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             padding-bottom: 4px;
-            border-bottom: 1px solid rgba(0, 180, 255, 0.06);
+            border-bottom: 1px solid rgba(0, 180, 255, 0.04);
         }
 
         .memory-item {
-            padding: 3px 0 3px 8px;
+            padding: 2px 0 2px 8px;
             color: #b0c8d8;
-            font-size: 13px;
-            border-left: 2px solid rgba(0, 180, 255, 0.06);
+            font-size: 12px;
+            border-left: 2px solid rgba(0, 180, 255, 0.04);
             margin-bottom: 2px;
         }
 
@@ -640,128 +937,146 @@
         }
 
         .memory-empty {
-            color: #3a5a7a;
+            color: #2a4a6a;
             text-align: center;
-            padding: 16px 0;
+            padding: 14px 0;
             font-style: italic;
+            font-size: 13px;
         }
 
         .memory-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .memory-action {
-            background: rgba(0, 100, 200, 0.06);
-            color: #4a7a9a;
-            border: 1px solid rgba(0, 180, 255, 0.06);
-            padding: 7px 18px;
-            border-radius: 18px;
-            font-size: 12px;
+            background: rgba(0, 80, 180, 0.04);
+            color: #3a6a8a;
+            border: 1px solid rgba(0, 180, 255, 0.04);
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
         }
 
         .memory-action:hover {
-            background: rgba(0, 100, 200, 0.12);
-            color: #7ab8e0;
-            border-color: rgba(0, 180, 255, 0.12);
+            background: rgba(0, 80, 180, 0.08);
+            color: #5a8aaa;
+            border-color: rgba(0, 180, 255, 0.08);
         }
 
         .memory-action.danger:hover {
-            background: rgba(233, 69, 96, 0.1);
+            background: rgba(233, 69, 96, 0.08);
             color: #e94560;
-            border-color: rgba(233, 69, 96, 0.12);
+            border-color: rgba(233, 69, 96, 0.08);
         }
 
         /* ============================================================
            АДАПТИВ
            ============================================================ */
 
-        @media (max-width: 500px) {
+        @media (max-width: 520px) {
             .jarvis {
-                padding: 18px 14px 20px;
+                padding: 16px 12px 18px;
                 border-radius: 24px;
             }
 
             .orb {
-                width: 80px;
-                height: 80px;
+                width: 76px;
+                height: 76px;
             }
             .orb-inner {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
             }
 
             .title {
-                font-size: 24px;
-                letter-spacing: 2px;
+                font-size: 26px;
+                letter-spacing: 3px;
             }
 
             .mic-button {
-                width: 56px;
-                height: 56px;
-                font-size: 26px;
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
             }
 
             .memory-panel {
-                padding: 18px 14px 20px;
+                padding: 16px 12px 18px;
                 border-radius: 18px;
             }
 
             .memory-content {
-                max-height: 200px;
+                max-height: 180px;
                 font-size: 12px;
                 padding: 10px 12px;
             }
 
             .conversation {
-                max-height: 200px;
-                font-size: 13px;
-                padding: 12px 14px;
-            }
-
-            .tab-btn {
-                font-size: 11px;
-                padding: 6px 8px;
-            }
-
-            .photo-row .file-label {
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-
-            .input-row input[type="text"] {
+                max-height: 180px;
                 font-size: 13px;
                 padding: 10px 12px;
             }
 
+            .tab-btn {
+                font-size: 10px;
+                padding: 5px 6px;
+            }
+            .tab-btn .icon {
+                font-size: 12px;
+            }
+
+            .input-row input[type="text"] {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
             .input-row .send-btn {
-                font-size: 16px;
-                padding: 10px 14px;
-                min-width: 44px;
+                font-size: 14px;
+                padding: 8px 12px;
+                min-width: 38px;
+            }
+
+            .photo-row .file-label {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+
+            .footer-text {
+                font-size: 10px;
             }
         }
 
         @media (max-width: 380px) {
             .jarvis {
-                padding: 12px 10px 16px;
-            }
-
-            .header {
-                font-size: 11px;
+                padding: 10px 8px 14px;
+                border-radius: 18px;
             }
 
             .tabs {
                 flex-wrap: wrap;
+                gap: 3px;
+            }
+            .tab-btn {
+                flex: 1 1 30%;
+                font-size: 9px;
+                padding: 4px 4px;
+            }
+            .tab-btn .icon {
+                font-size: 10px;
             }
 
-            .tab-btn {
-                flex: 1 1 45%;
-                font-size: 10px;
+            .header-title {
+                font-size: 11px;
+                letter-spacing: 1.5px;
+            }
+
+            .title {
+                font-size: 20px;
+                letter-spacing: 2px;
             }
         }
     </style>
@@ -769,103 +1084,110 @@
 
 <body>
 
+    <!-- ПАРЯЩИЕ ЧАСТИЦЫ -->
+    <div class="particles" id="particles"></div>
+
+    <!-- =========================================================
+         ОСНОВНОЙ КОНТЕЙНЕР
+    ========================================================== -->
     <main class="jarvis">
 
-        <!-- =========================================================
-             HEADER
-        ========================================================== -->
+        <!-- HEADER -->
         <div class="header">
             <div class="header-left">
                 <div class="status-dot"></div>
-                <span>JARVIS</span>
+                <span class="header-title">J<span>AR</span>VIS</span>
             </div>
             <div class="header-right">
-                <span class="header-badge">v2.0</span>
+                <span class="header-badge">● ONLINE</span>
             </div>
         </div>
 
-        <!-- =========================================================
-             ORB
-        ========================================================== -->
+        <!-- ORB -->
         <div class="orb-container">
             <div class="orb">
                 <div class="orb-inner"></div>
             </div>
         </div>
 
-        <div class="title">JARVIS</div>
-        <div class="subtitle">персональный AI-помощник</div>
+        <!-- ЗАГОЛОВОК -->
+        <div class="title-section">
+            <div class="title">JARVIS</div>
+            <div class="subtitle">Персональный AI-помощник</div>
+        </div>
 
-        <!-- =========================================================
-             СТАТУС
-        ========================================================== -->
-        <p id="status">Нажмите кнопку и говорите, сэр.</p>
+        <!-- СТАТУС -->
+        <p id="status">Нажмите 🎙️ и говорите, сэр.</p>
 
-        <!-- =========================================================
-             ВКЛАДКИ
-        ========================================================== -->
+        <!-- ВКЛАДКИ -->
         <div class="tabs" id="tabs">
-            <button class="tab-btn active" data-tab="voice">🎙️ Голосовой</button>
-            <button class="tab-btn" data-tab="text">💬 Текстовый</button>
-            <button class="tab-btn" data-tab="photo">📷 Фото</button>
+            <button class="tab-btn active" data-tab="voice">
+                <span class="icon">🎙️</span> Голос
+            </button>
+            <button class="tab-btn" data-tab="text">
+                <span class="icon">💬</span> Чат
+            </button>
         </div>
 
         <!-- =========================================================
-             ВКЛАДКА: ГОЛОСОВОЙ ЧАТ
+             ВКЛАДКА: ГОЛОСОВОЙ
         ========================================================== -->
         <div class="tab-content active" id="tab-voice">
             <div id="conversation" class="conversation">
-                <div class="jarvis-message">Добро пожаловать, сэр.</div>
+                <div class="jarvis-message">Добро пожаловать, сэр. Я готов.</div>
             </div>
 
             <div class="mic-area">
                 <button id="micButton" class="mic-button" type="button">🎙️</button>
-                <p class="hint">Нажмите для разговора</p>
+                <p class="hint">Нажмите и говорите</p>
             </div>
         </div>
 
         <!-- =========================================================
-             ВКЛАДКА: ТЕКСТОВЫЙ ЧАТ
+             ВКЛАДКА: ТЕКСТОВЫЙ ЧАТ + ФОТО (ОБЪЕДИНЕНЫ)
         ========================================================== -->
         <div class="tab-content" id="tab-text">
             <div id="textConversation" class="conversation">
-                <div class="jarvis-message">Напишите мне что-нибудь, сэр.</div>
+                <div class="jarvis-message">Напишите или загрузите фото, сэр.</div>
             </div>
 
-            <div class="input-row">
-                <input type="text" id="textInput" placeholder="Введите сообщение..." autocomplete="off">
-                <button class="send-btn" id="sendTextBtn">➤</button>
-            </div>
-        </div>
+            <!-- Превью фото -->
+            <img id="photoPreview" class="photo-preview" alt="Превью">
 
-        <!-- =========================================================
-             ВКЛАДКА: ФОТО
-        ========================================================== -->
-        <div class="tab-content" id="tab-photo">
-            <div id="photoConversation" class="conversation">
-                <div class="jarvis-message">Загрузите фото для анализа, сэр.</div>
-            </div>
+            <div class="input-area">
 
-            <img id="photoPreview" class="photo-preview" alt="Превью фото">
-
-            <div class="photo-row">
-                <div class="file-input-wrap">
-                    <input type="file" id="photoInput" accept="image/*">
-                    <span class="file-label" id="photoLabel">📎 Выбрать фото</span>
+                <!-- Строка ввода текста -->
+                <div class="input-row">
+                    <input type="text" id="textInput" placeholder="Введите сообщение..." autocomplete="off">
+                    <button class="send-btn" id="sendTextBtn">➤</button>
                 </div>
-                <button class="send-btn" id="analyzePhotoBtn" style="padding:10px 18px;font-size:14px;">🔍 Анализировать</button>
-            </div>
 
-            <div class="input-row" style="margin-bottom:0;">
-                <input type="text" id="photoQuestion" placeholder="Вопрос к фото (например: что тут написано?)" autocomplete="off">
+                <!-- Строка фото -->
+                <div class="photo-row">
+                    <div class="file-input-wrap">
+                        <input type="file" id="photoInput" accept="image/*">
+                        <span class="file-label" id="photoLabel">📎 Загрузить фото</span>
+                    </div>
+                    <button class="send-btn" id="analyzePhotoBtn" style="font-size:14px;padding:8px 14px;">🔍 Анализ</button>
+                </div>
+
+                <!-- Вопрос к фото -->
+                <div class="input-row" style="margin-top:0;">
+                    <input type="text" id="photoQuestion" placeholder="Вопрос к фото (необязательно)" autocomplete="off">
+                </div>
+
             </div>
         </div>
 
-        <!-- =========================================================
-             КНОПКА ПАМЯТИ
-        ========================================================== -->
+        <!-- КНОПКИ ВНИЗУ -->
         <div class="bottom-row">
             <button id="memoryButton" class="memory-button" type="button">🧠 Память</button>
+            <button id="clearChatBtn" class="memory-button" type="button">🗑️ Очистить</button>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p class="footer-text">by <span>Sergo</span> — JARVIS v2.0</p>
         </div>
 
     </main>
