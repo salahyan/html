@@ -11,31 +11,34 @@ const JARVIS_API =
     "https://jarvis.salahyansergei2006.workers.dev/";
 
 // ============================================================
-// НАСТРОЙКИ ПАМЯТИ (МАКСИМАЛЬНО ОПТИМИЗИРОВАНЫ)
+// НАСТРОЙКИ ПАМЯТИ (ОПТИМИЗИРОВАНЫ)
 // ============================================================
 
 const MEMORY_KEY = "jarvis_conversation_memory";
 const FACTS_KEY = "jarvis_smart_facts";
 
-const MAX_MESSAGES = 20;        // Еще меньше для скорости
-const MAX_CONTEXT_MESSAGES = 3; // Только 3 последних сообщения!
+const MAX_MESSAGES = 30;
+const MAX_CONTEXT_MESSAGES = 3; // Только 3 для скорости
 
 // ============================================================
-// ПАМЯТЬ ДИАЛОГА
+// ПАМЯТЬ ДИАЛОГА (СОХРАНЯЕТСЯ В LOCALSTORAGE)
 // ============================================================
 
-let memory = loadMemory();
-let smartFacts = loadFacts();
+let memory = [];
+let smartFacts = [];
 
+// Загружаем память при старте
 function loadMemory() {
     try {
         const saved = localStorage.getItem(MEMORY_KEY);
-        if (!saved) return [];
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : [];
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            memory = Array.isArray(parsed) ? parsed : [];
+            console.log(`📝 Загружено ${memory.length} сообщений`);
+        }
     } catch (error) {
         console.error("Ошибка загрузки памяти:", error);
-        return [];
+        memory = [];
     }
 }
 
@@ -43,6 +46,7 @@ function saveMemory() {
     try {
         memory = memory.slice(-MAX_MESSAGES);
         localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
+        console.log(`💾 Сохранено ${memory.length} сообщений`);
     } catch (error) {
         console.error("Ошибка сохранения памяти:", error);
     }
@@ -51,7 +55,7 @@ function saveMemory() {
 function addToMemory(role, text) {
     if (!text || !text.trim()) return;
     memory.push({
-        role,
+        role: role,
         text: text.trim(),
         time: new Date().toISOString()
     });
@@ -59,24 +63,28 @@ function addToMemory(role, text) {
 }
 
 // ============================================================
-// УМНЫЕ ФАКТЫ (ПАМЯТЬ О ПОЛЬЗОВАТЕЛЕ)
+// УМНЫЕ ФАКТЫ (СОХРАНЯЮТСЯ В LOCALSTORAGE)
 // ============================================================
 
 function loadFacts() {
     try {
         const saved = localStorage.getItem(FACTS_KEY);
-        if (!saved) return [];
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : [];
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            smartFacts = Array.isArray(parsed) ? parsed : [];
+            console.log(`📌 Загружено ${smartFacts.length} фактов`);
+        }
     } catch (error) {
         console.error("Ошибка загрузки фактов:", error);
-        return [];
+        smartFacts = [];
     }
 }
 
 function saveFacts() {
     try {
+        smartFacts = smartFacts.slice(-30);
         localStorage.setItem(FACTS_KEY, JSON.stringify(smartFacts));
+        console.log(`💾 Сохранено ${smartFacts.length} фактов`);
     } catch (error) {
         console.error("Ошибка сохранения фактов:", error);
     }
@@ -88,7 +96,6 @@ function addSmartFact(text) {
     const exists = smartFacts.some(item => item.toLowerCase() === fact.toLowerCase());
     if (exists) return;
     smartFacts.push(fact);
-    smartFacts = smartFacts.slice(-20); // Уменьшено для скорости
     saveFacts();
 }
 
@@ -97,7 +104,7 @@ function addSmartFact(text) {
 // ============================================================
 
 function detectSmartFact(text) {
-    if (!text) return;
+    if (!text) return false;
     const value = text.trim();
 
     // "Запомни..."
@@ -125,30 +132,43 @@ function detectSmartFact(text) {
 }
 
 // ============================================================
-// КОНТЕКСТ ДЛЯ AI (ТОЛЬКО ПОСЛЕДНИЕ 3 СООБЩЕНИЯ)
+// ПОКАЗАТЬ ПАМЯТЬ (КНОПКА "ПАМЯТЬ")
 // ============================================================
 
-function buildMemoryContext() {
-    return memory
-        .slice(-MAX_CONTEXT_MESSAGES)
-        .map(item => ({
-            role: item.role === "user" ? "user" : "assistant",
-            content: item.text
-        }));
-}
-
-// ============================================================
-// ОЧИСТКА ПАМЯТИ
-// ============================================================
-
-function clearJarvisMemory() {
-    memory = [];
-    smartFacts = [];
-    localStorage.removeItem(MEMORY_KEY);
-    localStorage.removeItem(FACTS_KEY);
-    statusText.textContent = "Память полностью очищена, сэр.";
-    showJarvisMessage("", "Память полностью очищена, сэр.");
-    speak("Память полностью очищена, сэр.");
+function showMemoryDialog() {
+    console.log("🔍 Показываем память...");
+    
+    let memoryText = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    memoryText += "📝 ПАМЯТЬ JARVIS\n";
+    memoryText += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+    
+    // Факты
+    if (smartFacts.length > 0) {
+        memoryText += "📌 ВАЖНЫЕ ФАКТЫ:\n";
+        smartFacts.forEach((fact, i) => {
+            memoryText += `  ${i + 1}. ${fact}\n`;
+        });
+        memoryText += "\n";
+    } else {
+        memoryText += "📌 Важных фактов пока нет.\n\n";
+    }
+    
+    // История диалога
+    if (memory.length > 0) {
+        memoryText += "💬 ИСТОРИЯ ДИАЛОГА:\n";
+        const lastMessages = memory.slice(-20);
+        lastMessages.forEach((msg) => {
+            const role = msg.role === "user" ? "👤 Вы" : "🤖 JARVIS";
+            const text = msg.text.length > 80 ? msg.text.substring(0, 80) + "..." : msg.text;
+            memoryText += `${role}: ${text}\n`;
+        });
+        memoryText += `\n📊 Всего сообщений: ${memory.length}`;
+    } else {
+        memoryText += "💬 История диалога пуста.";
+    }
+    
+    // Показываем в alert
+    alert(memoryText);
 }
 
 // ============================================================
@@ -203,47 +223,17 @@ function showJarvisMessage(userText, answer) {
 }
 
 // ============================================================
-// ПОКАЗАТЬ ВСЮ ПАМЯТЬ (КНОПКА "ПАМЯТЬ")
+// ОЧИСТКА ПАМЯТИ
 // ============================================================
 
-function showFullMemory() {
-    // Проверяем через глобальную функцию
-    if (typeof window.showMemoryDialog === 'function') {
-        window.showMemoryDialog();
-        return;
-    }
-    
-    // Если нет глобальной функции, показываем в диалоге
-    let memoryText = "📝 ПАМЯТЬ JARVIS\n\n";
-    memoryText += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
-    
-    // Факты
-    if (smartFacts.length > 0) {
-        memoryText += "📌 ВАЖНЫЕ ФАКТЫ:\n";
-        smartFacts.forEach((fact, i) => {
-            memoryText += `${i + 1}. ${fact}\n`;
-        });
-        memoryText += "\n";
-    } else {
-        memoryText += "📌 Важных фактов пока нет.\n\n";
-    }
-    
-    // История диалога
-    if (memory.length > 0) {
-        memoryText += "💬 ИСТОРИЯ ДИАЛОГА:\n";
-        const lastMessages = memory.slice(-20);
-        lastMessages.forEach((msg) => {
-            const role = msg.role === "user" ? "Вы" : "JARVIS";
-            const text = msg.text.length > 100 ? msg.text.substring(0, 100) + "..." : msg.text;
-            memoryText += `${role}: ${text}\n`;
-        });
-        memoryText += `\nВсего сообщений: ${memory.length}`;
-    } else {
-        memoryText += "💬 История диалога пуста.";
-    }
-    
-    // Показываем в диалоге
-    alert(memoryText);
+function clearJarvisMemory() {
+    memory = [];
+    smartFacts = [];
+    localStorage.removeItem(MEMORY_KEY);
+    localStorage.removeItem(FACTS_KEY);
+    statusText.textContent = "Память полностью очищена, сэр.";
+    showJarvisMessage("", "Память полностью очищена, сэр.");
+    speak("Память полностью очищена, сэр.");
 }
 
 // ============================================================
@@ -268,8 +258,8 @@ function handleCommand(text) {
         return true;
     }
 
-    // ПОКАЗАТЬ ПАМЯТЬ (команда)
-    if (/\b(что ты помнишь|что ты обо мне помнишь|покажи память|какую информацию ты помнишь|покажи мои данные)\b/.test(command)) {
+    // ПОКАЗАТЬ ПАМЯТЬ (команда голосом)
+    if (/\b(что ты помнишь|что ты обо мне помнишь|покажи память|какую информацию ты помнишь)\b/.test(command)) {
         let answer;
         if (smartFacts.length === 0 && memory.length === 0) {
             answer = "Пока в моей памяти нет сохранённой информации, сэр.";
@@ -318,24 +308,11 @@ function handleCommand(text) {
         return true;
     }
 
-    // ПОИСК
-    const searchMatch = command.match(/^(?:джарвис\s+)?(?:найди|поищи|загугли|погугли)\s+(.+)$/i);
-    if (searchMatch) {
-        const query = searchMatch[1].trim();
-        const answer = "Ищу информацию, сэр.";
-        showJarvisMessage(original, answer);
-        speak(answer);
-        setTimeout(function() {
-            window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
-        }, 150);
-        return true;
-    }
-
     return false;
 }
 
 // ============================================================
-// ЗАПРОС К JARVIS (МАКСИМАЛЬНО ОПТИМИЗИРОВАН)
+// ЗАПРОС К JARVIS (ОПТИМИЗИРОВАН)
 // ============================================================
 
 let requestInProgress = false;
@@ -347,12 +324,12 @@ async function askJarvis(text) {
         return;
     }
 
-    // Сначала проверяем локальные команды (включая "запомни")
+    // Проверяем локальные команды
     if (handleCommand(text)) return;
 
-    // Если это команда "запомни", обрабатываем отдельно
-    const isRememberCommand = detectSmartFact(text);
-    if (isRememberCommand) {
+    // Проверяем команду "запомни"
+    const isRemember = detectSmartFact(text);
+    if (isRemember) {
         const answer = "Я запомнил, сэр.";
         addToMemory("user", text);
         addToMemory("assistant", answer);
@@ -370,9 +347,12 @@ async function askJarvis(text) {
     statusText.textContent = "Обрабатываю запрос, сэр...";
 
     try {
-        // Формируем компактный запрос (только 3 последних сообщения)
-        const context = memory.slice(-MAX_CONTEXT_MESSAGES);
-        
+        // Формируем контекст (только 3 последних сообщения)
+        const context = memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
+            role: msg.role === "user" ? "user" : "assistant",
+            content: msg.text
+        }));
+
         // Отправляем запрос
         const response = await fetch(JARVIS_API, {
             method: "POST",
@@ -381,8 +361,8 @@ async function askJarvis(text) {
             },
             body: JSON.stringify({
                 text: cleanText,
-                history: context, // Только 3 последних сообщения
-                facts: smartFacts // Все факты
+                history: context,
+                facts: smartFacts.slice(-10)
             })
         });
 
@@ -398,7 +378,7 @@ async function askJarvis(text) {
 
         let answer = String(data.answer).trim();
 
-        // Очистка
+        // Очистка от тегов
         answer = answer
             .replace(/<think>[\s\S]*?<\/think>/gi, "")
             .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
@@ -552,6 +532,67 @@ document.addEventListener("click", function firstClick() {
 }, { passive: true });
 
 // ============================================================
+// ПРИВЯЗКА КНОПКИ "ПАМЯТЬ"
+// ============================================================
+
+// Функция для поиска и привязки кнопки
+function setupMemoryButton() {
+    console.log("🔍 Ищем кнопку 'Память'...");
+    
+    // Ищем все возможные элементы с текстом "Память"
+    const allElements = document.querySelectorAll('*');
+    let memoryButton = null;
+    
+    allElements.forEach(el => {
+        if (el.textContent && el.textContent.trim() === 'Память') {
+            memoryButton = el;
+            console.log("✅ Найдена кнопка:", el);
+        }
+    });
+    
+    if (memoryButton) {
+        // Убираем старые обработчики
+        const newButton = memoryButton.cloneNode(true);
+        memoryButton.parentNode.replaceChild(newButton, memoryButton);
+        
+        // Добавляем новый обработчик
+        newButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("🖱️ Нажата кнопка 'Память'");
+            showMemoryDialog();
+        });
+        
+        // Добавляем стиль курсора
+        newButton.style.cursor = 'pointer';
+        
+        console.log("✅ Кнопка 'Память' успешно привязана");
+    } else {
+        console.log("⚠️ Кнопка 'Память' не найдена, пробуем еще раз через 1 секунду...");
+        setTimeout(setupMemoryButton, 1000);
+    }
+}
+
+// ============================================================
+// ЗАГРУЗКА ПРИ СТАРТЕ
+// ============================================================
+
+// Загружаем память
+loadMemory();
+loadFacts();
+
+// Настраиваем кнопку после загрузки DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("📄 DOM загружен, настраиваем кнопку...");
+        setTimeout(setupMemoryButton, 500);
+    });
+} else {
+    console.log("📄 DOM уже загружен, настраиваем кнопку...");
+    setTimeout(setupMemoryButton, 500);
+}
+
+// ============================================================
 // ЭКСПОРТ ДЛЯ ДРУГИХ ЧАСТЕЙ САЙТА
 // ============================================================
 
@@ -562,38 +603,8 @@ window.JARVIS = {
     getMemory: function() { return memory; },
     getFacts: function() { return smartFacts; },
     addFact: addSmartFact,
-    showMemory: showFullMemory // Добавляем функцию показа памяти
+    showMemory: showMemoryDialog
 };
-
-// ============================================================
-// ПЕРЕХВАТ КНОПКИ "ПАМЯТЬ"
-// ============================================================
-
-// Ищем кнопку памяти на сайте
-document.addEventListener('DOMContentLoaded', function() {
-    // Ищем кнопку с текстом "Память"
-    const buttons = document.querySelectorAll('button, a, .button, .btn, [role="button"]');
-    buttons.forEach(btn => {
-        if (btn.textContent && btn.textContent.trim() === 'Память') {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                showFullMemory();
-            });
-            console.log('✅ Кнопка "Память" найдена и привязана');
-        }
-    });
-    
-    // Если кнопка не найдена, добавляем обработчик на все клики
-    if (!document.querySelector('button, a, .button, .btn, [role="button"]')) {
-        document.addEventListener('click', function(e) {
-            const target = e.target.closest('button, a, .button, .btn, [role="button"]');
-            if (target && target.textContent && target.textContent.trim() === 'Память') {
-                e.preventDefault();
-                showFullMemory();
-            }
-        });
-    }
-});
 
 // ============================================================
 // ГОТОВО
