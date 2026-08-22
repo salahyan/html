@@ -3,6 +3,10 @@
 // УМНАЯ ПАМЯТЬ + БЫСТРЫЕ ОТВЕТЫ + ГОЛОС
 // ============================================================
 
+// ============================================================
+// ЭЛЕМЕНТЫ
+// ============================================================
+
 const micButton = document.getElementById("micButton");
 const statusText = document.getElementById("status");
 const conversation = document.getElementById("conversation");
@@ -27,11 +31,15 @@ const MAX_MESSAGES = 30;
 const MAX_CONTEXT_MESSAGES = 5;
 
 // ============================================================
-// ЗАГРУЗКА ПАМЯТИ ПРИ СТАРТЕ
+// ПАМЯТЬ
 // ============================================================
 
 let memory = [];
 let smartFacts = [];
+
+// ============================================================
+// ЗАГРУЗКА ПАМЯТИ
+// ============================================================
 
 function loadMemory() {
     try {
@@ -68,7 +76,7 @@ function addToMemory(role, text) {
 }
 
 // ============================================================
-// ЗАГРУЗКА ФАКТОВ ПРИ СТАРТЕ
+// ФАКТЫ
 // ============================================================
 
 function loadFacts() {
@@ -106,28 +114,25 @@ function addSmartFact(text) {
 }
 
 // ============================================================
-// АВТОМАТИЧЕСКОЕ ОПРЕДЕЛЕНИЕ ВАЖНОЙ ИНФОРМАЦИИ
+// ОПРЕДЕЛЕНИЕ ВАЖНОЙ ИНФОРМАЦИИ
 // ============================================================
 
 function detectSmartFact(text) {
     if (!text) return false;
     const value = text.trim();
 
-    // "Запомни..."
     const rememberMatch = value.match(/^(?:джарвис\s+)?(?:запомни|запиши|сохрани)\s+(.+)$/i);
     if (rememberMatch) {
         addSmartFact(rememberMatch[1].trim());
         return true;
     }
 
-    // Имя пользователя
     const nameMatch = value.match(/(?:меня зовут|моё имя|мое имя)\s+([А-Яа-яЁёA-Za-z-]+)/i);
     if (nameMatch) {
         addSmartFact("Имя пользователя: " + nameMatch[1]);
         return true;
     }
 
-    // Предпочтения
     const preferenceMatch = value.match(/(?:я люблю|мне нравится|я предпочитаю|мне нравится больше)\s+(.+)/i);
     if (preferenceMatch) {
         addSmartFact("Предпочтение пользователя: " + preferenceMatch[1].trim());
@@ -143,32 +148,18 @@ function detectSmartFact(text) {
 
 function showMemoryDialog() {
     console.log("🔍 Показываем память...");
-    
-    // Обновляем содержимое
-    updateMemoryContent();
-    
-    // Показываем модальное окно
-    if (memoryModal) {
-        memoryModal.style.display = 'flex';
-        memoryModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-    }
-}
 
-function hideMemoryDialog() {
-    if (memoryModal) {
-        memoryModal.style.display = 'none';
-        memoryModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-    }
-}
+    const modal = document.getElementById('memoryModal');
+    const content = document.getElementById('memoryContent');
 
-function updateMemoryContent() {
-    if (!memoryContent) return;
-    
+    if (!modal) {
+        console.error("❌ Модальное окно не найдено!");
+        showMemoryAlert();
+        return;
+    }
+
     let html = '';
-    
-    // Факты
+
     if (smartFacts.length > 0) {
         html += '<div class="memory-section"><div class="memory-section-title">📌 ВАЖНЫЕ ФАКТЫ</div>';
         smartFacts.forEach((fact, i) => {
@@ -176,8 +167,7 @@ function updateMemoryContent() {
         });
         html += '</div>';
     }
-    
-    // История диалога
+
     if (memory.length > 0) {
         html += '<div class="memory-section"><div class="memory-section-title">💬 ИСТОРИЯ ДИАЛОГА</div>';
         const lastMessages = memory.slice(-20);
@@ -189,12 +179,65 @@ function updateMemoryContent() {
         html += `<div class="memory-item" style="color:#888;font-size:12px;margin-top:10px;">📊 Всего сообщений: ${memory.length}</div>`;
         html += '</div>';
     }
-    
+
     if (!html) {
         html = '<div class="memory-empty">Память пока пуста, сэр.</div>';
     }
-    
-    memoryContent.innerHTML = html;
+
+    if (content) {
+        content.innerHTML = html;
+    }
+
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    console.log("✅ Модальное окно открыто");
+}
+
+function hideMemoryDialog() {
+    const modal = document.getElementById('memoryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        console.log("✅ Модальное окно закрыто");
+    }
+}
+
+function showMemoryAlert() {
+    let text = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    text += "📝 ПАМЯТЬ JARVIS\n";
+    text += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+    if (smartFacts.length > 0) {
+        text += "📌 ВАЖНЫЕ ФАКТЫ:\n";
+        smartFacts.forEach((fact, i) => {
+            text += `  ${i + 1}. ${fact}\n`;
+        });
+        text += "\n";
+    } else {
+        text += "📌 Важных фактов пока нет.\n\n";
+    }
+
+    if (memory.length > 0) {
+        text += "💬 ИСТОРИЯ ДИАЛОГА:\n";
+        const lastMessages = memory.slice(-20);
+        lastMessages.forEach((msg) => {
+            const role = msg.role === "user" ? "👤 Вы" : "🤖 JARVIS";
+            const msgText = msg.text.length > 80 ? msg.text.substring(0, 80) + "..." : msg.text;
+            text += `${role}: ${msgText}\n`;
+        });
+        text += `\n📊 Всего сообщений: ${memory.length}`;
+    } else {
+        text += "💬 История диалога пуста.";
+    }
+
+    alert(text);
 }
 
 // ============================================================
@@ -211,6 +254,38 @@ function clearJarvisMemory() {
     speak("Память полностью очищена, сэр.");
     updateMemoryContent();
     hideMemoryDialog();
+}
+
+function updateMemoryContent() {
+    if (!memoryContent) return;
+
+    let html = '';
+
+    if (smartFacts.length > 0) {
+        html += '<div class="memory-section"><div class="memory-section-title">📌 ВАЖНЫЕ ФАКТЫ</div>';
+        smartFacts.forEach((fact, i) => {
+            html += `<div class="memory-item">${i + 1}. ${escapeHTML(fact)}</div>`;
+        });
+        html += '</div>';
+    }
+
+    if (memory.length > 0) {
+        html += '<div class="memory-section"><div class="memory-section-title">💬 ИСТОРИЯ ДИАЛОГА</div>';
+        const lastMessages = memory.slice(-20);
+        lastMessages.forEach((msg) => {
+            const role = msg.role === "user" ? "👤 Вы" : "🤖 JARVIS";
+            const text = msg.text.length > 80 ? msg.text.substring(0, 80) + "..." : msg.text;
+            html += `<div class="memory-item ${msg.role}">${role}: ${escapeHTML(text)}</div>`;
+        });
+        html += `<div class="memory-item" style="color:#888;font-size:12px;margin-top:10px;">📊 Всего сообщений: ${memory.length}</div>`;
+        html += '</div>';
+    }
+
+    if (!html) {
+        html = '<div class="memory-empty">Память пока пуста, сэр.</div>';
+    }
+
+    memoryContent.innerHTML = html;
 }
 
 // ============================================================
@@ -272,7 +347,6 @@ function handleCommand(text) {
     const original = text.trim();
     const command = original.toLowerCase().replace(/[!?.,]/g, "").trim();
 
-    // СТОП
     if (/\b(стоп|остановись|замолчи|хватит|прекрати говорить|останови речь)\b/.test(command)) {
         window.speechSynthesis.cancel();
         statusText.textContent = "Речь остановлена, сэр.";
@@ -280,13 +354,11 @@ function handleCommand(text) {
         return true;
     }
 
-    // ОЧИСТИТЬ ПАМЯТЬ
     if (/\b(очисти память|очистить память|удали память|сотри память)\b/.test(command)) {
         clearJarvisMemory();
         return true;
     }
 
-    // ПОКАЗАТЬ ПАМЯТЬ (команда голосом)
     if (/\b(что ты помнишь|что ты обо мне помнишь|покажи память|какую информацию ты помнишь)\b/.test(command)) {
         let answer;
         if (smartFacts.length === 0 && memory.length === 0) {
@@ -316,10 +388,8 @@ async function askJarvis(text) {
         return;
     }
 
-    // Проверяем локальные команды
     if (handleCommand(text)) return;
 
-    // Проверяем команду "запомни"
     const isRemember = detectSmartFact(text);
     if (isRemember) {
         const answer = "Я запомнил, сэр.";
@@ -333,13 +403,11 @@ async function askJarvis(text) {
     requestInProgress = true;
     const cleanText = text.trim();
 
-    // Сохраняем сообщение пользователя
     addToMemory("user", cleanText);
 
     statusText.textContent = "Обрабатываю запрос, сэр...";
 
     try {
-        // Формируем контекст
         const context = memory.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
             role: msg.role === "user" ? "user" : "assistant",
             content: msg.text
@@ -347,7 +415,6 @@ async function askJarvis(text) {
 
         console.log(`📤 Отправляем запрос с ${context.length} сообщениями`);
 
-        // Отправляем запрос
         const response = await fetch(JARVIS_API, {
             method: "POST",
             headers: {
@@ -372,7 +439,6 @@ async function askJarvis(text) {
 
         let answer = String(data.answer).trim();
 
-        // Очистка от тегов
         answer = answer
             .replace(/<think>[\s\S]*?<\/think>/gi, "")
             .replace(/<analysis>[\s\S]*?<\/analysis>/gi, "")
@@ -382,10 +448,8 @@ async function askJarvis(text) {
             throw new Error("После очистки AI не вернул текст");
         }
 
-        // Сохраняем ответ
         addToMemory("assistant", answer);
 
-        // Показываем
         showJarvisMessage(cleanText, answer);
         statusText.textContent = "Готов, сэр.";
         speak(answer);
@@ -431,10 +495,6 @@ function handleMicClick() {
         console.error("Ошибка запуска микрофона:", error);
     }
 }
-
-// ============================================================
-// SPEECH RECOGNITION
-// ============================================================
 
 if (!SpeechRecognition) {
     statusText.textContent = "Распознавание речи не поддерживается.";
@@ -526,94 +586,109 @@ document.addEventListener("click", function firstClick() {
 }, { passive: true });
 
 // ============================================================
-// ПРИВЯЗКА КНОПКИ "ПАМЯТЬ"
+// НАСТРОЙКА КНОПКИ "ПАМЯТЬ"
 // ============================================================
 
 function setupMemoryButton() {
     console.log("🔍 Настраиваем кнопку 'Память'...");
-    
-    // Прямая привязка по ID
-    if (memoryButton) {
-        // Убираем старые обработчики
-        const newButton = memoryButton.cloneNode(true);
-        memoryButton.parentNode.replaceChild(newButton, memoryButton);
-        
-        // Добавляем обработчик
-        newButton.addEventListener('click', function(e) {
+
+    const memoryBtn = document.getElementById('memoryButton');
+
+    if (memoryBtn) {
+        const newBtn = memoryBtn.cloneNode(true);
+        memoryBtn.parentNode.replaceChild(newBtn, memoryBtn);
+
+        newBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             console.log("🖱️ Нажата кнопка 'Память'");
             showMemoryDialog();
         });
-        
-        console.log("✅ Кнопка 'Память' привязана по ID");
+
+        newBtn.style.cursor = 'pointer';
+        newBtn.style.transition = 'background 0.3s';
+
+        console.log("✅ Кнопка 'Память' успешно привязана!");
     } else {
         console.log("⚠️ Кнопка с ID 'memoryButton' не найдена");
     }
 }
 
 // ============================================================
-// МОДАЛЬНОЕ ОКНО
+// НАСТРОЙКА МОДАЛЬНОГО ОКНА
 // ============================================================
 
-// Закрытие по кнопке
-if (closeMemoryBtn) {
-    closeMemoryBtn.addEventListener('click', hideMemoryDialog);
-}
+function setupModal() {
+    const modal = document.getElementById('memoryModal');
+    const closeBtn = document.getElementById('closeMemory');
+    const refreshBtn = document.getElementById('refreshMemory');
+    const clearBtn = document.getElementById('clearMemory');
 
-// Закрытие по клику вне панели
-if (memoryModal) {
-    memoryModal.addEventListener('click', function(e) {
-        if (e.target === memoryModal) {
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             hideMemoryDialog();
-        }
-    });
-}
+        });
+    }
 
-// Обновление памяти
-if (refreshMemoryBtn) {
-    refreshMemoryBtn.addEventListener('click', function() {
-        updateMemoryContent();
-        statusText.textContent = "Память обновлена, сэр.";
-        setTimeout(() => {
-            statusText.textContent = "Готов, сэр.";
-        }, 1000);
-    });
-}
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                hideMemoryDialog();
+            }
+        });
+    }
 
-// Очистка памяти
-if (clearMemoryBtn) {
-    clearMemoryBtn.addEventListener('click', function() {
-        if (confirm('Вы уверены, что хотите очистить всю память, сэр?')) {
-            clearJarvisMemory();
-        }
-    });
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            updateMemoryContent();
+            statusText.textContent = "Память обновлена, сэр.";
+            setTimeout(() => {
+                statusText.textContent = "Готов, сэр.";
+            }, 1000);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите очистить всю память, сэр?')) {
+                clearJarvisMemory();
+                hideMemoryDialog();
+            }
+        });
+    }
+
+    console.log("✅ Модальное окно настроено");
 }
 
 // ============================================================
 // ЗАГРУЗКА ПРИ СТАРТЕ
 // ============================================================
 
-// Загружаем память
 loadMemory();
 loadFacts();
 
 console.log("📝 Текущая память:", memory.length, "сообщений");
 console.log("📌 Текущие факты:", smartFacts.length, "фактов");
 
-// Настраиваем кнопку после загрузки DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("📄 DOM загружен, настраиваем кнопку...");
-        setTimeout(setupMemoryButton, 300);
+        console.log("📄 DOM загружен, настраиваем...");
+        setTimeout(() => {
+            setupMemoryButton();
+            setupModal();
+        }, 300);
     });
 } else {
-    console.log("📄 DOM уже загружен, настраиваем кнопку...");
-    setTimeout(setupMemoryButton, 300);
+    console.log("📄 DOM уже загружен, настраиваем...");
+    setTimeout(() => {
+        setupMemoryButton();
+        setupModal();
+    }, 300);
 }
 
 // ============================================================
-// ЭКСПОРТ ДЛЯ ДРУГИХ ЧАСТЕЙ САЙТА
+// ЭКСПОРТ
 // ============================================================
 
 window.JARVIS = {
