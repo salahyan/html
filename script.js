@@ -28,40 +28,21 @@ const clearMemoryBtn = document.getElementById("clearMemory");
 const memoryButton = document.getElementById("memoryButton");
 
 // ============================================================
-// API НАСТРОЙКИ
+// ⚠️ СЮДА ВСТАВЬ СВОЙ КЛЮЧ ОТ HUGGING FACE
+// ============================================================
+
+const HF_API_KEY = "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"; // ← ВСТАВЬ СВОЙ КЛЮЧ СЮДА!
+
+// ============================================================
+// НАСТРОЙКИ
 // ============================================================
 
 const JARVIS_API = "https://jarvis.salahyansergei2006.workers.dev/";
 
-// Hugging Face API для анализа фото (бесплатно)
-const HF_API_KEY = "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"; // Замени на свой токен
-
 const HF_MODELS = {
-    caption: "microsoft/git-base-coco",           // Описание фото
-    caption2: "nlpconnect/vit-gpt2-image-captioning", // Альтернатива
-    classify: "google/vit-base-patch16-224"      // Классификация
+    caption: "microsoft/git-base-coco",
+    caption2: "nlpconnect/vit-gpt2-image-captioning"
 };
-
-// ============================================================
-// ЧАСТИЦЫ
-// ============================================================
-
-function createParticles() {
-    const container = document.getElementById('particles');
-    if (!container) return;
-    for (let i = 0; i < 40; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.width = (Math.random() * 2 + 1) + 'px';
-        particle.style.height = particle.style.width;
-        particle.style.animationDuration = (Math.random() * 25 + 15) + 's';
-        particle.style.animationDelay = (Math.random() * 25) + 's';
-        particle.style.opacity = Math.random() * 0.3 + 0.05;
-        container.appendChild(particle);
-    }
-}
-createParticles();
 
 // ============================================================
 // ПАМЯТЬ
@@ -301,12 +282,12 @@ async function askJarvis(text, source = 'voice') {
 }
 
 // ============================================================
-// РЕАЛЬНЫЙ АНАЛИЗ ФОТО через Hugging Face
+// РЕАЛЬНЫЙ АНАЛИЗ ФОТО
 // ============================================================
 
 async function analyzePhotoWithHF(imageData, question = '') {
     try {
-        // Преобразуем base64 в blob
+        // Конвертируем base64 в Blob
         const response = await fetch(imageData);
         const blob = await response.blob();
 
@@ -315,60 +296,60 @@ async function analyzePhotoWithHF(imageData, question = '') {
             "https://api-inference.huggingface.co/models/" + HF_MODELS.caption,
             {
                 headers: {
-                    "Authorization": `Bearer ${HF_API_KEY}`,
-                    "Content-Type": "application/json"
+                    "Authorization": `Bearer ${HF_API_KEY}`
                 },
                 method: "POST",
-                body: JSON.stringify({ inputs: blob })
+                body: blob
             }
         );
 
+        // Если ошибка - пробуем другую модель
         if (!hfResponse.ok) {
-            // Пробуем альтернативную модель
+            console.log("Пробуем альтернативную модель...");
+
             const hfResponse2 = await fetch(
                 "https://api-inference.huggingface.co/models/" + HF_MODELS.caption2,
                 {
                     headers: {
-                        "Authorization": `Bearer ${HF_API_KEY}`,
-                        "Content-Type": "application/json"
+                        "Authorization": `Bearer ${HF_API_KEY}`
                     },
                     method: "POST",
-                    body: JSON.stringify({ inputs: blob })
+                    body: blob
                 }
             );
 
             if (!hfResponse2.ok) {
-                throw new Error("Не удалось распознать фото");
+                const errorText = await hfResponse2.text();
+                console.error("HF Error:", errorText);
+                throw new Error("Модель не может описать это фото. Попробуйте другое изображение.");
             }
 
             const result = await hfResponse2.json();
             let description = result[0]?.generated_text || "Не удалось описать фото";
 
-            // Если есть вопрос, формируем ответ
-            if (question.trim()) {
-                return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, я могу сказать, что это изображение содержит ${description}.`;
-            }
-
-            return `Сэр, я вижу на этом фото: ${description}`;
+            return formatPhotoAnswer(description, question);
         }
 
         const result = await hfResponse.json();
         let description = result[0]?.generated_text || "Не удалось описать фото";
 
-        if (question.trim()) {
-            return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, я могу сказать, что это изображение содержит ${description}.`;
-        }
-
-        return `Сэр, я вижу на этом фото: ${description}`;
+        return formatPhotoAnswer(description, question);
 
     } catch (error) {
         console.error("HF Error:", error);
-        throw new Error("Ошибка анализа фото: " + error.message);
+        throw new Error("Не удалось проанализировать фото. Попробуйте другое изображение или повторите попытку.");
     }
 }
 
+function formatPhotoAnswer(description, question) {
+    if (question.trim() && question.trim() !== "Опиши, что ты видишь на этом фото.") {
+        return `Сэр, вот что я вижу на фото: ${description}. Отвечая на ваш вопрос "${question}": на основе того, что я вижу, могу сказать, что это изображение содержит ${description}.`;
+    }
+    return `Сэр, я вижу на этом фото: ${description}`;
+}
+
 // ============================================================
-// ЗАПРОС С ФОТО (РЕАЛЬНЫЙ АНАЛИЗ)
+// ЗАПРОС С ФОТО
 // ============================================================
 
 let uploadedFile = null;
@@ -384,6 +365,7 @@ function resetPhotoUpload() {
     photoInput.value = '';
     photoQuestion.value = '';
     hidePhotoLoading();
+    console.log("✅ Фото очищено из поля ввода");
 }
 
 async function askWithPhoto(question) {
@@ -402,53 +384,48 @@ async function askWithPhoto(question) {
     requestInProgress = true;
     statusText.textContent = "Анализирую фото, сэр...";
 
-    // Показываем анимацию отправки
-    photoPreview.classList.add('sending');
+    // Сохраняем данные фото для чата
+    const photoData = uploadedImageData;
+    const fileName = uploadedFile ? uploadedFile.name : 'фото';
 
-    // Показываем миниатюру фото в чате
-    const photoThumbnail = `<div class="user-message"><strong>Вы:</strong> [Фото] <br><img src="${uploadedImageData}" style="max-width:100%;max-height:150px;border-radius:10px;margin-top:6px;border:1px solid rgba(0,180,255,0.1);"></div>`;
+    // Показываем фото в чате
+    const photoThumbnail = `<div class="user-message"><strong>Вы:</strong> [Фото: ${fileName}] <br><img src="${photoData}" style="max-width:100%;max-height:150px;border-radius:10px;margin-top:6px;border:1px solid rgba(0,180,255,0.1);"></div>`;
     textConversation.innerHTML += photoThumbnail;
     textConversation.scrollTop = textConversation.scrollHeight;
 
-    // Если есть вопрос, показываем его
+    // Показываем вопрос (если есть)
     if (cleanQuestion && cleanQuestion !== "Опиши, что ты видишь на этом фото.") {
         const questionHTML = `<div class="user-message" style="margin-top:-4px;"><strong>Вопрос:</strong> ${escapeHTML(cleanQuestion)}</div>`;
         textConversation.innerHTML += questionHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
     }
 
+    // ✅ УДАЛЯЕМ ФОТО ИЗ ПОЛЯ ВВОДА (сразу!)
+    resetPhotoUpload();
+
     showTyping('text');
 
     try {
-        // Реальный анализ фото
-        let answer = await analyzePhotoWithHF(uploadedImageData, cleanQuestion);
+        // Анализируем фото
+        let answer = await analyzePhotoWithHF(photoData, cleanQuestion);
 
         removeTyping('text');
 
-        // Добавляем в память
         addToMemory("user", "[Фото] " + cleanQuestion);
         addToMemory("assistant", answer);
 
-        // Показываем ответ JARVIS
         const jarvisHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(answer)}</div>`;
         textConversation.innerHTML += jarvisHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
 
         statusText.textContent = "Готов, сэр.";
 
-        // Очищаем фото после отправки
-        setTimeout(() => {
-            resetPhotoUpload();
-        }, 500);
-
     } catch (error) {
         removeTyping('text');
         statusText.textContent = "Ошибка анализа, сэр.";
-        const errorHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> Ошибка: ${escapeHTML(error.message)}</div>`;
+        const errorHTML = `<div class="jarvis-message"><strong>JARVIS:</strong> ${escapeHTML(error.message)}</div>`;
         textConversation.innerHTML += errorHTML;
         textConversation.scrollTop = textConversation.scrollHeight;
-
-        photoPreview.classList.remove('sending');
     } finally {
         requestInProgress = false;
     }
@@ -470,7 +447,6 @@ function sendTextMessage() {
 
     if (!text) return;
 
-    // Сразу показываем сообщение пользователя
     showUserMessageOnly(text, 'text');
     textInput.value = '';
     askJarvis(text, 'text');
@@ -503,7 +479,6 @@ photoInput.addEventListener('change', function(e) {
 
         hidePhotoLoading();
 
-        // Показываем сообщение в чате
         const readyMsg = `<div class="jarvis-message" style="border-right-color:#4a9eff;color:#7ab8e0;"><strong>📷 JARVIS:</strong> Фото загружено, сэр. Нажмите "🔍 Анализ" или напишите вопрос.</div>`;
         textConversation.innerHTML += readyMsg;
         textConversation.scrollTop = textConversation.scrollHeight;
@@ -578,7 +553,6 @@ if (!SpeechRecognition) {
             statusText.textContent = "Я не расслышал вас, сэр.";
             return;
         }
-        // Сразу показываем сообщение пользователя
         showUserMessageOnly(text, 'voice');
         await askJarvis(text, 'voice');
     };
