@@ -35,7 +35,6 @@
             position: relative;
         }
 
-        /* Анимированный фон */
         body::before {
             content: '';
             position: fixed;
@@ -50,7 +49,6 @@
             z-index: 0;
         }
 
-        /* Сетка */
         .grid-overlay {
             position: fixed;
             top: 0;
@@ -65,7 +63,6 @@
             background-size: 50px 50px;
         }
 
-        /* Парящие частицы */
         .particles {
             position: fixed;
             top: 0;
@@ -103,7 +100,6 @@
             }
         }
 
-        /* --- ОСНОВНОЙ КОНТЕЙНЕР --- */
         .jarvis {
             max-width: 560px;
             width: 100%;
@@ -143,7 +139,6 @@
             border-radius: 100%;
         }
 
-        /* --- ШАПКА --- */
         .header {
             display: flex;
             align-items: center;
@@ -242,7 +237,6 @@
             animation: pulse-dot 1.5s infinite;
         }
 
-        /* --- ORB --- */
         .orb-container {
             display: flex;
             justify-content: center;
@@ -323,7 +317,6 @@
             }
         }
 
-        /* --- ЗАГОЛОВОК --- */
         .title-section {
             text-align: center;
             margin-bottom: 2px;
@@ -383,7 +376,6 @@
             margin-top: 0px;
         }
 
-        /* --- СТАТУС --- */
         #status {
             font-size: 12px;
             color: #3a6a8a;
@@ -398,7 +390,6 @@
             transition: all 0.3s ease;
         }
 
-        /* --- ВКЛАДКИ --- */
         .tabs {
             display: flex;
             gap: 4px;
@@ -464,7 +455,6 @@
             }
         }
 
-        /* --- ЧАТ (общий) --- */
         .conversation {
             background: rgba(10, 20, 35, 0.35);
             border-radius: 16px;
@@ -550,7 +540,6 @@
             }
         }
 
-        /* --- СТАТУС ЗАГРУЗКИ ФОТО --- */
         .photo-loading {
             display: none;
             padding: 10px 14px;
@@ -588,7 +577,6 @@
             }
         }
 
-        /* --- МИКРОФОН --- */
         .mic-area {
             display: flex;
             flex-direction: column;
@@ -677,7 +665,6 @@
             font-weight: 300;
         }
 
-        /* --- ТЕКСТОВЫЙ ЧАТ + ФОТО --- */
         .input-area {
             display: flex;
             flex-direction: column;
@@ -735,7 +722,6 @@
             transform: scale(0.95);
         }
 
-        /* --- ФОТО --- */
         .photo-row {
             display: flex;
             gap: 8px;
@@ -820,7 +806,6 @@
             }
         }
 
-        /* --- КНОПКИ ВНИЗУ --- */
         .bottom-row {
             display: flex;
             justify-content: center;
@@ -859,10 +844,7 @@
             transform: scale(0.95);
         }
 
-        /* ============================================================
-           МОДАЛЬНОЕ ОКНО ПАМЯТИ
-           ============================================================ */
-
+        /* МОДАЛЬНОЕ ОКНО */
         .memory-modal {
             display: none;
             position: fixed;
@@ -1052,16 +1034,11 @@
             border-color: rgba(233, 69, 96, 0.06);
         }
 
-        /* ============================================================
-           АДАПТИВ
-           ============================================================ */
-
         @media (max-width: 520px) {
             .jarvis {
                 padding: 16px 12px 18px;
                 border-radius: 24px;
             }
-
             .orb {
                 width: 68px;
                 height: 68px;
@@ -1070,35 +1047,29 @@
                 width: 32px;
                 height: 32px;
             }
-
             .title {
                 font-size: 24px;
                 letter-spacing: 4px;
             }
-
             .mic-button {
                 width: 54px;
                 height: 54px;
                 font-size: 24px;
             }
-
             .memory-panel {
                 padding: 16px 12px 18px;
                 border-radius: 18px;
             }
-
             .memory-content {
                 max-height: 160px;
                 font-size: 12px;
                 padding: 10px 12px;
             }
-
             .conversation {
                 max-height: 160px;
                 font-size: 13px;
                 padding: 10px 12px;
             }
-
             .tab-btn {
                 font-size: 10px;
                 padding: 6px 6px;
@@ -1107,7 +1078,6 @@
             .tab-btn .icon {
                 font-size: 13px;
             }
-
             .input-row input[type="text"] {
                 font-size: 13px;
                 padding: 8px 12px;
@@ -1117,12 +1087,10 @@
                 padding: 8px 12px;
                 min-width: 38px;
             }
-
             .photo-row .file-label {
                 font-size: 11px;
                 padding: 6px 10px;
             }
-
             .header-title {
                 font-size: 12px;
                 letter-spacing: 2px;
@@ -1138,7 +1106,6 @@
                 padding: 10px 8px 14px;
                 border-radius: 18px;
             }
-
             .tabs {
                 flex-wrap: wrap;
                 gap: 3px;
@@ -1151,7 +1118,6 @@
             .tab-btn .icon {
                 font-size: 11px;
             }
-
             .title {
                 font-size: 18px;
                 letter-spacing: 2px;
@@ -1160,14 +1126,12 @@
                 font-size: 8px;
                 letter-spacing: 2px;
             }
-
             .conversation {
                 min-height: 100px;
                 max-height: 140px;
                 font-size: 12px;
                 padding: 8px 10px;
             }
-
             .mic-button {
                 width: 46px;
                 height: 46px;
@@ -1179,18 +1143,11 @@
 
 <body>
 
-    <!-- СЕТКА -->
     <div class="grid-overlay"></div>
-
-    <!-- ПАРЯЩИЕ ЧАСТИЦЫ -->
     <div class="particles" id="particles"></div>
 
-    <!-- =========================================================
-         ОСНОВНОЙ КОНТЕЙНЕР
-    ========================================================== -->
     <main class="jarvis">
 
-        <!-- HEADER -->
         <div class="header">
             <div class="header-left">
                 <div class="status-dot"></div>
@@ -1204,24 +1161,20 @@
             </div>
         </div>
 
-        <!-- ORB -->
         <div class="orb-container">
             <div class="orb">
                 <div class="orb-inner"></div>
             </div>
         </div>
 
-        <!-- ЗАГОЛОВОК -->
         <div class="title-section">
             <div class="creator">by <span>Sergo</span></div>
             <div class="title">JARVIS</div>
             <div class="subtitle">Персональный AI-помощник</div>
         </div>
 
-        <!-- СТАТУС -->
         <p id="status">Нажмите 🎙️ и говорите, сэр.</p>
 
-        <!-- ВКЛАДКИ -->
         <div class="tabs" id="tabs">
             <button class="tab-btn active" data-tab="voice">
                 <span class="icon">🎙️</span> Голосовой
@@ -1231,46 +1184,37 @@
             </button>
         </div>
 
-        <!-- =========================================================
-             ВКЛАДКА 1: ГОЛОСОВОЙ
-        ========================================================== -->
+        <!-- ГОЛОСОВОЙ -->
         <div class="tab-content active" id="tab-voice">
             <div id="conversation" class="conversation">
                 <div class="jarvis-message">Добро пожаловать, сэр. Я готов.</div>
             </div>
-
             <div class="mic-area">
                 <button id="micButton" class="mic-button" type="button">🎙️</button>
                 <p class="hint">Нажмите и говорите</p>
             </div>
         </div>
 
-        <!-- =========================================================
-             ВКЛАДКА 2: ТЕКСТОВЫЙ + ФОТО
-        ========================================================== -->
+        <!-- ТЕКСТОВЫЙ + ФОТО -->
         <div class="tab-content" id="tab-text">
             <div id="textConversation" class="conversation">
                 <div class="jarvis-message">Напишите сообщение или загрузите фото, сэр.</div>
             </div>
 
-            <!-- Статус загрузки фото -->
             <div id="photoLoading" class="photo-loading">
                 <span class="spinner"></span>
                 <span id="photoLoadingText">Фото загружается, сэр...</span>
             </div>
 
-            <!-- Превью фото -->
             <img id="photoPreview" class="photo-preview" alt="Превью">
 
             <div class="input-area">
 
-                <!-- Строка ввода текста -->
                 <div class="input-row">
                     <input type="text" id="textInput" placeholder="Введите сообщение..." autocomplete="off">
                     <button class="send-btn" id="sendTextBtn">➤</button>
                 </div>
 
-                <!-- Строка фото -->
                 <div class="photo-row">
                     <div class="file-input-wrap">
                         <input type="file" id="photoInput" accept="image/*">
@@ -1279,7 +1223,6 @@
                     <button class="send-btn" id="analyzePhotoBtn" style="font-size:14px;padding:8px 14px;">🔍 Анализ</button>
                 </div>
 
-                <!-- Вопрос к фото -->
                 <div class="input-row" style="margin-top:0;">
                     <input type="text" id="photoQuestion" placeholder="Вопрос к фото (необязательно)" autocomplete="off">
                 </div>
@@ -1287,16 +1230,13 @@
             </div>
         </div>
 
-        <!-- КНОПКИ ВНИЗУ -->
         <div class="bottom-row">
             <button id="memoryButton" class="memory-button" type="button">🧠 Память</button>
         </div>
 
     </main>
 
-    <!-- =========================================================
-         МОДАЛЬНОЕ ОКНО ПАМЯТИ
-    ========================================================== -->
+    <!-- МОДАЛЬНОЕ ОКНО ПАМЯТИ -->
     <div id="memoryModal" class="memory-modal" aria-hidden="true">
         <div class="memory-panel">
             <button id="closeMemory" class="memory-close" type="button">✕</button>
@@ -1313,9 +1253,6 @@
         </div>
     </div>
 
-    <!-- =========================================================
-         SCRIPT
-    ========================================================== -->
     <script src="script.js"></script>
 
 </body>
